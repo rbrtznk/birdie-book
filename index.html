@@ -282,6 +282,24 @@ select.inp{appearance:none;-webkit-appearance:none;background-image:url("data:im
 .volsum .v.tot{color:var(--green);}
 .volsum .l{font-size:10px;color:var(--accent-text);text-transform:uppercase;letter-spacing:.5px;margin-top:2px;}
 
+/* live session */
+.livestart{margin:14px 16px 0;}
+.livestart button{width:100%;padding:16px;border-radius:16px;background:var(--green);color:#06281a;font-weight:700;font-size:16px;display:flex;align-items:center;justify-content:center;gap:8px;}
+.livestart button:active{transform:scale(.99);}
+.livebanner{margin:14px 16px 0;background:linear-gradient(135deg,#1fc77b 0%,#159e60 100%);border-radius:16px;padding:18px;box-shadow:0 8px 24px rgba(31,199,123,.25);}
+.livebanner .lb-top{display:flex;align-items:center;gap:8px;color:#06281a;font-size:13px;font-weight:700;}
+.livebanner .pulse{width:10px;height:10px;border-radius:50%;background:#06281a;animation:pulse 1.4s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+.livebanner .lb-time{font-size:34px;font-weight:800;color:#06281a;letter-spacing:-1px;margin:6px 0 2px;font-variant-numeric:tabular-nums;}
+.livebanner .lb-since{font-size:12px;color:#0a3d26;font-weight:600;}
+.livebanner .lb-stop{margin-top:14px;width:100%;padding:14px;border-radius:12px;background:#06281a;color:#fff;font-weight:700;font-size:15px;display:flex;align-items:center;justify-content:center;gap:8px;}
+.livebanner .lb-stop:active{opacity:.85;}
+.livebanner.stale{background:linear-gradient(135deg,#ffb23d 0%,#e0951f 100%);box-shadow:0 8px 24px rgba(255,178,61,.25);}
+.livebanner.stale .lb-top,.livebanner.stale .lb-time,.livebanner.stale .lb-since{color:#3a2700;}
+.livebanner.stale .pulse{background:#3a2700;}
+.livebanner.stale .lb-stop{background:#3a2700;}
+.livetag{font-size:11px;color:var(--green);font-weight:700;margin-left:4px;}
+
 /* inline svg icons */
 .ti{display:inline-flex;width:1em;height:1em;vertical-align:-0.125em;}
 .ti svg{width:100%;height:100%;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round;}
@@ -415,6 +433,7 @@ select.inp{appearance:none;-webkit-appearance:none;background-image:url("data:im
 
     <!-- PRACTICE -->
     <div id="practiceMode" style="display:none">
+      <div id="liveBox"></div>
       <div class="sheet">
         <div class="sheet-body">
           <div class="datestrip"><div class="dow" id="dowP"></div><input class="inp" id="p_date" placeholder="Datum"></div>
@@ -558,6 +577,7 @@ function blankRound(){return{type:'round',id:null,savedAt:null,date:fmtDate(new 
   holes:Array.from({length:18},()=>({score:'',fir:null,gir:null,putts:0,note:''})),
   shots:[],review:{tech:'',tact:'',ment:'',good:'',bad:''}};}
 function blankPractice(){return{type:'practice',id:null,savedAt:null,date:fmtDate(new Date()),dow:new Date().getDay(),
+  live:false,startTs:null,
   timeFrom:'',timeTo:'',rangeBalls:'',shortBlocks:[],
   pgoals:[{done:false,t:''},{done:false,t:''},{done:false,t:''}],
   agenda:[{done:false,t:''},{done:false,t:''},{done:false,t:''},{done:false,t:''},{done:false,t:''},{done:false,t:''}],
@@ -575,7 +595,7 @@ function go(v){
   const sc=$('scroll');if(sc)sc.scrollTo(0,0);
 }
 function startRound(){editingId=null;mapHoleNum=1;cur=blankRound();setMode('round');fillRoundForm();go('play');document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));}
-function startPractice(){editingId=null;curP=blankPractice();setMode('practice');fillPracticeForm();go('play');document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));}
+function startPractice(){editingId=null;const open=DB.entries.find(e=>e.type==='practice'&&e.live);if(open){editingId=open.id;curP=JSON.parse(JSON.stringify(open));}else{curP=blankPractice();}setMode('practice');fillPracticeForm();go('play');document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));}
 function setMode(m){MODE=m;$('mode-round').classList.toggle('on',m==='round');$('mode-practice').classList.toggle('on',m==='practice');$('roundMode').style.display=m==='round'?'block':'none';$('practiceMode').style.display=m==='practice'?'block':'none';}
 
 /* ===== HOME ===== */
@@ -627,7 +647,7 @@ function rowItem(e,withDelete){
   }else{
     const done=e.agenda.filter(a=>a.done&&a.t).length,total=e.agenda.filter(a=>a.t).length;
     card.innerHTML=`<div class="ic practice">🎯</div>
-      <div class="meta"><div class="crs">Training</div><div class="dt">${e.date}${practiceVolumes(e).total?` · ${practiceVolumes(e).total} Bälle`:''}${total?` · ${done}/${total} Übungen`:''}</div></div>
+      <div class="meta"><div class="crs">Training${e.live?' <span class="livetag">● läuft</span>':''}</div><div class="dt">${e.date}${practiceVolumes(e).total?` · ${practiceVolumes(e).total} Bälle`:''}${total?` · ${done}/${total} Übungen`:''}</div></div>
       <span class="ti chev"><svg viewBox="0 0 24 24"><path d="M9 6l6 6l-6 6"/></svg></span>`;
   }
   card.onclick=()=>editEntry(e.id);
@@ -638,8 +658,8 @@ function rowItem(e,withDelete){
 /* ===== BUILDERS ===== */
 function buildDow(elId,active){const el=$(elId);el.innerHTML='';const labs=['S','M','D','M','D','F','S'];for(let i=0;i<7;i++){const s=document.createElement('span');s.textContent=labs[i];if(i===active)s.classList.add('on');s.onclick=()=>{(MODE==='round'?cur:curP).dow=i;buildDow(elId,i);};el.appendChild(s);}}
 function buildGoals(){const box=$('goalsBox');box.innerHTML='';cur.goals.forEach((g,i)=>{const row=document.createElement('div');row.className='goal';const chk=document.createElement('div');chk.className='chk'+(g.done?' on':'');chk.onclick=()=>{g.done=!g.done;chk.classList.toggle('on');};const inp=document.createElement('input');inp.placeholder='Ziel '+(i+1);inp.value=g.t;inp.oninput=()=>g.t=inp.value;row.appendChild(chk);row.appendChild(inp);box.appendChild(row);});}
-function buildPGoals(){const box=$('pGoalsBox');box.innerHTML='';curP.pgoals.forEach((g,i)=>{const row=document.createElement('div');row.className='goal';const chk=document.createElement('div');chk.className='chk'+(g.done?' on':'');chk.onclick=()=>{g.done=!g.done;chk.classList.toggle('on');};const inp=document.createElement('input');inp.placeholder='Fokus '+(i+1);inp.value=g.t;inp.oninput=()=>g.t=inp.value;row.appendChild(chk);row.appendChild(inp);box.appendChild(row);});}
-function buildAgenda(){const box=$('pAgendaBox');box.innerHTML='';curP.agenda.forEach((g,i)=>{const row=document.createElement('div');row.className='goal';const chk=document.createElement('div');chk.className='chk round'+(g.done?' on':'');chk.onclick=()=>{g.done=!g.done;chk.classList.toggle('on');};const inp=document.createElement('input');inp.placeholder='Übung '+(i+1);inp.value=g.t;inp.oninput=()=>g.t=inp.value;row.appendChild(chk);row.appendChild(inp);box.appendChild(row);});}
+function buildPGoals(){const box=$('pGoalsBox');box.innerHTML='';curP.pgoals.forEach((g,i)=>{const row=document.createElement('div');row.className='goal';const chk=document.createElement('div');chk.className='chk'+(g.done?' on':'');chk.onclick=()=>{g.done=!g.done;chk.classList.toggle('on');autosaveLive();};const inp=document.createElement('input');inp.placeholder='Fokus '+(i+1);inp.value=g.t;inp.oninput=()=>{g.t=inp.value;autosaveLive();};row.appendChild(chk);row.appendChild(inp);box.appendChild(row);});}
+function buildAgenda(){const box=$('pAgendaBox');box.innerHTML='';curP.agenda.forEach((g,i)=>{const row=document.createElement('div');row.className='goal';const chk=document.createElement('div');chk.className='chk round'+(g.done?' on':'');chk.onclick=()=>{g.done=!g.done;chk.classList.toggle('on');autosaveLive();};const inp=document.createElement('input');inp.placeholder='Übung '+(i+1);inp.value=g.t;inp.oninput=()=>{g.t=inp.value;autosaveLive();};row.appendChild(chk);row.appendChild(inp);box.appendChild(row);});}
 
 /* ===== CURRENT COURSE CONTEXT ===== */
 function curCourse(){return COURSES[cur.courseKey]||COURSES.mettmann;}
@@ -692,10 +712,10 @@ function populateCourseSelect(){const cs=$('r_courseKey');cs.innerHTML='';Object
 function populateTeeSelect(){const ts=$('r_teeId');ts.innerHTML='';const c=COURSES[cur.courseKey]||COURSES.mettmann;c.tees.forEach(t=>{const o=document.createElement('option');o.value=t.id;o.textContent=`${t.label} · CR ${t.cr} / Slope ${t.slope} / Par ${t.par}`;if(t.id===cur.teeId)o.selected=true;ts.appendChild(o);});}
 function updateCHBanner(){const b=$('chBanner');const ch=curCH();if(ch==null){b.classList.remove('show');return;}b.classList.add('show');const pts=totalStableford();b.innerHTML=`<div><div class="ch-l">Course Handicap</div><div class="ch-v">${ch}</div></div><div class="ch-r"><div class="ch-pts">${pts}</div><div class="ch-pl">Stableford-Punkte</div></div>`;}
 function fillRoundForm(){$('r_date').value=cur.date;$('r_hcpIndex').value=cur.hcpIndex||'';populateCourseSelect();$('k_tech').value=cur.keys.tech;$('k_tact').value=cur.keys.tact;$('k_ment').value=cur.keys.ment;$('rv_tech').value=cur.review.tech;$('rv_tact').value=cur.review.tact;$('rv_ment').value=cur.review.ment;$('rv_good').value=cur.review.good;$('rv_bad').value=cur.review.bad;buildDow('dow',cur.dow);buildGoals();setNine(1);setMapView('single');buildGreen();$('mapHoleNum').textContent=mapHoleNum;updateCHBanner();}
-function fillPracticeForm(){$('p_date').value=curP.date;$('p_from').value=curP.timeFrom||'';$('p_to').value=curP.timeTo||'';$('p_rangeBalls').value=curP.rangeBalls||'';$('p_tech').value=curP.pnotes.tech;$('p_feel').value=curP.pnotes.feel;buildDow('dowP',curP.dow);buildPGoals();buildAgenda();buildShortBlocks();updateDuration();updateVolSum();}
+function fillPracticeForm(){$('p_date').value=curP.date;$('p_from').value=curP.timeFrom||'';$('p_to').value=curP.timeTo||'';$('p_rangeBalls').value=curP.rangeBalls||'';$('p_tech').value=curP.pnotes.tech;$('p_feel').value=curP.pnotes.feel;buildDow('dowP',curP.dow);buildPGoals();buildAgenda();buildShortBlocks();updateDuration();updateVolSum();renderLiveBox();}
 
 /* ===== PRACTICE VOLUME ===== */
-function addShortBlock(){curP.shortBlocks.push({balls:'',rounds:1});buildShortBlocks();updateVolSum();}
+function addShortBlock(){curP.shortBlocks.push({balls:'',rounds:1});buildShortBlocks();updateVolSum();autosaveLive();}
 function buildShortBlocks(){const box=$('shortBlocks');box.innerHTML='';curP.shortBlocks.forEach((b,i)=>{const div=document.createElement('div');div.className='sblock';const shots=(Number(b.balls)||0)*(Number(b.rounds)||0);
   div.innerHTML=`<div class="sb-head"><span class="sb-title">Short Game ${i+1}</span><button class="sb-del" data-i="${i}">✕</button></div>
     <div class="sb-row">
@@ -705,9 +725,9 @@ function buildShortBlocks(){const box=$('shortBlocks');box.innerHTML='';curP.sho
       <span class="sb-eq">= <span class="sb-shots" id="sbshots${i}">${shots}</span></span>
     </div>`;
   const balls=div.querySelector('.sb-balls'),rounds=div.querySelector('.sb-rounds');
-  balls.oninput=()=>{b.balls=balls.value;$('sbshots'+i).textContent=(Number(b.balls)||0)*(Number(b.rounds)||0);updateVolSum();};
-  rounds.oninput=()=>{b.rounds=rounds.value;$('sbshots'+i).textContent=(Number(b.balls)||0)*(Number(b.rounds)||0);updateVolSum();};
-  div.querySelector('.sb-del').onclick=()=>{curP.shortBlocks.splice(i,1);buildShortBlocks();updateVolSum();};
+  balls.oninput=()=>{b.balls=balls.value;$('sbshots'+i).textContent=(Number(b.balls)||0)*(Number(b.rounds)||0);updateVolSum();autosaveLive();};
+  rounds.oninput=()=>{b.rounds=rounds.value;$('sbshots'+i).textContent=(Number(b.balls)||0)*(Number(b.rounds)||0);updateVolSum();autosaveLive();};
+  div.querySelector('.sb-del').onclick=()=>{curP.shortBlocks.splice(i,1);buildShortBlocks();updateVolSum();autosaveLive();};
   box.appendChild(div);
 });}
 function practiceVolumes(p){const long=Number(p.rangeBalls)||0;let short=0;(p.shortBlocks||[]).forEach(b=>short+=(Number(b.balls)||0)*(Number(b.rounds)||0));return{long,short,total:long+short};}
@@ -715,6 +735,54 @@ function updateVolSum(){const v=practiceVolumes(curP);$('volSum').innerHTML=`<di
 function durationMinutes(from,to){if(!from||!to)return null;const[fh,fm]=from.split(':').map(Number),[th,tm]=to.split(':').map(Number);let d=(th*60+tm)-(fh*60+fm);if(d<0)d+=1440;return d;}
 function fmtDur(min){if(min==null)return'–';const h=Math.floor(min/60),m=min%60;return h?`${h}h ${m}min`:`${m}min`;}
 function updateDuration(){$('p_dur').textContent=fmtDur(durationMinutes(curP.timeFrom,curP.timeTo));}
+
+/* ===== LIVE SESSION ===== */
+function pad2(n){return String(n).padStart(2,'0');}
+function hhmm(ts){const d=new Date(ts);return pad2(d.getHours())+':'+pad2(d.getMinutes());}
+function startLiveSession(){
+  // fresh open session, persisted immediately so it survives app close
+  curP=blankPractice();
+  curP.live=true;curP.startTs=Date.now();curP.timeFrom=hhmm(curP.startTs);
+  curP.id='e'+Date.now();curP.savedAt=curP.startTs;
+  editingId=curP.id;
+  DB.entries.unshift(JSON.parse(JSON.stringify(curP)));
+  persist();
+  fillPracticeForm();
+  toast('Training läuft ▶');
+}
+function stopLiveSession(){
+  curP.live=false;
+  const now=Date.now();
+  curP.timeTo=hhmm(now);
+  if(!curP.timeFrom&&curP.startTs)curP.timeFrom=hhmm(curP.startTs);
+  // persist into the existing entry
+  const idx=DB.entries.findIndex(e=>e.id===curP.id);
+  if(idx>=0)DB.entries[idx]=JSON.parse(JSON.stringify(curP));
+  persist();
+  fillPracticeForm();
+  toast('Training beendet ■ · Endzeit anpassbar');
+}
+function renderLiveBox(){
+  const box=$('liveBox');if(!box)return;
+  if(curP.live&&curP.startTs){
+    const mins=Math.floor((Date.now()-curP.startTs)/60000);
+    const h=Math.floor(mins/60),m=mins%60;
+    const stale=mins>=600; // >10h → probably forgot to stop
+    box.innerHTML=`<div class="livebanner ${stale?'stale':''}">
+      <div class="lb-top"><span class="pulse"></span> SESSION LÄUFT</div>
+      <div class="lb-time">${h?h+':':''}${pad2(m)}${h?'':' min'}</div>
+      <div class="lb-since">gestartet um ${hhmm(curP.startTs)}${stale?' · gestern? Endzeit danach anpassbar':''}</div>
+      <button class="lb-stop" onclick="stopLiveSession()">■ Training beenden</button>
+    </div>`;
+  }else{
+    const hasOpen=DB.entries.some(e=>e.type==='practice'&&e.live&&e.id!==curP.id);
+    box.innerHTML=`<div class="livestart"><button onclick="startLiveSession()">▶ Training jetzt starten</button></div>`;
+  }
+}
+let liveTimer=setInterval(()=>{if(MODE==='practice'&&curP.live)renderLiveBox();},20000);
+/* keep an open live session continuously saved so nothing is lost */
+let autosaveT;
+function autosaveLive(){if(!(MODE==='practice'&&curP.live&&curP.id))return;clearTimeout(autosaveT);autosaveT=setTimeout(()=>{const idx=DB.entries.findIndex(e=>e.id===curP.id);if(idx>=0){DB.entries[idx]=JSON.parse(JSON.stringify(curP));persist();}},600);}
 const bind=(id,fn)=>$(id).addEventListener('input',e=>fn(e.target.value));
 bind('r_date',v=>cur.date=v);
 bind('r_hcpIndex',v=>{cur.hcpIndex=v;buildHoles();updateCHBanner();});
@@ -722,12 +790,12 @@ $('r_courseKey').addEventListener('change',e=>{cur.courseKey=e.target.value;cur.
 $('r_teeId').addEventListener('change',e=>{cur.teeId=e.target.value;buildHoles();updateCHBanner();});
 bind('k_tech',v=>cur.keys.tech=v);bind('k_tact',v=>cur.keys.tact=v);bind('k_ment',v=>cur.keys.ment=v);
 bind('rv_tech',v=>cur.review.tech=v);bind('rv_tact',v=>cur.review.tact=v);bind('rv_ment',v=>cur.review.ment=v);bind('rv_good',v=>cur.review.good=v);bind('rv_bad',v=>cur.review.bad=v);
-bind('p_date',v=>curP.date=v);bind('p_tech',v=>curP.pnotes.tech=v);bind('p_feel',v=>curP.pnotes.feel=v);
-bind('p_from',v=>{curP.timeFrom=v;updateDuration();});bind('p_to',v=>{curP.timeTo=v;updateDuration();});
-bind('p_rangeBalls',v=>{curP.rangeBalls=v;updateVolSum();});
+bind('p_date',v=>{curP.date=v;autosaveLive();});bind('p_tech',v=>{curP.pnotes.tech=v;autosaveLive();});bind('p_feel',v=>{curP.pnotes.feel=v;autosaveLive();});
+bind('p_from',v=>{curP.timeFrom=v;updateDuration();autosaveLive();});bind('p_to',v=>{curP.timeTo=v;updateDuration();autosaveLive();});
+bind('p_rangeBalls',v=>{curP.rangeBalls=v;updateVolSum();autosaveLive();});
 
 /* ===== SAVE / EDIT ===== */
-function saveEntry(){const entry=MODE==='round'?JSON.parse(JSON.stringify(cur)):JSON.parse(JSON.stringify(curP));entry.type=MODE;if(MODE==='round'){const c=curCourse(),t=curTee();entry.course=c.name;entry.tees=t.label;entry.courseKey=cur.courseKey;entry.teeId=cur.teeId;entry.stableford=totalStableford();entry.ch=curCH();}if(editingId){entry.id=editingId;const idx=DB.entries.findIndex(e=>e.id===editingId);entry.savedAt=DB.entries[idx].savedAt;DB.entries[idx]=entry;}else{entry.id='e'+Date.now();entry.savedAt=Date.now();DB.entries.unshift(entry);}persist();editingId=null;toast(MODE==='round'?'Runde gesichert ⛳':'Session gesichert 🎯');go('home');}
+function saveEntry(){const entry=MODE==='round'?JSON.parse(JSON.stringify(cur)):JSON.parse(JSON.stringify(curP));entry.type=MODE;if(MODE==='practice')entry.live=false;if(MODE==='round'){const c=curCourse(),t=curTee();entry.course=c.name;entry.tees=t.label;entry.courseKey=cur.courseKey;entry.teeId=cur.teeId;entry.stableford=totalStableford();entry.ch=curCH();}if(editingId){entry.id=editingId;const idx=DB.entries.findIndex(e=>e.id===editingId);entry.savedAt=DB.entries[idx].savedAt;DB.entries[idx]=entry;}else{entry.id='e'+Date.now();entry.savedAt=Date.now();DB.entries.unshift(entry);}persist();editingId=null;toast(MODE==='round'?'Runde gesichert ⛳':'Session gesichert 🎯');go('home');}
 function newEntry(){editingId=null;mapHoleNum=1;cur=blankRound();curP=blankPractice();fillRoundForm();fillPracticeForm();setMode('round');toast('Neues Blatt');}
 function editEntry(id){const e=DB.entries.find(x=>x.id===id);if(!e)return;editingId=id;if(e.type==='round'){cur=JSON.parse(JSON.stringify(e));setMode('round');fillRoundForm();}else{curP=JSON.parse(JSON.stringify(e));setMode('practice');fillPracticeForm();}go('play');document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));toast('Zum Bearbeiten geladen');}
 function delEntry(id){if(!confirm('Diesen Eintrag löschen?'))return;DB.entries=DB.entries.filter(e=>e.id!==id);persist();renderHistory();renderHome();toast('Gelöscht');}
@@ -796,6 +864,7 @@ document.addEventListener('focusin',e=>{const t=e.target;if(t&&(t.tagName==='INP
 let lastTouch=0;document.addEventListener('touchend',e=>{const now=Date.now();if(now-lastTouch<=300){const tag=(e.target.tagName||'').toLowerCase();if(tag!=='input'&&tag!=='textarea'&&tag!=='select')e.preventDefault();}lastTouch=now;},{passive:false});
 
 /* boot */
+(function resumeLive(){const open=DB.entries.find(e=>e.type==='practice'&&e.live);if(open){curP=JSON.parse(JSON.stringify(open));editingId=open.id;}})();
 fillRoundForm();fillPracticeForm();setMode('round');renderHome();
 if(!storageOK)toast('Speicher eingeschränkt – nutze Backup-Export');
 </script>

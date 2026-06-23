@@ -84,7 +84,7 @@ input,textarea{-webkit-user-select:text;user-select:text;}
 .hcp .trend .d.down{color:var(--green);}
 .hcp .trend .d.up{color:var(--red);}
 .hcp .trend .t{font-size:11px;color:var(--text-3);margin-top:3px;}
-.hcp input{background:transparent;border:none;font-size:28px;font-weight:700;width:80px;letter-spacing:-1px;}
+.hcp input{background:transparent;border:none;font-size:26px;font-weight:700;width:110px;letter-spacing:-.5px;line-height:1.3;padding:2px 0;}
 .hcp input:focus{outline:none;}
 
 /* quick actions */
@@ -168,6 +168,9 @@ input,textarea{-webkit-user-select:text;user-select:text;}
 .holesum b{color:var(--accent-text);}
 .holescore{font-size:26px;font-weight:700;letter-spacing:-1px;min-width:30px;text-align:right;color:var(--text);}
 .holebody{display:none;padding:4px 16px 14px;border-top:1px solid var(--line);}
+.holecard.empty{border-color:#34384a;border-style:dashed;}
+.holecard.empty .holenum{background:#1a1d26;color:var(--text-3);}
+.needsentry{color:var(--amber);font-weight:600;}
 .statrow{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0;}
 .statbox{text-align:center;}
 .statbox .lab{font-size:9px;letter-spacing:.5px;text-transform:uppercase;color:var(--text-3);font-weight:600;margin-bottom:6px;}
@@ -247,6 +250,24 @@ input,textarea{-webkit-user-select:text;user-select:text;}
 .chbanner .ch-pl{font-size:11px;color:var(--accent-text);}
 select.inp{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23a0a6b4' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:34px;}
 
+/* custom tee picker */
+.teepick{position:relative;}
+.teepick-btn{display:flex;align-items:center;gap:10px;text-align:left;width:100%;}
+.teeswatch{width:16px;height:16px;border-radius:50%;flex:none;background:var(--text-3);border:1.5px solid rgba(255,255,255,.3);}
+#teePickLabel{flex:1;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.teechev{color:var(--text-3);font-size:12px;}
+.teepanel{display:none;position:absolute;top:calc(100% + 6px);left:0;right:0;z-index:30;background:var(--surface-3);border:1px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:0 12px 30px rgba(0,0,0,.5);}
+.teepanel.open{display:block;}
+.teeopt{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--line);}
+.teeopt:last-child{border-bottom:none;}
+.teeopt:active{background:var(--surface-2);}
+.teeopt .sw{width:16px;height:16px;border-radius:50%;flex:none;border:1.5px solid rgba(255,255,255,.3);}
+.teeopt .info{flex:1;}
+.teeopt .info .nm{font-size:14px;font-weight:600;}
+.teeopt .info .det{font-size:11px;color:var(--text-3);margin-top:1px;}
+.teeopt.sel{background:var(--accent-soft);}
+.teeopt.sel .info .nm{color:var(--accent-text);}
+
 /* hole par/index meta + stableford pts */
 .holepar{font-size:10px;color:var(--text-3);font-weight:600;margin-top:1px;}
 .holepts{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;border-radius:8px;background:var(--green-soft);color:var(--green);font-size:13px;font-weight:700;margin-left:8px;padding:0 6px;}
@@ -300,6 +321,16 @@ select.inp{appearance:none;-webkit-appearance:none;background-image:url("data:im
 .livebanner.stale .lb-stop{background:#3a2700;}
 .livetag{font-size:11px;color:var(--green);font-weight:700;margin-left:4px;}
 
+/* profile clubs */
+.clubrow{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.clubrow .cname{flex:2;}
+.clubrow .cdist-wrap{flex:1;position:relative;}
+.clubrow .cdist-wrap .unit{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--text-3);pointer-events:none;}
+.clubrow .cdist-wrap input{padding-right:30px;}
+.clubrow .cdel{color:var(--text-3);font-size:18px;padding:6px;flex:none;}
+.avatar{cursor:pointer;}
+.avatar:active{opacity:.7;}
+
 /* inline svg icons */
 .ti{display:inline-flex;width:1em;height:1em;vertical-align:-0.125em;}
 .ti svg{width:100%;height:100%;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round;}
@@ -316,7 +347,7 @@ select.inp{appearance:none;-webkit-appearance:none;background-image:url("data:im
         <div class="hi">Willkommen zurück</div>
         <div class="sub" id="greetSub">Bereit für die nächste Runde?</div>
       </div>
-      <div class="avatar" id="avatar">R</div>
+      <div class="avatar" id="avatar" onclick="openProfile()">R</div>
     </div>
 
     <div id="heroSlot"></div>
@@ -365,7 +396,12 @@ select.inp{appearance:none;-webkit-appearance:none;background-image:url("data:im
             <select class="inp" id="r_courseKey"></select>
           </div>
           <div class="row">
-            <div class="field"><label>Abschlag (Tee)</label><select class="inp" id="r_teeId"></select></div>
+            <div class="field"><label>Abschlag (Tee)</label>
+              <div class="teepick" id="teePick">
+                <button class="inp teepick-btn" id="teePickBtn" onclick="toggleTeePanel(event)"><span class="teeswatch" id="teeSwatch"></span><span id="teePickLabel">Tee</span><span class="teechev">▾</span></button>
+                <div class="teepanel" id="teePanel"></div>
+              </div>
+            </div>
             <div class="field"><label>Handicap-Index</label><input class="inp" id="r_hcpIndex" inputmode="decimal" placeholder="24.5"></div>
           </div>
           <div id="chBanner" class="chbanner"></div>
@@ -510,6 +546,23 @@ select.inp{appearance:none;-webkit-appearance:none;background-image:url("data:im
     <button class="bigbtn danger" onclick="wipeAll()">Alles löschen</button>
     <div class="empty" style="padding:20px"><p style="font-size:12px">Tipp: „Zum Homescreen hinzufügen" → läuft wie eine echte App, auch offline.</p></div>
   </section>
+
+  <!-- =============== PROFILE =============== -->
+  <section class="view" id="view-profile">
+    <div class="scrhead"><h1>Profil</h1><p>Dein Name und dein Schläger-Bag</p></div>
+    <div class="sheet">
+      <div class="sheet-body">
+        <div class="field"><label>Name</label><input class="inp" id="pr_name" placeholder="z.B. Robert"></div>
+      </div>
+    </div>
+    <div class="sheet">
+      <div class="sheet-head"><h2>Schläger-Bag</h2><div class="hint">Schläger mit Carry-Weite (Trägerweite)</div></div>
+      <div class="sheet-body">
+        <div id="clubList"></div>
+        <button class="addblock" onclick="addClub()">+ Schläger hinzufügen</button>
+      </div>
+    </div>
+  </section>
   </div>
 
   <nav class="tabbar">
@@ -525,9 +578,9 @@ select.inp{appearance:none;-webkit-appearance:none;background-image:url("data:im
 <script>
 /* ===== STORAGE ===== */
 const KEY='birdiebook_v2';
-let DB={entries:[],hcp:'',hcpHist:[]};
+let DB={entries:[],hcp:'',hcpHist:[],profile:{name:'',clubs:[]}};
 let storageOK=true;
-function load(){try{const r=localStorage.getItem(KEY);if(r)DB=Object.assign({entries:[],hcp:'',hcpHist:[]},JSON.parse(r));}catch(e){storageOK=false;}}
+function load(){try{const r=localStorage.getItem(KEY);if(r)DB=Object.assign({entries:[],hcp:'',hcpHist:[],profile:{name:'',clubs:[]}},JSON.parse(r));}catch(e){storageOK=false;}}
 function persist(){try{localStorage.setItem(KEY,JSON.stringify(DB));}catch(e){storageOK=false;toast('Speicher blockiert – nutze Backup!');}}
 load();
 
@@ -537,23 +590,25 @@ const COURSES={
     name:'GC Mettmann', par:72,
     holePar:[4,4,3,5,4,3,5,4,3,4,4,3,4,5,4,4,5,4],
     holeIdx:[7,3,13,5,1,11,9,15,17,2,14,18,16,6,4,12,10,8],
+    holeLen:[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
     tees:[
-      {id:'gelb',label:'Herren Gelb',cr:72.4,slope:136,par:72},
-      {id:'blau',label:'Herren Blau',cr:70.5,slope:130,par:72},
-      {id:'rot',label:'Damen Rot',cr:74.3,slope:128,par:72},
-      {id:'orange',label:'Damen Orange',cr:72.3,slope:121,par:72}
+      {id:'gelb',label:'Herren Gelb',color:'#e8d44d',cr:72.4,slope:136,par:72},
+      {id:'blau',label:'Herren Blau',color:'#4a90e2',cr:70.5,slope:130,par:72},
+      {id:'rot',label:'Damen Rot',color:'#e2574a',cr:74.3,slope:128,par:72},
+      {id:'orange',label:'Damen Orange',color:'#e8943d',cr:72.3,slope:121,par:72}
     ]
   },
   duesseldorf:{
     name:'Düsseldorfer GC', par:71,
     holePar:[4,4,5,4,4,3,4,3,4,5,5,3,4,4,3,5,3,4],
     holeIdx:[11,1,13,3,7,17,5,15,9,16,10,14,8,4,18,6,12,2],
+    holeLen:[346,367,447,365,308,126,313,191,366,503,440,186,337,360,134,459,163,370],
     tees:[
-      {id:'gelb',label:'Herren Gelb',cr:71.3,slope:131,par:71},
-      {id:'hblau',label:'Herren Blau',cr:68.6,slope:128,par:71},
-      {id:'dblau',label:'Damen Blau',cr:74.1,slope:131,par:71},
-      {id:'hrot',label:'Herren Rot',cr:67.5,slope:121,par:69},
-      {id:'drot',label:'Damen Rot',cr:72.9,slope:128,par:71}
+      {id:'gelb',label:'Herren Gelb',color:'#e8d44d',cr:71.3,slope:131,par:71},
+      {id:'hblau',label:'Herren Blau',color:'#4a90e2',cr:68.6,slope:128,par:71},
+      {id:'dblau',label:'Damen Blau',color:'#4a90e2',cr:74.1,slope:131,par:71},
+      {id:'hrot',label:'Herren Rot',color:'#e2574a',cr:67.5,slope:121,par:69},
+      {id:'drot',label:'Damen Rot',color:'#e2574a',cr:72.9,slope:128,par:71}
     ]
   }
 };
@@ -600,6 +655,10 @@ function setMode(m){MODE=m;$('mode-round').classList.toggle('on',m==='round');$(
 
 /* ===== HOME ===== */
 function renderHome(){
+  // personalize from profile
+  const nm=(DB.profile&&DB.profile.name||'').trim();
+  $('avatar').textContent=nm?nm[0].toUpperCase():'R';
+  $('greetSub').textContent=nm?`Bereit für die nächste Runde, ${nm}?`:'Bereit für die nächste Runde?';
   // hero = latest round
   const slot=$('heroSlot');
   const lastRound=DB.entries.find(e=>e.type==='round');
@@ -637,6 +696,19 @@ $('hcpInput').addEventListener('change',e=>{
   persist();renderHcpTrend();
 });
 
+function openProfile(){renderProfile();document.querySelectorAll('.view').forEach(s=>s.classList.remove('active'));$('view-profile').classList.add('active');document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));const sc=$('scroll');if(sc)sc.scrollTo(0,0);}
+function renderProfile(){if(!DB.profile)DB.profile={name:'',clubs:[]};$('pr_name').value=DB.profile.name||'';buildClubs();}
+function buildClubs(){const box=$('clubList');box.innerHTML='';(DB.profile.clubs||[]).forEach((cl,i)=>{const row=document.createElement('div');row.className='clubrow';
+  row.innerHTML=`<input class="inp cname" placeholder="z.B. 7 Eisen" value="${esc(cl.name||'')}"><div class="cdist-wrap"><input class="inp cdist" inputmode="numeric" placeholder="0" value="${cl.dist||''}"><span class="unit">m</span></div><button class="cdel">✕</button>`;
+  const nm=row.querySelector('.cname'),di=row.querySelector('.cdist');
+  nm.oninput=()=>{cl.name=nm.value;saveProfile();};
+  di.oninput=()=>{cl.dist=di.value;saveProfile();};
+  row.querySelector('.cdel').onclick=()=>{DB.profile.clubs.splice(i,1);buildClubs();saveProfile();};
+  box.appendChild(row);
+});}
+function addClub(){if(!DB.profile.clubs)DB.profile.clubs=[];DB.profile.clubs.push({name:'',dist:''});buildClubs();saveProfile();}
+let profSaveT;function saveProfile(){clearTimeout(profSaveT);profSaveT=setTimeout(()=>{persist();},500);}
+
 function rowItem(e,withDelete){
   const card=document.createElement('div');card.className='row-item';
   if(e.type==='round'){
@@ -669,11 +741,11 @@ function curStrokes(){const ch=curCH();return strokeAllocation(ch==null?0:ch,cur
 function totalStableford(){const c=curCourse(),strokes=curStrokes();let tot=0;cur.holes.forEach((h,i)=>{const p=stablefordHole(Number(h.score),c.holePar[i],strokes[i]);if(p!=null)tot+=p;});return tot;}
 
 function setNine(n){nine=n;$('front9').classList.toggle('on',n===1);$('back9').classList.toggle('on',n===2);buildHoles();}
-function buildHoles(){const box=$('holes');box.innerHTML='';const c=curCourse();const strokes=curStrokes();const start=nine===1?0:9,end=nine===1?9:18;for(let i=start;i<end;i++){const h=cur.holes[i];const card=document.createElement('div');card.className='holecard';const head=document.createElement('div');head.className='holehead';const dots=strokes[i]>0?'•'.repeat(strokes[i]):'';head.innerHTML=`<div class="holenum">${i+1}</div><div><div class="holesum" id="sum${i}">${holeSummary(h)}</div><div class="holepar">Par ${c.holePar[i]} · Idx ${c.holeIdx[i]} <span class="strokedots">${dots}</span></div></div><div class="holepts ${ptsClass(h,i)}" id="pts${i}">${ptsLabel(h,i)}</div><div class="holescore">${h.score||'–'}</div>`;head.onclick=()=>card.classList.toggle('open');const body=document.createElement('div');body.className='holebody';const sr=document.createElement('div');sr.className='statrow';sr.appendChild(stepBox('Score',h.score===''?0:h.score,v=>{h.score=v;refreshHole(i,card);},1,15));sr.appendChild(stepBox('Putts',h.putts,v=>{h.putts=v;refreshHole(i,card);},0,10));sr.appendChild(toggleBox('Fairway',h.fir,v=>{h.fir=v;refreshHole(i,card);}));sr.appendChild(toggleBox('GIR',h.gir,v=>{h.gir=v;refreshHole(i,card);}));body.appendChild(sr);const note=document.createElement('textarea');note.className='holenote';note.placeholder='Notiz zum Loch…';note.value=h.note;note.oninput=()=>h.note=note.value;body.appendChild(note);card.appendChild(head);card.appendChild(body);box.appendChild(card);}}
-function ptsLabel(h,i){const c=curCourse(),strokes=curStrokes();const p=stablefordHole(Number(h.score),c.holePar[i],strokes[i]);return p==null?'–':p+'P';}
+function buildHoles(){const box=$('holes');box.innerHTML='';const c=curCourse();const strokes=curStrokes();const start=nine===1?0:9,end=nine===1?9:18;for(let i=start;i<end;i++){const h=cur.holes[i];const card=document.createElement('div');card.className='holecard'+(h.score?'':' empty');const head=document.createElement('div');head.className='holehead';const dots=strokes[i]>0?'•'.repeat(strokes[i]):'';const len=(c.holeLen&&c.holeLen[i])?`${c.holeLen[i]} m · `:'';head.innerHTML=`<div class="holenum">${i+1}</div><div><div class="holesum" id="sum${i}">${holeSummary(h,i)}</div><div class="holepar">${len}Par ${c.holePar[i]} · Idx ${c.holeIdx[i]} <span class="strokedots">${dots}</span></div></div><div class="holepts ${ptsClass(h,i)}" id="pts${i}">${ptsLabel(h,i)}</div><div class="holescore">${h.score||'–'}</div>`;head.onclick=()=>card.classList.toggle('open');const body=document.createElement('div');body.className='holebody';const sr=document.createElement('div');sr.className='statrow';sr.appendChild(stepBox('Score',h.score===''?0:h.score,v=>{h.score=v;refreshHole(i,card);},1,15));sr.appendChild(stepBox('Putts',h.putts,v=>{h.putts=v;refreshHole(i,card);},0,10));sr.appendChild(toggleBox('Fairway',h.fir,v=>{h.fir=v;refreshHole(i,card);}));sr.appendChild(toggleBox('GIR',h.gir,v=>{h.gir=v;refreshHole(i,card);}));body.appendChild(sr);const note=document.createElement('textarea');note.className='holenote';note.placeholder='Notiz zum Loch…';note.value=h.note;note.oninput=()=>h.note=note.value;body.appendChild(note);card.appendChild(head);card.appendChild(body);box.appendChild(card);}}
+function ptsLabel(h,i){const c=curCourse(),strokes=curStrokes();const p=stablefordHole(Number(h.score),c.holePar[i],strokes[i]);return p==null?'':p+'P';}
 function ptsClass(h,i){const c=curCourse(),strokes=curStrokes();const p=stablefordHole(Number(h.score),c.holePar[i],strokes[i]);return p===0?'zero':'';}
-function holeSummary(h){let p=[];if(h.putts)p.push(`Putts <b>${h.putts}</b>`);if(h.fir===true)p.push('FIR ✓');if(h.fir===false)p.push('FIR ✗');if(h.gir===true)p.push('GIR ✓');if(h.gir===false)p.push('GIR ✗');return p.join(' · ')||'antippen';}
-function refreshHole(i,card){const h=cur.holes[i];card.querySelector('.holescore').textContent=h.score||'–';$('sum'+i).innerHTML=holeSummary(h);const pe=$('pts'+i);if(pe){pe.textContent=ptsLabel(h,i);pe.className='holepts '+ptsClass(h,i);}updateCHBanner();}
+function holeSummary(h,i){let p=[];if(h.putts)p.push(`Putts <b>${h.putts}</b>`);if(h.fir===true)p.push('FIR ✓');if(h.fir===false)p.push('FIR ✗');if(h.gir===true)p.push('GIR ✓');if(h.gir===false)p.push('GIR ✗');if(p.length)return p.join(' · ');return h.score?'':'<span class="needsentry">○ noch offen</span>';}
+function refreshHole(i,card){const h=cur.holes[i];card.querySelector('.holescore').textContent=h.score||'–';$('sum'+i).innerHTML=holeSummary(h,i);card.classList.toggle('empty',!h.score);const pe=$('pts'+i);if(pe){pe.textContent=ptsLabel(h,i);pe.className='holepts '+ptsClass(h,i);}updateCHBanner();}
 function stepBox(lab,val,cb,min,max){const b=document.createElement('div');b.className='statbox';b.innerHTML=`<div class="lab">${lab}</div>`;const st=document.createElement('div');st.className='stepper';const minus=document.createElement('button');minus.textContent='–';const v=document.createElement('div');v.className='val';v.textContent=val||(min===0?'0':'–');const plus=document.createElement('button');plus.textContent='+';let cv=typeof val==='number'?val:(val===''?min:val);minus.onclick=()=>{cv=Math.max(min,(cv||min)-1);v.textContent=cv;cb(cv);};plus.onclick=()=>{cv=Math.min(max,(cv||min)+1);v.textContent=cv;cb(cv);};st.appendChild(minus);st.appendChild(v);st.appendChild(plus);b.appendChild(st);return b;}
 function toggleBox(lab,val,cb){const b=document.createElement('div');b.className='statbox';b.innerHTML=`<div class="lab">${lab}</div>`;const t=document.createElement('div');t.className='toggle2';const yes=document.createElement('button');yes.className='yes';yes.textContent='✓';if(val===true)yes.classList.add('on');const no=document.createElement('button');no.className='no';no.textContent='✗';if(val===false)no.classList.add('on');yes.onclick=()=>{const nv=val===true?null:true;val=nv;yes.classList.toggle('on',nv===true);no.classList.remove('on');cb(nv);};no.onclick=()=>{const nv=val===false?null:false;val=nv;no.classList.toggle('on',nv===false);yes.classList.remove('on');cb(nv);};t.appendChild(yes);t.appendChild(no);b.appendChild(t);return b;}
 
@@ -709,7 +781,11 @@ function mapHole(d){mapHoleNum=Math.min(18,Math.max(1,mapHoleNum+d));$('mapHoleN
 
 /* ===== FORM SYNC ===== */
 function populateCourseSelect(){const cs=$('r_courseKey');cs.innerHTML='';Object.keys(COURSES).forEach(k=>{const o=document.createElement('option');o.value=k;o.textContent=COURSES[k].name;if(k===cur.courseKey)o.selected=true;cs.appendChild(o);});populateTeeSelect();}
-function populateTeeSelect(){const ts=$('r_teeId');ts.innerHTML='';const c=COURSES[cur.courseKey]||COURSES.mettmann;c.tees.forEach(t=>{const o=document.createElement('option');o.value=t.id;o.textContent=`${t.label} · CR ${t.cr} / Slope ${t.slope} / Par ${t.par}`;if(t.id===cur.teeId)o.selected=true;ts.appendChild(o);});}
+function populateTeeSelect(){const c=COURSES[cur.courseKey]||COURSES.mettmann;const panel=$('teePanel');panel.innerHTML='';if(!c.tees.find(t=>t.id===cur.teeId))cur.teeId=c.tees[0].id;c.tees.forEach(t=>{const o=document.createElement('div');o.className='teeopt'+(t.id===cur.teeId?' sel':'');o.innerHTML=`<span class="sw" style="background:${t.color}"></span><div class="info"><div class="nm">${t.label}</div><div class="det">CR ${t.cr} · Slope ${t.slope} · Par ${t.par}</div></div>`;o.onclick=()=>{cur.teeId=t.id;updateTeeButton();populateTeeSelect();closeTeePanel();buildHoles();updateCHBanner();};panel.appendChild(o);});updateTeeButton();}
+function updateTeeButton(){const c=COURSES[cur.courseKey]||COURSES.mettmann;const t=c.tees.find(x=>x.id===cur.teeId)||c.tees[0];$('teeSwatch').style.background=t.color;$('teePickLabel').textContent=t.label;}
+function toggleTeePanel(e){e.stopPropagation();$('teePanel').classList.toggle('open');}
+function closeTeePanel(){$('teePanel').classList.remove('open');}
+document.addEventListener('click',e=>{if(!e.target.closest('#teePick'))closeTeePanel();});
 function updateCHBanner(){const b=$('chBanner');const ch=curCH();if(ch==null){b.classList.remove('show');return;}b.classList.add('show');const pts=totalStableford();b.innerHTML=`<div><div class="ch-l">Course Handicap</div><div class="ch-v">${ch}</div></div><div class="ch-r"><div class="ch-pts">${pts}</div><div class="ch-pl">Stableford-Punkte</div></div>`;}
 function fillRoundForm(){$('r_date').value=cur.date;$('r_hcpIndex').value=cur.hcpIndex||'';populateCourseSelect();$('k_tech').value=cur.keys.tech;$('k_tact').value=cur.keys.tact;$('k_ment').value=cur.keys.ment;$('rv_tech').value=cur.review.tech;$('rv_tact').value=cur.review.tact;$('rv_ment').value=cur.review.ment;$('rv_good').value=cur.review.good;$('rv_bad').value=cur.review.bad;buildDow('dow',cur.dow);buildGoals();setNine(1);setMapView('single');buildGreen();$('mapHoleNum').textContent=mapHoleNum;updateCHBanner();}
 function fillPracticeForm(){$('p_date').value=curP.date;$('p_from').value=curP.timeFrom||'';$('p_to').value=curP.timeTo||'';$('p_rangeBalls').value=curP.rangeBalls||'';$('p_tech').value=curP.pnotes.tech;$('p_feel').value=curP.pnotes.feel;buildDow('dowP',curP.dow);buildPGoals();buildAgenda();buildShortBlocks();updateDuration();updateVolSum();renderLiveBox();}
@@ -787,12 +863,12 @@ const bind=(id,fn)=>$(id).addEventListener('input',e=>fn(e.target.value));
 bind('r_date',v=>cur.date=v);
 bind('r_hcpIndex',v=>{cur.hcpIndex=v;buildHoles();updateCHBanner();});
 $('r_courseKey').addEventListener('change',e=>{cur.courseKey=e.target.value;cur.teeId=(COURSES[cur.courseKey]||COURSES.mettmann).tees[0].id;populateTeeSelect();buildHoles();updateCHBanner();});
-$('r_teeId').addEventListener('change',e=>{cur.teeId=e.target.value;buildHoles();updateCHBanner();});
 bind('k_tech',v=>cur.keys.tech=v);bind('k_tact',v=>cur.keys.tact=v);bind('k_ment',v=>cur.keys.ment=v);
 bind('rv_tech',v=>cur.review.tech=v);bind('rv_tact',v=>cur.review.tact=v);bind('rv_ment',v=>cur.review.ment=v);bind('rv_good',v=>cur.review.good=v);bind('rv_bad',v=>cur.review.bad=v);
 bind('p_date',v=>{curP.date=v;autosaveLive();});bind('p_tech',v=>{curP.pnotes.tech=v;autosaveLive();});bind('p_feel',v=>{curP.pnotes.feel=v;autosaveLive();});
 bind('p_from',v=>{curP.timeFrom=v;updateDuration();autosaveLive();});bind('p_to',v=>{curP.timeTo=v;updateDuration();autosaveLive();});
 bind('p_rangeBalls',v=>{curP.rangeBalls=v;updateVolSum();autosaveLive();});
+bind('pr_name',v=>{if(!DB.profile)DB.profile={name:'',clubs:[]};DB.profile.name=v;saveProfile();});
 
 /* ===== SAVE / EDIT ===== */
 function saveEntry(){const entry=MODE==='round'?JSON.parse(JSON.stringify(cur)):JSON.parse(JSON.stringify(curP));entry.type=MODE;if(MODE==='practice')entry.live=false;if(MODE==='round'){const c=curCourse(),t=curTee();entry.course=c.name;entry.tees=t.label;entry.courseKey=cur.courseKey;entry.teeId=cur.teeId;entry.stableford=totalStableford();entry.ch=curCH();}if(editingId){entry.id=editingId;const idx=DB.entries.findIndex(e=>e.id===editingId);entry.savedAt=DB.entries[idx].savedAt;DB.entries[idx]=entry;}else{entry.id='e'+Date.now();entry.savedAt=Date.now();DB.entries.unshift(entry);}persist();editingId=null;toast(MODE==='round'?'Runde gesichert ⛳':'Session gesichert 🎯');go('home');}
@@ -848,9 +924,9 @@ function chartBlock(title,data,color){const wrap=document.createElement('div');w
 
 /* ===== BACKUP ===== */
 function exportData(){dl(new Blob([JSON.stringify(DB,null,2)],{type:'application/json'}),`birdiebook-backup-${new Date().toISOString().slice(0,10)}.json`);toast('Backup exportiert');}
-function importData(ev){const f=ev.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(d.entries){DB=Object.assign({entries:[],hcp:'',hcpHist:[]},d);persist();renderHome();renderHistory();renderStats();toast('Backup importiert ✓');go('home');}else toast('Keine gültige Datei');}catch(e){toast('Datei konnte nicht gelesen werden');}};r.readAsText(f);ev.target.value='';}
+function importData(ev){const f=ev.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(d.entries){DB=Object.assign({entries:[],hcp:'',hcpHist:[],profile:{name:'',clubs:[]}},d);persist();renderHome();renderHistory();renderStats();toast('Backup importiert ✓');go('home');}else toast('Keine gültige Datei');}catch(e){toast('Datei konnte nicht gelesen werden');}};r.readAsText(f);ev.target.value='';}
 function exportText(){let out='⛳ BIRDIE BOOK — Export '+new Date().toLocaleString('de-DE')+'\n\n';DB.entries.forEach(e=>{if(e.type==='round'){const s=roundStats(e);out+=`════════\nRUNDE · ${e.date}\nKurs: ${e.course} (${e.tees})\nScore ${s.score} (${s.played} Löcher) · Stableford ${entryStableford(e)} · Putts ${s.putts} · GIR ${s.gir} · FIR ${s.fir}\nZiele: ${e.goals.filter(g=>g.t).map(g=>(g.done?'[x] ':'[ ] ')+g.t).join(' | ')}\nReview Gut: ${e.review.good}\nReview Schlecht: ${e.review.bad}\n\n`;}else{out+=`════════\nTRAINING · ${e.date}${e.timeFrom?` · ${e.timeFrom}–${e.timeTo} (${fmtDur(durationMinutes(e.timeFrom,e.timeTo))})`:''}\nVolumen: Vollschwung ${practiceVolumes(e).long} · Short Game ${practiceVolumes(e).short} · Gesamt ${practiceVolumes(e).total} Schläge\nFokus: ${e.pgoals.filter(g=>g.t).map(g=>(g.done?'[x] ':'[ ] ')+g.t).join(' | ')}\nAgenda: ${e.agenda.filter(a=>a.t).map(a=>(a.done?'[x] ':'[ ] ')+a.t).join(' | ')}\n\n`;}});dl(new Blob([out],{type:'text/plain'}),`birdiebook-${new Date().toISOString().slice(0,10)}.txt`);toast('Text exportiert');}
-function wipeAll(){if(!confirm('Wirklich ALLE Einträge löschen? Mach vorher ein Backup!'))return;DB={entries:[],hcp:'',hcpHist:[]};persist();renderHome();renderHistory();renderStats();toast('Alles gelöscht');}
+function wipeAll(){if(!confirm('Wirklich ALLE Einträge löschen? Mach vorher ein Backup!'))return;DB={entries:[],hcp:'',hcpHist:[],profile:DB.profile||{name:'',clubs:[]}};persist();renderHome();renderHistory();renderStats();toast('Alles gelöscht');}
 function dl(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);}
 
 /* ===== UTIL ===== */

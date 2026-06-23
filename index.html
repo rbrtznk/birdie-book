@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0a0b0f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Birdie Book</title>
+<style>
+:root{
+  --bg:#0a0b0f;          /* near-black app background */
+  --surface:#15171f;     /* card surface */
+  --surface-2:#1d2029;   /* raised / inputs */
+  --surface-3:#262a35;   /* hover / steppers */
+  --line:#2a2e3a;        /* hairline borders */
+  --text:#f4f5f7;
+  --text-2:#a0a6b4;      /* muted */
+  --text-3:#6b7180;      /* hint */
+  --accent:#3d7bff;      /* revolut-ish electric blue */
+  --accent-soft:#1a2747;
+  --accent-text:#9cc0ff;
+  --green:#1fc77b;
+  --green-soft:#10301f;
+  --red:#ff5c5c;
+  --red-soft:#3a1414;
+  --amber:#ffb23d;
+  --radius:20px;
+  --radius-sm:14px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;}
+body{
+  font-family:-apple-system,'SF Pro Display','Segoe UI',system-ui,sans-serif;
+  background:var(--bg);color:var(--text);
+  -webkit-font-smoothing:antialiased;overscroll-behavior-y:contain;
+}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+input,textarea,select{font-family:inherit;font-size:16px;color:var(--text);}
+
+#app{max-width:480px;margin:0 auto;min-height:100vh;background:var(--bg);position:relative;padding-bottom:84px;}
+
+/* ---------- top greeting ---------- */
+.greet{padding:22px 20px 8px;display:flex;align-items:center;justify-content:space-between;}
+.greet .hi{font-size:14px;color:var(--text-2);}
+.greet .sub{font-size:17px;font-weight:600;margin-top:2px;}
+.avatar{width:40px;height:40px;border-radius:50%;background:var(--accent-soft);color:var(--accent-text);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;}
+
+/* screen title (non-home) */
+.scrhead{padding:24px 20px 6px;}
+.scrhead h1{margin:0;font-size:26px;font-weight:700;letter-spacing:-.5px;}
+.scrhead p{margin:4px 0 0;font-size:14px;color:var(--text-2);}
+
+/* ---------- views ---------- */
+.view{display:none;animation:fade .25s ease;}
+.view.active{display:block;}
+@keyframes fade{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+
+/* ---------- hero card ---------- */
+.hero{margin:12px 16px;background:linear-gradient(135deg,#3d7bff 0%,#2756cc 100%);border-radius:var(--radius);padding:20px;position:relative;overflow:hidden;box-shadow:0 10px 30px rgba(61,123,255,.25);}
+.hero::after{content:'';position:absolute;right:-30px;top:-30px;width:140px;height:140px;border-radius:50%;background:rgba(255,255,255,.08);}
+.hero .top{display:flex;justify-content:space-between;align-items:center;color:rgba(255,255,255,.85);font-size:13px;position:relative;z-index:1;}
+.hero .score{font-size:54px;font-weight:800;line-height:1;color:#fff;margin:6px 0 0;letter-spacing:-2px;position:relative;z-index:1;}
+.hero .stats{display:flex;gap:18px;margin-top:14px;position:relative;z-index:1;}
+.hero .stats span{font-size:13px;color:rgba(255,255,255,.9);font-weight:500;}
+.hero.empty-hero{background:linear-gradient(135deg,#2a2e3a,#1d2029);box-shadow:none;}
+.hero.empty-hero .score{font-size:22px;font-weight:600;}
+
+/* handicap strip */
+.hcp{margin:0 16px 12px;background:var(--surface);border-radius:var(--radius-sm);padding:16px 18px;display:flex;align-items:center;justify-content:space-between;border:1px solid var(--line);}
+.hcp .lab{font-size:11px;letter-spacing:1.2px;color:var(--text-3);font-weight:600;}
+.hcp .val{font-size:28px;font-weight:700;margin-top:3px;letter-spacing:-1px;}
+.hcp .trend{text-align:right;}
+.hcp .trend .d{font-size:14px;font-weight:600;}
+.hcp .trend .d.down{color:var(--green);}
+.hcp .trend .d.up{color:var(--red);}
+.hcp .trend .t{font-size:11px;color:var(--text-3);margin-top:3px;}
+.hcp input{background:transparent;border:none;font-size:28px;font-weight:700;width:80px;letter-spacing:-1px;}
+.hcp input:focus{outline:none;}
+
+/* quick actions */
+.quick{margin:0 16px 8px;display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.qa{border-radius:var(--radius-sm);padding:18px;border:1px solid var(--line);}
+.qa.primary{background:var(--accent);border-color:var(--accent);}
+.qa.primary i,.qa.primary .t{color:#fff;}
+.qa.sec{background:var(--surface);}
+.qa i{font-size:24px;color:var(--text-2);}
+.qa .t{font-size:15px;font-weight:600;margin-top:10px;}
+
+/* mini section header */
+.sechead{padding:18px 20px 8px;display:flex;align-items:center;justify-content:space-between;}
+.sechead h2{margin:0;font-size:13px;letter-spacing:1.2px;color:var(--text-3);font-weight:600;text-transform:uppercase;}
+.sechead a{font-size:13px;color:var(--accent-text);font-weight:600;}
+
+/* list rows (history) */
+.row-item{margin:0 16px 10px;background:var(--surface);border-radius:var(--radius-sm);padding:14px 16px;display:flex;align-items:center;gap:14px;border:1px solid var(--line);}
+.row-item .ic{width:44px;height:44px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:20px;flex:none;}
+.ic.round{background:var(--accent-soft);color:var(--accent-text);}
+.ic.practice{background:var(--green-soft);color:var(--green);}
+.row-item .meta{flex:1;min-width:0;}
+.row-item .meta .crs{font-size:15px;font-weight:600;}
+.row-item .meta .dt{font-size:12px;color:var(--text-3);margin-top:2px;}
+.row-item .big{font-size:24px;font-weight:700;letter-spacing:-1px;}
+.row-item .chev{color:var(--text-3);font-size:18px;}
+.rowdel{font-size:17px;color:var(--text-3);padding:6px;opacity:.6;}
+
+/* ---------- generic sheet (forms) ---------- */
+.sheet{margin:14px 16px;background:var(--surface);border-radius:var(--radius);border:1px solid var(--line);overflow:hidden;}
+.sheet-head{padding:16px 18px 12px;border-bottom:1px solid var(--line);}
+.sheet-head h2{margin:0;font-size:12px;letter-spacing:1.4px;text-transform:uppercase;color:var(--text);font-weight:700;}
+.sheet-head .hint{font-size:12px;color:var(--text-3);margin-top:3px;}
+.sheet-body{padding:16px 18px;}
+
+.field{margin-bottom:14px;}
+.field:last-child{margin-bottom:0;}
+.field label{display:block;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--text-3);font-weight:600;margin-bottom:6px;}
+.inp{width:100%;border:none;border-radius:12px;background:var(--surface-2);padding:12px 14px;font-size:16px;font-weight:500;color:var(--text);}
+.inp:focus{outline:none;box-shadow:0 0 0 2px var(--accent);}
+.inp::placeholder{color:var(--text-3);font-weight:400;}
+.row{display:flex;gap:10px;}
+.row .field{flex:1;}
+
+/* date strip */
+.datestrip{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;}
+.dow{display:flex;gap:5px;}
+.dow span{width:30px;height:30px;border-radius:50%;border:1.5px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--text-3);}
+.dow span.on{border-color:var(--accent);color:#fff;background:var(--accent-soft);}
+.datestrip .inp{max-width:130px;text-align:right;}
+
+/* goals */
+.goal{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);}
+.goal:last-child{border-bottom:none;}
+.chk{width:28px;height:28px;border:2px solid var(--text-3);border-radius:8px;flex:none;display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff;}
+.chk.round{border-radius:50%;}
+.chk.on{background:var(--accent);border-color:var(--accent);}
+.chk.on::after{content:'✓';}
+.goal input{flex:1;border:none;background:transparent;font-size:15px;font-weight:500;padding:4px 0;}
+.goal input:focus{outline:none;}
+.goal input::placeholder{color:var(--text-3);font-weight:400;}
+
+/* 3-col keys */
+.keys{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+.keys.two{grid-template-columns:1fr 2fr;}
+.kcol{background:var(--surface-2);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;}
+.kcol h3{margin:0;font-size:11px;text-align:center;padding:9px 2px;background:var(--surface-3);font-weight:600;color:var(--text-2);}
+.kcol textarea{flex:1;border:none;background:transparent;resize:none;padding:10px 8px;font-size:13px;line-height:1.5;min-height:120px;color:var(--text);}
+.kcol textarea:focus{outline:none;}
+.kcol textarea::placeholder{color:var(--text-3);font-size:12px;}
+
+/* ---------- scorecard ---------- */
+.ninetabs{display:flex;gap:8px;margin:0 16px 10px;}
+.ninetabs button{flex:1;padding:11px;border-radius:12px;background:var(--surface);border:1px solid var(--line);font-weight:600;font-size:14px;color:var(--text-2);}
+.ninetabs button.on{background:var(--accent);color:#fff;border-color:var(--accent);}
+.holecard{margin:0 16px 10px;background:var(--surface);border-radius:var(--radius-sm);border:1px solid var(--line);overflow:hidden;}
+.holecard.open .holebody{display:block;}
+.holehead{display:grid;grid-template-columns:40px 1fr auto;align-items:center;gap:12px;padding:13px 16px;}
+.holenum{width:36px;height:36px;border-radius:11px;background:var(--surface-3);color:var(--text);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;}
+.holesum{font-size:12px;color:var(--text-3);font-weight:500;display:flex;gap:8px;flex-wrap:wrap;}
+.holesum b{color:var(--accent-text);}
+.holescore{font-size:26px;font-weight:700;letter-spacing:-1px;min-width:30px;text-align:right;color:var(--text);}
+.holebody{display:none;padding:4px 16px 14px;border-top:1px solid var(--line);}
+.statrow{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0;}
+.statbox{text-align:center;}
+.statbox .lab{font-size:9px;letter-spacing:.5px;text-transform:uppercase;color:var(--text-3);font-weight:600;margin-bottom:6px;}
+.stepper{display:flex;align-items:center;justify-content:center;gap:4px;}
+.stepper button{width:30px;height:30px;border-radius:9px;background:var(--surface-3);font-size:18px;font-weight:700;color:var(--text);display:flex;align-items:center;justify-content:center;}
+.stepper button:active{background:var(--accent);}
+.stepper .val{min-width:24px;text-align:center;font-size:18px;font-weight:700;color:var(--text);}
+.toggle2{display:flex;border-radius:9px;overflow:hidden;border:1px solid var(--line);}
+.toggle2 button{flex:1;padding:7px 0;font-size:13px;font-weight:700;color:var(--text-3);background:var(--surface-2);}
+.toggle2 button.on{color:#fff;}
+.toggle2 button.yes.on{background:var(--green);}
+.toggle2 button.no.on{background:var(--red);}
+.holenote{width:100%;border:none;border-radius:10px;background:var(--surface-2);padding:10px;resize:none;font-size:14px;color:var(--text);min-height:44px;}
+.holenote:focus{outline:none;box-shadow:0 0 0 2px var(--accent);}
+
+/* ---------- shot map ---------- */
+.maptool{display:flex;gap:6px;margin:0 16px 10px;flex-wrap:wrap;align-items:center;}
+.maptool button{padding:9px 13px;border-radius:11px;background:var(--surface);border:1px solid var(--line);font-weight:600;font-size:13px;color:var(--text-2);}
+.maptool button.on{background:var(--accent);color:#fff;border-color:var(--accent);}
+.maptool .holepick{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--text-3);}
+.maptool .holepick .val{font-size:18px;color:var(--accent-text);min-width:22px;text-align:center;font-weight:700;}
+.maptool .holepick button{padding:4px 10px;font-size:18px;}
+.greencanvas{margin:0 16px;background:var(--surface);border-radius:var(--radius);padding:10px;touch-action:none;border:1px solid var(--line);}
+.shotlegend{font-size:12px;color:var(--text-3);text-align:center;margin:10px 16px 0;line-height:1.5;}
+
+/* review */
+.wellbad{margin-top:16px;}
+.wellbad label{display:flex;align-items:center;gap:6px;}
+.wellbad .inp{min-height:64px;resize:none;line-height:1.5;}
+.dot-good{color:var(--green);font-size:14px;}
+.dot-bad{color:var(--red);font-size:14px;}
+
+/* ---------- analytics ---------- */
+.statgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0 16px 14px;}
+.statcard{background:var(--surface);border-radius:var(--radius-sm);padding:16px;border:1px solid var(--line);}
+.statcard .l{font-size:12px;color:var(--text-2);}
+.statcard .n{font-size:30px;font-weight:700;margin-top:6px;letter-spacing:-1px;}
+.statcard .n.good{color:var(--green);}
+.chartcard{margin:0 16px 14px;background:var(--surface);border-radius:var(--radius);padding:18px;border:1px solid var(--line);}
+.chartcard .ch-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+.chartcard .ch-head .ti{font-size:13px;font-weight:600;}
+.chartcard .ch-head .tr{font-size:12px;color:var(--green);}
+
+/* ---------- buttons ---------- */
+.bigbtn{display:block;width:calc(100% - 32px);margin:16px;padding:16px;border-radius:14px;background:var(--accent);color:#fff;font-weight:700;font-size:15px;text-align:center;}
+.bigbtn:active{transform:scale(.99);}
+.bigbtn.ghost{background:var(--surface);color:var(--accent-text);border:1px solid var(--line);}
+.bigbtn.dark{background:var(--surface-2);}
+.bigbtn.danger{background:transparent;color:var(--red);border:1px solid var(--red-soft);}
+
+.empty{text-align:center;color:var(--text-3);padding:60px 30px;}
+.empty .ic{font-size:42px;margin-bottom:12px;opacity:.5;}
+.empty p{font-size:14px;line-height:1.6;}
+
+/* ---------- bottom nav ---------- */
+.tabbar{position:fixed;bottom:0;left:0;right:0;max-width:480px;margin:0 auto;z-index:60;background:rgba(13,15,20,.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);padding:8px 4px calc(8px + env(safe-area-inset-bottom));}
+.tab{display:flex;flex-direction:column;align-items:center;gap:4px;padding:4px;color:var(--text-3);font-size:10px;font-weight:600;}
+.tab i{font-size:22px;}
+.tab.active{color:var(--accent-text);}
+.tab.fab i{background:var(--accent);color:#fff;width:42px;height:42px;border-radius:14px;display:flex;align-items:center;justify-content:center;margin-top:-2px;}
+.tab.fab{color:var(--text-3);}
+
+.modeswitch{display:flex;margin:14px 16px 0;border-radius:14px;overflow:hidden;border:1px solid var(--line);background:var(--surface);}
+.modeswitch button{flex:1;padding:13px;font-weight:700;font-size:14px;color:var(--text-2);}
+.modeswitch button.on{background:var(--surface-3);color:#fff;}
+
+.toast{position:fixed;bottom:96px;left:50%;transform:translateX(-50%);background:var(--surface-3);color:#fff;padding:12px 22px;border-radius:30px;font-size:14px;font-weight:600;box-shadow:0 8px 30px rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:.25s;z-index:200;border:1px solid var(--line);}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(-6px);}
+
+/* course handicap banner */
+.chbanner{margin-top:4px;background:var(--accent-soft);border-radius:12px;padding:12px 14px;display:none;}
+.chbanner.show{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.chbanner .ch-l{font-size:11px;letter-spacing:.8px;text-transform:uppercase;color:var(--accent-text);font-weight:600;}
+.chbanner .ch-v{font-size:22px;font-weight:700;color:#fff;letter-spacing:-1px;}
+.chbanner .ch-r{text-align:right;}
+.chbanner .ch-pts{font-size:22px;font-weight:700;color:var(--green);letter-spacing:-1px;}
+.chbanner .ch-pl{font-size:11px;color:var(--accent-text);}
+select.inp{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23a0a6b4' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:34px;}
+
+/* hole par/index meta + stableford pts */
+.holepar{font-size:10px;color:var(--text-3);font-weight:600;margin-top:1px;}
+.holepts{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;border-radius:8px;background:var(--green-soft);color:var(--green);font-size:13px;font-weight:700;margin-left:8px;padding:0 6px;}
+.holepts.zero{background:var(--red-soft);color:var(--red);}
+.holehead{grid-template-columns:40px 1fr auto auto;}
+.strokedots{color:var(--accent-text);font-size:11px;letter-spacing:1px;}
+
+/* shot status toggle in map */
+.shotstatus{display:flex;gap:8px;margin:0 16px 10px;}
+.shotstatus button{flex:1;padding:9px;border-radius:11px;background:var(--surface);border:1px solid var(--line);font-weight:600;font-size:13px;color:var(--text-2);}
+.shotstatus button.on.hit{background:var(--green);border-color:var(--green);color:#06281a;}
+.shotstatus button.on.miss{background:var(--red);border-color:var(--red);color:#3a0c0c;}
+
+/* map view toggle */
+.mapviewtoggle{display:flex;gap:8px;margin:0 16px 10px;}
+.mapviewtoggle button{flex:1;padding:10px;border-radius:11px;background:var(--surface);border:1px solid var(--line);font-weight:600;font-size:13px;color:var(--text-2);}
+.mapviewtoggle button.on{background:var(--accent);color:#fff;border-color:var(--accent);}
+
+/* inline svg icons */
+.ti{display:inline-flex;width:1em;height:1em;vertical-align:-0.125em;}
+.ti svg{width:100%;height:100%;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round;}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- =============== HOME =============== -->
+  <section class="view active" id="view-home">
+    <div class="greet">
+      <div>
+        <div class="hi">Willkommen zurück</div>
+        <div class="sub" id="greetSub">Bereit für die nächste Runde?</div>
+      </div>
+      <div class="avatar" id="avatar">R</div>
+    </div>
+
+    <div id="heroSlot"></div>
+
+    <div class="hcp">
+      <div>
+        <div class="lab">HANDICAP</div>
+        <input id="hcpInput" inputmode="decimal" placeholder="24.5">
+      </div>
+      <div class="trend" id="hcpTrend">
+        <div class="d down">–</div>
+        <div class="t">trag deine Runden ein</div>
+      </div>
+    </div>
+
+    <div class="quick">
+      <button class="qa primary" onclick="startRound()">
+        <span class="ti"><svg viewBox="0 0 24 24"><path d="M12 5l0 14"/><path d="M5 12l14 0"/></svg></span><div class="t">Neue Runde</div>
+      </button>
+      <button class="qa sec" onclick="startPractice()">
+        <span class="ti"><svg viewBox="0 0 24 24"><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"/><path d="M12 12m-5 0a5 5 0 1 0 10 0a5 5 0 1 0 -10 0"/><path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/></svg></span><div class="t">Training</div>
+      </button>
+    </div>
+
+    <div class="sechead"><h2>Letzte Einträge</h2><a onclick="go('history')">Alle ›</a></div>
+    <div id="homeList"></div>
+    <div style="height:10px"></div>
+  </section>
+
+  <!-- =============== PLAY (round + practice) =============== -->
+  <section class="view" id="view-play">
+    <div class="modeswitch">
+      <button id="mode-round" class="on" onclick="setMode('round')">🏌️ Runde</button>
+      <button id="mode-practice" onclick="setMode('practice')">🎯 Training</button>
+    </div>
+
+    <!-- ROUND -->
+    <div id="roundMode">
+      <div class="sheet">
+        <div class="sheet-body">
+          <div class="datestrip">
+            <div class="dow" id="dow"></div>
+            <input class="inp" id="r_date" placeholder="Datum">
+          </div>
+          <div class="field"><label>Platz</label>
+            <select class="inp" id="r_courseKey"></select>
+          </div>
+          <div class="row">
+            <div class="field"><label>Abschlag (Tee)</label><select class="inp" id="r_teeId"></select></div>
+            <div class="field"><label>Handicap-Index</label><input class="inp" id="r_hcpIndex" inputmode="decimal" placeholder="24.5"></div>
+          </div>
+          <div id="chBanner" class="chbanner"></div>
+        </div>
+      </div>
+
+      <div class="sheet">
+        <div class="sheet-head"><h2>Focus / Goals</h2><div class="hint">Was macht diese Runde zum Erfolg?</div></div>
+        <div class="sheet-body" id="goalsBox"></div>
+      </div>
+
+      <div class="sheet">
+        <div class="sheet-head"><h2>Keys to Success</h2><div class="hint">Was hilft dir, die Ziele zu erreichen?</div></div>
+        <div class="sheet-body">
+          <div class="keys">
+            <div class="kcol"><h3>Technisch</h3><textarea id="k_tech" placeholder="Lockerer Griff…"></textarea></div>
+            <div class="kcol"><h3>Taktisch</h3><textarea id="k_tact" placeholder="Wind beachten…"></textarea></div>
+            <div class="kcol"><h3>Mental</h3><textarea id="k_ment" placeholder="Positiv bleiben…"></textarea></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sechead"><h2>Scorecard</h2></div>
+      <div class="ninetabs">
+        <button id="front9" class="on" onclick="setNine(1)">Front 9</button>
+        <button id="back9" onclick="setNine(2)">Back 9</button>
+      </div>
+      <div id="holes"></div>
+
+      <div class="sechead"><h2>Shot Map · Grün</h2></div>
+      <div class="mapviewtoggle">
+        <button id="mv-single" class="on" onclick="setMapView('single')">Einzelloch</button>
+        <button id="mv-all" onclick="setMapView('all')">Alle 18</button>
+      </div>
+      <div class="maptool" id="mapToolRow">
+        <button id="tool-place" class="on" onclick="setTool('place')">📍 Setzen</button>
+        <button id="tool-erase" onclick="setTool('erase')">🩹 Löschen</button>
+        <button onclick="clearMap()">🧽 Loch</button>
+        <div class="holepick">
+          <button onclick="mapHole(-1)">‹</button><span>Loch</span><span class="val" id="mapHoleNum">1</span><button onclick="mapHole(1)">›</button>
+        </div>
+      </div>
+      <div class="shotstatus" id="shotStatusRow">
+        <button id="ss-hit" class="hit on" onclick="setShotStatus('hit')">● Grün getroffen</button>
+        <button id="ss-miss" class="miss" onclick="setShotStatus('miss')">● Daneben</button>
+      </div>
+      <div class="greencanvas"><svg id="green" viewBox="0 0 300 300" width="100%" style="display:block"></svg></div>
+      <div class="shotlegend" id="mapLegend">Tippe aufs Grün, wo dein Approach landete · Ringe = 3 / 20 / 40 ft</div>
+
+      <div class="sheet" style="margin-top:18px">
+        <div class="sheet-head"><h2>Post-Round Review</h2><div class="hint">Wie lief es in den 3 Bereichen?</div></div>
+        <div class="sheet-body">
+          <div class="keys">
+            <div class="kcol"><h3>Technisch</h3><textarea id="rv_tech" placeholder="gute Gewichtsverlagerung…"></textarea></div>
+            <div class="kcol"><h3>Taktisch</h3><textarea id="rv_tact" placeholder="Drives oft rechts…"></textarea></div>
+            <div class="kcol"><h3>Mental</h3><textarea id="rv_ment" placeholder="ruhig nach Doppelbogey…"></textarea></div>
+          </div>
+          <div class="wellbad">
+            <div class="field"><label><span class="dot-good">●</span> Was gut lief</label><textarea class="inp" id="rv_good" placeholder="Unter 90 bei viel Wind…"></textarea></div>
+            <div class="field"><label><span class="dot-bad">●</span> Was nicht lief</label><textarea class="inp" id="rv_bad" placeholder="2 O.B. an Loch 13…"></textarea></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PRACTICE -->
+    <div id="practiceMode" style="display:none">
+      <div class="sheet">
+        <div class="sheet-body">
+          <div class="datestrip"><div class="dow" id="dowP"></div><input class="inp" id="p_date" placeholder="Datum"></div>
+        </div>
+      </div>
+      <div class="sheet">
+        <div class="sheet-head"><h2>Practice Focus / Goals</h2><div class="hint">Was macht diese Session zum Erfolg?</div></div>
+        <div class="sheet-body" id="pGoalsBox"></div>
+      </div>
+      <div class="sheet">
+        <div class="sheet-head"><h2>Practice Agenda</h2><div class="hint">Hak ab, was du durchgezogen hast</div></div>
+        <div class="sheet-body" id="pAgendaBox"></div>
+      </div>
+      <div class="sheet">
+        <div class="sheet-head"><h2>Notizen</h2></div>
+        <div class="sheet-body">
+          <div class="keys two">
+            <div class="kcol"><h3>Technik / Mechanik</h3><textarea id="p_tech" placeholder="Woran gearbeitet…"></textarea></div>
+            <div class="kcol"><h3>Swing Thoughts / Feel</h3><textarea id="p_feel" placeholder="Wie es sich anfühlte…"></textarea></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <button class="bigbtn" onclick="saveEntry()">In die Birdie Book sichern</button>
+    <button class="bigbtn ghost" onclick="newEntry()">Leeren / Neu</button>
+  </section>
+
+  <!-- =============== HISTORY =============== -->
+  <section class="view" id="view-history">
+    <div class="scrhead"><h1>Verlauf</h1><p id="histCount">Alle deine Runden & Sessions</p></div>
+    <div style="height:8px"></div>
+    <div id="histList"></div>
+    <div style="height:10px"></div>
+  </section>
+
+  <!-- =============== ANALYTICS =============== -->
+  <section class="view" id="view-stats">
+    <div class="scrhead"><h1>Analytics</h1><p>Deine Form über die letzten Runden</p></div>
+    <div id="statsBody">
+      <div class="empty"><div class="ic">📊</div><p>Noch keine Runden gespeichert.<br>Spiele eine Runde, dann erscheinen hier deine Trends.</p></div>
+    </div>
+  </section>
+
+  <!-- =============== DATA =============== -->
+  <section class="view" id="view-data">
+    <div class="scrhead"><h1>Daten</h1><p>Deine Einträge liegen auf diesem Gerät</p></div>
+    <div class="sheet">
+      <div class="sheet-body">
+        <p style="font-size:13px;line-height:1.6;color:var(--text-2);margin:0 0 8px">Alle Runden und Sessions werden lokal in diesem Browser gespeichert. Mach regelmäßig ein Backup, damit nichts verloren geht.</p>
+      </div>
+    </div>
+    <button class="bigbtn dark" onclick="exportData()">⬇️  Backup exportieren (.json)</button>
+    <label class="bigbtn ghost" style="text-align:center">⬆️  Backup importieren
+      <input type="file" accept="application/json" id="importFile" style="display:none" onchange="importData(event)">
+    </label>
+    <button class="bigbtn ghost" onclick="exportText()">📄  Als Text exportieren</button>
+    <button class="bigbtn danger" onclick="wipeAll()">Alles löschen</button>
+    <div class="empty" style="padding:20px"><p style="font-size:12px">Tipp: „Zum Homescreen hinzufügen" → läuft wie eine echte App, auch offline.</p></div>
+  </section>
+
+  <nav class="tabbar">
+    <button class="tab active" data-v="home" onclick="go('home')"><span class="ti"><svg viewBox="0 0 24 24"><path d="M5 12l-2 0l9 -9l9 9l-2 0"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7"/><path d="M9 21v-6h6v6"/></svg></span>Home</button>
+    <button class="tab" data-v="history" onclick="go('history')"><span class="ti"><svg viewBox="0 0 24 24"><path d="M3 19a9 9 0 0 1 9 0a9 9 0 0 1 9 0"/><path d="M3 6a9 9 0 0 1 9 0a9 9 0 0 1 9 0"/><path d="M3 6v13"/><path d="M12 6v13"/><path d="M21 6v13"/></svg></span>Verlauf</button>
+    <button class="tab fab" data-v="play" onclick="startRound()"><span class="ti"><svg viewBox="0 0 24 24"><path d="M12 5l0 14"/><path d="M5 12l14 0"/></svg></span>Neu</button>
+    <button class="tab" data-v="stats" onclick="go('stats')"><span class="ti"><svg viewBox="0 0 24 24"><path d="M4 19l16 0"/><path d="M4 15l4 -6l4 2l4 -5l4 4"/></svg></span>Analytics</button>
+    <button class="tab" data-v="data" onclick="go('data')"><span class="ti"><svg viewBox="0 0 24 24"><path d="M12 6m-8 0a8 3 0 1 0 16 0a8 3 0 1 0 -16 0"/><path d="M4 6v6a8 3 0 0 0 16 0v-6"/><path d="M4 12v6a8 3 0 0 0 16 0v-6"/></svg></span>Daten</button>
+  </nav>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===== STORAGE ===== */
+const KEY='birdiebook_v2';
+let DB={entries:[],hcp:'',hcpHist:[]};
+let storageOK=true;
+function load(){try{const r=localStorage.getItem(KEY);if(r)DB=Object.assign({entries:[],hcp:'',hcpHist:[]},JSON.parse(r));}catch(e){storageOK=false;}}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(DB));}catch(e){storageOK=false;toast('Speicher blockiert – nutze Backup!');}}
+load();
+
+/* ===== COURSE DATABASE ===== */
+const COURSES={
+  mettmann:{
+    name:'GC Mettmann', par:72,
+    holePar:[4,4,3,5,4,3,5,4,3,4,4,3,4,5,4,4,5,4],
+    holeIdx:[7,3,13,5,1,11,9,15,17,2,14,18,16,6,4,12,10,8],
+    tees:[
+      {id:'gelb',label:'Herren Gelb',cr:72.4,slope:136,par:72},
+      {id:'blau',label:'Herren Blau',cr:70.5,slope:130,par:72},
+      {id:'rot',label:'Damen Rot',cr:74.3,slope:128,par:72},
+      {id:'orange',label:'Damen Orange',cr:72.3,slope:121,par:72}
+    ]
+  },
+  duesseldorf:{
+    name:'Düsseldorfer GC', par:71,
+    holePar:[4,4,5,4,4,3,4,3,4,5,5,3,4,4,3,5,3,4],
+    holeIdx:[11,1,13,3,7,17,5,15,9,16,10,14,8,4,18,6,12,2],
+    tees:[
+      {id:'gelb',label:'Herren Gelb',cr:71.3,slope:131,par:71},
+      {id:'hblau',label:'Herren Blau',cr:68.6,slope:128,par:71},
+      {id:'dblau',label:'Damen Blau',cr:74.1,slope:131,par:71},
+      {id:'hrot',label:'Herren Rot',cr:67.5,slope:121,par:69},
+      {id:'drot',label:'Damen Rot',cr:72.9,slope:128,par:71}
+    ]
+  }
+};
+/* Course Handicap = Index × Slope/113 + (CR − Par), rounded */
+function courseHandicap(index,tee){if(index===''||index==null||isNaN(parseFloat(index)))return null;const i=parseFloat(String(index).replace(',','.'));return Math.round(i*tee.slope/113+(tee.cr-tee.par));}
+/* distribute CH strokes across holes by difficulty index (1=hardest) */
+function strokeAllocation(ch,holeIdx){if(ch==null||ch<0)ch=0;const base=Math.floor(ch/18),rem=ch-base*18;const strokes=holeIdx.map(()=>base);const order=holeIdx.map((idx,i)=>[idx,i]).sort((a,b)=>a[0]-b[0]);for(let k=0;k<rem;k++)strokes[order[k][1]]++;return strokes;}
+/* stableford points for one hole */
+function stablefordHole(gross,par,strokes){if(!gross||gross<=0)return null;const net=gross-strokes;const pts=2-(net-par);return Math.max(0,pts);}
+
+/* ===== STATE ===== */
+let MODE='round',nine=1,mapHoleNum=1,tool='place',editingId=null,mapView='single',shotStatus='hit';
+const $=id=>document.getElementById(id);
+function fmtDate(d){return d.toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'});}
+
+function blankRound(){return{type:'round',id:null,savedAt:null,date:fmtDate(new Date()),dow:new Date().getDay(),
+  courseKey:'mettmann',teeId:'gelb',hcpIndex:DB.hcp||'',
+  course:'',tees:'',yards:'',rating:'',slope:'',hcp:'',
+  goals:[{done:false,t:''},{done:false,t:''},{done:false,t:''}],
+  keys:{tech:'',tact:'',ment:''},
+  holes:Array.from({length:18},()=>({score:'',fir:null,gir:null,putts:0,note:''})),
+  shots:[],review:{tech:'',tact:'',ment:'',good:'',bad:''}};}
+function blankPractice(){return{type:'practice',id:null,savedAt:null,date:fmtDate(new Date()),dow:new Date().getDay(),
+  pgoals:[{done:false,t:''},{done:false,t:''},{done:false,t:''}],
+  agenda:[{done:false,t:''},{done:false,t:''},{done:false,t:''},{done:false,t:''},{done:false,t:''},{done:false,t:''}],
+  pnotes:{tech:'',feel:''}};}
+let cur=blankRound(),curP=blankPractice();
+
+/* ===== NAV ===== */
+function go(v){
+  document.querySelectorAll('.view').forEach(s=>s.classList.remove('active'));
+  $('view-'+v).classList.add('active');
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.v===v));
+  if(v==='home')renderHome();
+  if(v==='history')renderHistory();
+  if(v==='stats')renderStats();
+  window.scrollTo(0,0);
+}
+function startRound(){editingId=null;mapHoleNum=1;cur=blankRound();setMode('round');fillRoundForm();go('play');document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));}
+function startPractice(){editingId=null;curP=blankPractice();setMode('practice');fillPracticeForm();go('play');document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));}
+function setMode(m){MODE=m;$('mode-round').classList.toggle('on',m==='round');$('mode-practice').classList.toggle('on',m==='practice');$('roundMode').style.display=m==='round'?'block':'none';$('practiceMode').style.display=m==='practice'?'block':'none';}
+
+/* ===== HOME ===== */
+function renderHome(){
+  // hero = latest round
+  const slot=$('heroSlot');
+  const lastRound=DB.entries.find(e=>e.type==='round');
+  if(lastRound){
+    const s=roundStats(lastRound);
+    slot.innerHTML=`<div class="hero" onclick="editEntry('${lastRound.id}')">
+      <div class="top"><span>Letzte Runde · ${esc(lastRound.course||'Runde')}</span><span>${lastRound.date}</span></div>
+      <div class="score">${s.score||'–'}</div>
+      <div class="stats"><span>📊 ${entryStableford(lastRound)} Pkt</span><span>⛳ GIR ${s.gir}</span><span>🟢 Putts ${s.putts}</span></div>
+    </div>`;
+  }else{
+    slot.innerHTML=`<div class="hero empty-hero"><div class="score">Noch keine Runde – leg los! 🏌️</div></div>`;
+  }
+  // handicap
+  $('hcpInput').value=DB.hcp||'';
+  renderHcpTrend();
+  // recent list (max 3)
+  const list=$('homeList');list.innerHTML='';
+  if(!DB.entries.length){list.innerHTML='<div class="empty" style="padding:30px"><p>Deine Einträge erscheinen hier.</p></div>';return;}
+  DB.entries.slice(0,3).forEach(e=>list.appendChild(rowItem(e,false)));
+}
+function renderHcpTrend(){
+  const tr=$('hcpTrend');
+  const h=DB.hcpHist||[];
+  if(h.length>=2){
+    const diff=+(h[h.length-1].v-h[0].v).toFixed(1);
+    const down=diff<=0;
+    tr.innerHTML=`<div class="d ${down?'down':'up'}">${down?'↓':'↑'} ${Math.abs(diff)}</div><div class="t">seit Beginn</div>`;
+  }else{tr.innerHTML=`<div class="d down">–</div><div class="t">trag mehr Runden ein</div>`;}
+}
+$('hcpInput').addEventListener('change',e=>{
+  const v=parseFloat(e.target.value.replace(',','.'));
+  DB.hcp=e.target.value;
+  if(!isNaN(v)){DB.hcpHist=DB.hcpHist||[];DB.hcpHist.push({t:Date.now(),v});if(DB.hcpHist.length>24)DB.hcpHist.shift();}
+  persist();renderHcpTrend();
+});
+
+function rowItem(e,withDelete){
+  const card=document.createElement('div');card.className='row-item';
+  if(e.type==='round'){
+    const s=roundStats(e);
+    card.innerHTML=`<div class="ic round">⛳</div>
+      <div class="meta"><div class="crs">${esc(e.course||'Runde')}</div><div class="dt">${e.date} · ${esc(e.tees||'–')} · ${entryStableford(e)} Pkt</div></div>
+      <div class="big">${s.score||'–'}</div>`;
+  }else{
+    const done=e.agenda.filter(a=>a.done&&a.t).length,total=e.agenda.filter(a=>a.t).length;
+    card.innerHTML=`<div class="ic practice">🎯</div>
+      <div class="meta"><div class="crs">Training</div><div class="dt">${e.date}${total?` · ${done}/${total} Übungen`:''}</div></div>
+      <span class="ti chev"><svg viewBox="0 0 24 24"><path d="M9 6l6 6l-6 6"/></svg></span>`;
+  }
+  card.onclick=()=>editEntry(e.id);
+  if(withDelete){const d=document.createElement('button');d.className='rowdel';d.innerHTML='<span class="ti"><svg viewBox="0 0 24 24"><path d="M4 7l16 0"/><path d="M10 11l0 6"/><path d="M14 11l0 6"/><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12"/><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3"/></svg></span>';d.onclick=ev=>{ev.stopPropagation();delEntry(e.id);};card.appendChild(d);}
+  return card;
+}
+
+/* ===== BUILDERS ===== */
+function buildDow(elId,active){const el=$(elId);el.innerHTML='';const labs=['S','M','D','M','D','F','S'];for(let i=0;i<7;i++){const s=document.createElement('span');s.textContent=labs[i];if(i===active)s.classList.add('on');s.onclick=()=>{(MODE==='round'?cur:curP).dow=i;buildDow(elId,i);};el.appendChild(s);}}
+function buildGoals(){const box=$('goalsBox');box.innerHTML='';cur.goals.forEach((g,i)=>{const row=document.createElement('div');row.className='goal';const chk=document.createElement('div');chk.className='chk'+(g.done?' on':'');chk.onclick=()=>{g.done=!g.done;chk.classList.toggle('on');};const inp=document.createElement('input');inp.placeholder='Ziel '+(i+1);inp.value=g.t;inp.oninput=()=>g.t=inp.value;row.appendChild(chk);row.appendChild(inp);box.appendChild(row);});}
+function buildPGoals(){const box=$('pGoalsBox');box.innerHTML='';curP.pgoals.forEach((g,i)=>{const row=document.createElement('div');row.className='goal';const chk=document.createElement('div');chk.className='chk'+(g.done?' on':'');chk.onclick=()=>{g.done=!g.done;chk.classList.toggle('on');};const inp=document.createElement('input');inp.placeholder='Fokus '+(i+1);inp.value=g.t;inp.oninput=()=>g.t=inp.value;row.appendChild(chk);row.appendChild(inp);box.appendChild(row);});}
+function buildAgenda(){const box=$('pAgendaBox');box.innerHTML='';curP.agenda.forEach((g,i)=>{const row=document.createElement('div');row.className='goal';const chk=document.createElement('div');chk.className='chk round'+(g.done?' on':'');chk.onclick=()=>{g.done=!g.done;chk.classList.toggle('on');};const inp=document.createElement('input');inp.placeholder='Übung '+(i+1);inp.value=g.t;inp.oninput=()=>g.t=inp.value;row.appendChild(chk);row.appendChild(inp);box.appendChild(row);});}
+
+/* ===== CURRENT COURSE CONTEXT ===== */
+function curCourse(){return COURSES[cur.courseKey]||COURSES.mettmann;}
+function curTee(){const c=curCourse();return c.tees.find(t=>t.id===cur.teeId)||c.tees[0];}
+function curCH(){return courseHandicap(cur.hcpIndex,curTee());}
+function curStrokes(){const ch=curCH();return strokeAllocation(ch==null?0:ch,curCourse().holeIdx);}
+function totalStableford(){const c=curCourse(),strokes=curStrokes();let tot=0;cur.holes.forEach((h,i)=>{const p=stablefordHole(Number(h.score),c.holePar[i],strokes[i]);if(p!=null)tot+=p;});return tot;}
+
+function setNine(n){nine=n;$('front9').classList.toggle('on',n===1);$('back9').classList.toggle('on',n===2);buildHoles();}
+function buildHoles(){const box=$('holes');box.innerHTML='';const c=curCourse();const strokes=curStrokes();const start=nine===1?0:9,end=nine===1?9:18;for(let i=start;i<end;i++){const h=cur.holes[i];const card=document.createElement('div');card.className='holecard';const head=document.createElement('div');head.className='holehead';const dots=strokes[i]>0?'•'.repeat(strokes[i]):'';head.innerHTML=`<div class="holenum">${i+1}</div><div><div class="holesum" id="sum${i}">${holeSummary(h)}</div><div class="holepar">Par ${c.holePar[i]} · Idx ${c.holeIdx[i]} <span class="strokedots">${dots}</span></div></div><div class="holepts ${ptsClass(h,i)}" id="pts${i}">${ptsLabel(h,i)}</div><div class="holescore">${h.score||'–'}</div>`;head.onclick=()=>card.classList.toggle('open');const body=document.createElement('div');body.className='holebody';const sr=document.createElement('div');sr.className='statrow';sr.appendChild(stepBox('Score',h.score===''?0:h.score,v=>{h.score=v;refreshHole(i,card);},1,15));sr.appendChild(stepBox('Putts',h.putts,v=>{h.putts=v;refreshHole(i,card);},0,10));sr.appendChild(toggleBox('Fairway',h.fir,v=>{h.fir=v;refreshHole(i,card);}));sr.appendChild(toggleBox('GIR',h.gir,v=>{h.gir=v;refreshHole(i,card);}));body.appendChild(sr);const note=document.createElement('textarea');note.className='holenote';note.placeholder='Notiz zum Loch…';note.value=h.note;note.oninput=()=>h.note=note.value;body.appendChild(note);card.appendChild(head);card.appendChild(body);box.appendChild(card);}}
+function ptsLabel(h,i){const c=curCourse(),strokes=curStrokes();const p=stablefordHole(Number(h.score),c.holePar[i],strokes[i]);return p==null?'–':p+'P';}
+function ptsClass(h,i){const c=curCourse(),strokes=curStrokes();const p=stablefordHole(Number(h.score),c.holePar[i],strokes[i]);return p===0?'zero':'';}
+function holeSummary(h){let p=[];if(h.putts)p.push(`Putts <b>${h.putts}</b>`);if(h.fir===true)p.push('FIR ✓');if(h.fir===false)p.push('FIR ✗');if(h.gir===true)p.push('GIR ✓');if(h.gir===false)p.push('GIR ✗');return p.join(' · ')||'antippen';}
+function refreshHole(i,card){const h=cur.holes[i];card.querySelector('.holescore').textContent=h.score||'–';$('sum'+i).innerHTML=holeSummary(h);const pe=$('pts'+i);if(pe){pe.textContent=ptsLabel(h,i);pe.className='holepts '+ptsClass(h,i);}updateCHBanner();}
+function stepBox(lab,val,cb,min,max){const b=document.createElement('div');b.className='statbox';b.innerHTML=`<div class="lab">${lab}</div>`;const st=document.createElement('div');st.className='stepper';const minus=document.createElement('button');minus.textContent='–';const v=document.createElement('div');v.className='val';v.textContent=val||(min===0?'0':'–');const plus=document.createElement('button');plus.textContent='+';let cv=typeof val==='number'?val:(val===''?min:val);minus.onclick=()=>{cv=Math.max(min,(cv||min)-1);v.textContent=cv;cb(cv);};plus.onclick=()=>{cv=Math.min(max,(cv||min)+1);v.textContent=cv;cb(cv);};st.appendChild(minus);st.appendChild(v);st.appendChild(plus);b.appendChild(st);return b;}
+function toggleBox(lab,val,cb){const b=document.createElement('div');b.className='statbox';b.innerHTML=`<div class="lab">${lab}</div>`;const t=document.createElement('div');t.className='toggle2';const yes=document.createElement('button');yes.className='yes';yes.textContent='✓';if(val===true)yes.classList.add('on');const no=document.createElement('button');no.className='no';no.textContent='✗';if(val===false)no.classList.add('on');yes.onclick=()=>{const nv=val===true?null:true;val=nv;yes.classList.toggle('on',nv===true);no.classList.remove('on');cb(nv);};no.onclick=()=>{const nv=val===false?null:false;val=nv;no.classList.toggle('on',nv===false);yes.classList.remove('on');cb(nv);};t.appendChild(yes);t.appendChild(no);b.appendChild(t);return b;}
+
+/* ===== SHOT MAP ===== */
+const NS='http://www.w3.org/2000/svg',CX=150,CY=150,R3=20,R20=58,R40=104,RGREEN=112,RFRINGE=132;
+function buildGreen(){const svg=$('green');svg.innerHTML='';
+  for(let x=15;x<300;x+=30)for(let y=15;y<300;y+=30){const d=document.createElementNS(NS,'circle');d.setAttribute('cx',x);d.setAttribute('cy',y);d.setAttribute('r',1);d.setAttribute('fill','#2a2e3a');svg.appendChild(d);}
+  circle(svg,CX,CY,RFRINGE,'#1d2029','#3a3f4d',1.5);
+  circle(svg,CX,CY,RGREEN,'#243b2e',null,0);
+  [R40,R20,R3].forEach(r=>{const c=document.createElementNS(NS,'circle');c.setAttribute('cx',CX);c.setAttribute('cy',CY);c.setAttribute('r',r);c.setAttribute('fill','none');c.setAttribute('stroke','#3d6b4f');c.setAttribute('stroke-width',1);c.setAttribute('stroke-dasharray','2 3');svg.appendChild(c);});
+  addText(svg,CX,CY+R3+11,'3 ft','#7fe3a8',9);addText(svg,CX,CY+R20+12,'20 ft','#5a8f6e',9);addText(svg,CX,CY+R40+13,'40 ft','#5a8f6e',9);
+  const hole=document.createElementNS(NS,'circle');hole.setAttribute('cx',CX);hole.setAttribute('cy',CY);hole.setAttribute('r',4);hole.setAttribute('fill','#0a0b0f');svg.appendChild(hole);
+  const pin=document.createElementNS(NS,'line');pin.setAttribute('x1',CX);pin.setAttribute('y1',CY);pin.setAttribute('x2',CX);pin.setAttribute('y2',CY-34);pin.setAttribute('stroke','#888');pin.setAttribute('stroke-width',1.5);svg.appendChild(pin);
+  const flag=document.createElementNS(NS,'path');flag.setAttribute('d',`M${CX} ${CY-34} L${CX+18} ${CY-29} L${CX} ${CY-24} Z`);flag.setAttribute('fill','#3d7bff');svg.appendChild(flag);
+  if(mapView==='all'){cur.shots.forEach(s=>drawShot(svg,s));}
+  else{cur.shots.filter(s=>s.hole===mapHoleNum).forEach(s=>drawShot(svg,s));}
+  svg.onclick=e=>{
+    if(mapView==='all')return;
+    const pt=svgPoint(svg,e);
+    if(tool==='place'){cur.shots=cur.shots.filter(s=>s.hole!==mapHoleNum);cur.shots.push({hole:mapHoleNum,x:pt.x,y:pt.y,status:shotStatus});buildGreen();}
+    else if(tool==='erase'){cur.shots=cur.shots.filter(s=>Math.hypot(s.x-pt.x,s.y-pt.y)>14);buildGreen();}
+  };
+}
+function circle(svg,cx,cy,r,fill,stroke,sw){const c=document.createElementNS(NS,'circle');c.setAttribute('cx',cx);c.setAttribute('cy',cy);c.setAttribute('r',r);c.setAttribute('fill',fill);if(stroke){c.setAttribute('stroke',stroke);c.setAttribute('stroke-width',sw);}svg.appendChild(c);}
+function addText(svg,x,y,txt,fill,size){const t=document.createElementNS(NS,'text');t.setAttribute('x',x);t.setAttribute('y',y);t.setAttribute('text-anchor','middle');t.setAttribute('font-size',size);t.setAttribute('fill',fill);t.textContent=txt;svg.appendChild(t);}
+function svgPoint(svg,e){const r=svg.getBoundingClientRect();const cx=(e.touches?e.touches[0].clientX:e.clientX)-r.left;const cy=(e.touches?e.touches[0].clientY:e.clientY)-r.top;return{x:cx/r.width*300,y:cy/r.height*300};}
+function drawShot(svg,s){const g=document.createElementNS(NS,'g');const col=s.status==='miss'?'#ff5c5c':'#1fc77b';const c=document.createElementNS(NS,'circle');c.setAttribute('cx',s.x);c.setAttribute('cy',s.y);c.setAttribute('r',11);c.setAttribute('fill',col);c.setAttribute('stroke','#fff');c.setAttribute('stroke-width',2);const t=document.createElementNS(NS,'text');t.setAttribute('x',s.x);t.setAttribute('y',s.y+4);t.setAttribute('text-anchor','middle');t.setAttribute('font-size',11);t.setAttribute('font-weight','700');t.setAttribute('fill','#06281a');t.textContent=s.hole;g.appendChild(c);g.appendChild(t);svg.appendChild(g);}
+function setTool(t){tool=t;$('tool-place').classList.toggle('on',t==='place');$('tool-erase').classList.toggle('on',t==='erase');}
+function setShotStatus(s){shotStatus=s;$('ss-hit').classList.toggle('on',s==='hit');$('ss-miss').classList.toggle('on',s==='miss');}
+function setMapView(v){mapView=v;$('mv-single').classList.toggle('on',v==='single');$('mv-all').classList.toggle('on',v==='all');const single=v==='single';$('mapToolRow').style.display=single?'flex':'none';$('shotStatusRow').style.display=single?'flex':'none';$('mapLegend').textContent=single?'Tippe aufs Grün, wo dein Approach landete · grün = getroffen, rot = daneben':'Alle Einschläge der Runde · Zahl = Loch · grün getroffen, rot daneben';buildGreen();}
+function clearMap(){cur.shots=cur.shots.filter(s=>s.hole!==mapHoleNum);buildGreen();}
+function mapHole(d){mapHoleNum=Math.min(18,Math.max(1,mapHoleNum+d));$('mapHoleNum').textContent=mapHoleNum;buildGreen();}
+
+/* ===== FORM SYNC ===== */
+function populateCourseSelect(){const cs=$('r_courseKey');cs.innerHTML='';Object.keys(COURSES).forEach(k=>{const o=document.createElement('option');o.value=k;o.textContent=COURSES[k].name;if(k===cur.courseKey)o.selected=true;cs.appendChild(o);});populateTeeSelect();}
+function populateTeeSelect(){const ts=$('r_teeId');ts.innerHTML='';const c=COURSES[cur.courseKey]||COURSES.mettmann;c.tees.forEach(t=>{const o=document.createElement('option');o.value=t.id;o.textContent=`${t.label} · CR ${t.cr} / Slope ${t.slope} / Par ${t.par}`;if(t.id===cur.teeId)o.selected=true;ts.appendChild(o);});}
+function updateCHBanner(){const b=$('chBanner');const ch=curCH();if(ch==null){b.classList.remove('show');return;}b.classList.add('show');const pts=totalStableford();b.innerHTML=`<div><div class="ch-l">Course Handicap</div><div class="ch-v">${ch}</div></div><div class="ch-r"><div class="ch-pts">${pts}</div><div class="ch-pl">Stableford-Punkte</div></div>`;}
+function fillRoundForm(){$('r_date').value=cur.date;$('r_hcpIndex').value=cur.hcpIndex||'';populateCourseSelect();$('k_tech').value=cur.keys.tech;$('k_tact').value=cur.keys.tact;$('k_ment').value=cur.keys.ment;$('rv_tech').value=cur.review.tech;$('rv_tact').value=cur.review.tact;$('rv_ment').value=cur.review.ment;$('rv_good').value=cur.review.good;$('rv_bad').value=cur.review.bad;buildDow('dow',cur.dow);buildGoals();setNine(1);setMapView('single');buildGreen();$('mapHoleNum').textContent=mapHoleNum;updateCHBanner();}
+function fillPracticeForm(){$('p_date').value=curP.date;$('p_tech').value=curP.pnotes.tech;$('p_feel').value=curP.pnotes.feel;buildDow('dowP',curP.dow);buildPGoals();buildAgenda();}
+const bind=(id,fn)=>$(id).addEventListener('input',e=>fn(e.target.value));
+bind('r_date',v=>cur.date=v);
+bind('r_hcpIndex',v=>{cur.hcpIndex=v;buildHoles();updateCHBanner();});
+$('r_courseKey').addEventListener('change',e=>{cur.courseKey=e.target.value;cur.teeId=(COURSES[cur.courseKey]||COURSES.mettmann).tees[0].id;populateTeeSelect();buildHoles();updateCHBanner();});
+$('r_teeId').addEventListener('change',e=>{cur.teeId=e.target.value;buildHoles();updateCHBanner();});
+bind('k_tech',v=>cur.keys.tech=v);bind('k_tact',v=>cur.keys.tact=v);bind('k_ment',v=>cur.keys.ment=v);
+bind('rv_tech',v=>cur.review.tech=v);bind('rv_tact',v=>cur.review.tact=v);bind('rv_ment',v=>cur.review.ment=v);bind('rv_good',v=>cur.review.good=v);bind('rv_bad',v=>cur.review.bad=v);
+bind('p_date',v=>curP.date=v);bind('p_tech',v=>curP.pnotes.tech=v);bind('p_feel',v=>curP.pnotes.feel=v);
+
+/* ===== SAVE / EDIT ===== */
+function saveEntry(){const entry=MODE==='round'?JSON.parse(JSON.stringify(cur)):JSON.parse(JSON.stringify(curP));entry.type=MODE;if(MODE==='round'){const c=curCourse(),t=curTee();entry.course=c.name;entry.tees=t.label;entry.courseKey=cur.courseKey;entry.teeId=cur.teeId;entry.stableford=totalStableford();entry.ch=curCH();}if(editingId){entry.id=editingId;const idx=DB.entries.findIndex(e=>e.id===editingId);entry.savedAt=DB.entries[idx].savedAt;DB.entries[idx]=entry;}else{entry.id='e'+Date.now();entry.savedAt=Date.now();DB.entries.unshift(entry);}persist();editingId=null;toast(MODE==='round'?'Runde gesichert ⛳':'Session gesichert 🎯');go('home');}
+function newEntry(){editingId=null;mapHoleNum=1;cur=blankRound();curP=blankPractice();fillRoundForm();fillPracticeForm();setMode('round');toast('Neues Blatt');}
+function editEntry(id){const e=DB.entries.find(x=>x.id===id);if(!e)return;editingId=id;if(e.type==='round'){cur=JSON.parse(JSON.stringify(e));setMode('round');fillRoundForm();}else{curP=JSON.parse(JSON.stringify(e));setMode('practice');fillPracticeForm();}go('play');document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));toast('Zum Bearbeiten geladen');}
+function delEntry(id){if(!confirm('Diesen Eintrag löschen?'))return;DB.entries=DB.entries.filter(e=>e.id!==id);persist();renderHistory();renderHome();toast('Gelöscht');}
+
+/* ===== STATS ===== */
+function entryStableford(e){if(e.stableford!=null)return e.stableford;const c=COURSES[e.courseKey];if(!c)return null;const ch=e.ch!=null?e.ch:courseHandicap(e.hcpIndex,(c.tees.find(t=>t.id===e.teeId)||c.tees[0]));const strokes=strokeAllocation(ch==null?0:ch,c.holeIdx);let tot=0;e.holes.forEach((h,i)=>{const p=stablefordHole(Number(h.score),c.holePar[i],strokes[i]);if(p!=null)tot+=p;});return tot;}
+function roundStats(e){let score=0,putts=0,gir=0,fir=0,played=0;e.holes.forEach(h=>{if(h.score){score+=Number(h.score);played++;}putts+=Number(h.putts||0);if(h.gir===true)gir++;if(h.fir===true)fir++;});return{score,putts,gir,fir,played};}
+
+function renderHistory(){const list=$('histList');list.innerHTML='';$('histCount').textContent=DB.entries.length?`${DB.entries.length} Einträge`:'Noch nichts gespeichert';if(!DB.entries.length){list.innerHTML='<div class="empty"><div class="ic">📖</div><p>Noch nichts gespeichert.<br>Tippe unten auf ➕, um zu starten.</p></div>';return;}DB.entries.forEach(e=>list.appendChild(rowItem(e,true)));}
+
+function renderStats(){const body=$('statsBody');const rounds=DB.entries.filter(e=>e.type==='round');if(!rounds.length){body.innerHTML='<div class="empty"><div class="ic">📊</div><p>Noch keine Runden gespeichert.</p></div>';return;}
+  const last5=rounds.slice(0,5);
+  let ts=0,tsN=0,tp=0,tpN=0,tg=0,tf=0,tn=0;
+  last5.forEach(e=>{const s=roundStats(e);if(s.played>=9){ts+=s.score;tsN++;}if(s.putts){tp+=s.putts;tpN++;}tg+=s.gir;tf+=s.fir;tn++;});
+  const avgScore=tsN?Math.round(ts/tsN):'–',avgPutts=tpN?Math.round(tp/tpN):'–',girPct=tn?Math.round(tg/tn/18*100):0,firPct=tn?Math.round(tf/tn/18*100):0;
+  body.innerHTML=`<div class="scrhead" style="padding-top:6px"><p style="margin:0;font-size:13px;color:var(--text-3)">Letzte ${last5.length} Runden</p></div>
+    <div class="statgrid">
+      <div class="statcard"><div class="l">Ø Score</div><div class="n">${avgScore}</div></div>
+      <div class="statcard"><div class="l">Ø Putts</div><div class="n">${avgPutts}</div></div>
+      <div class="statcard"><div class="l">GIR Quote</div><div class="n good">${girPct}%</div></div>
+      <div class="statcard"><div class="l">FIR Quote</div><div class="n">${firPct}%</div></div>
+    </div>`;
+  body.appendChild(chartBlock('Score-Verlauf',rounds.slice().reverse().map(e=>{const s=roundStats(e);return s.played>=9?s.score:null;}),'#3d7bff'));
+  body.appendChild(chartBlock('Putts-Verlauf',rounds.slice().reverse().map(e=>roundStats(e).putts||null),'#1fc77b'));
+}
+function chartBlock(title,data,color){const wrap=document.createElement('div');wrap.className='chartcard';const valid=data.filter(v=>v!=null);const avg=valid.length?Math.round(valid.reduce((a,b)=>a+b,0)/valid.length):'–';wrap.innerHTML=`<div class="ch-head"><span class="ti">${title}</span><span class="tr">Ø ${avg}</span></div>`;const W=440,H=132,padX=14,padTop=26,padBot=16;const max=Math.max(...valid,1),min=Math.min(...valid,0),span=Math.max(max-min,1);const svg=document.createElementNS(NS,'svg');svg.setAttribute('viewBox',`0 0 ${W} ${H}`);svg.setAttribute('width','100%');let pts=[];data.forEach((v,i)=>{if(v==null)return;const x=padX+(data.length<=1?W/2-padX:i/(data.length-1)*(W-2*padX));const y=H-padBot-((v-min)/span)*(H-padTop-padBot);pts.push([x,y,v]);});if(pts.length>1){const path=document.createElementNS(NS,'polyline');path.setAttribute('points',pts.map(p=>p[0]+','+p[1]).join(' '));path.setAttribute('fill','none');path.setAttribute('stroke',color);path.setAttribute('stroke-width',2.5);path.setAttribute('stroke-linejoin','round');svg.appendChild(path);}pts.forEach(p=>{const c=document.createElementNS(NS,'circle');c.setAttribute('cx',p[0]);c.setAttribute('cy',p[1]);c.setAttribute('r',4);c.setAttribute('fill','#15171f');c.setAttribute('stroke',color);c.setAttribute('stroke-width',2.5);svg.appendChild(c);const t=document.createElementNS(NS,'text');t.setAttribute('x',p[0]);t.setAttribute('y',p[1]-9);t.setAttribute('text-anchor','middle');t.setAttribute('font-size',11);t.setAttribute('font-weight',700);t.setAttribute('fill',color);t.textContent=p[2];svg.appendChild(t);});wrap.appendChild(svg);return wrap;}
+
+/* ===== BACKUP ===== */
+function exportData(){dl(new Blob([JSON.stringify(DB,null,2)],{type:'application/json'}),`birdiebook-backup-${new Date().toISOString().slice(0,10)}.json`);toast('Backup exportiert');}
+function importData(ev){const f=ev.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(d.entries){DB=Object.assign({entries:[],hcp:'',hcpHist:[]},d);persist();renderHome();renderHistory();renderStats();toast('Backup importiert ✓');go('home');}else toast('Keine gültige Datei');}catch(e){toast('Datei konnte nicht gelesen werden');}};r.readAsText(f);ev.target.value='';}
+function exportText(){let out='⛳ BIRDIE BOOK — Export '+new Date().toLocaleString('de-DE')+'\n\n';DB.entries.forEach(e=>{if(e.type==='round'){const s=roundStats(e);out+=`════════\nRUNDE · ${e.date}\nKurs: ${e.course} (${e.tees})\nScore ${s.score} (${s.played} Löcher) · Stableford ${entryStableford(e)} · Putts ${s.putts} · GIR ${s.gir} · FIR ${s.fir}\nZiele: ${e.goals.filter(g=>g.t).map(g=>(g.done?'[x] ':'[ ] ')+g.t).join(' | ')}\nReview Gut: ${e.review.good}\nReview Schlecht: ${e.review.bad}\n\n`;}else{out+=`════════\nTRAINING · ${e.date}\nFokus: ${e.pgoals.filter(g=>g.t).map(g=>(g.done?'[x] ':'[ ] ')+g.t).join(' | ')}\nAgenda: ${e.agenda.filter(a=>a.t).map(a=>(a.done?'[x] ':'[ ] ')+a.t).join(' | ')}\n\n`;}});dl(new Blob([out],{type:'text/plain'}),`birdiebook-${new Date().toISOString().slice(0,10)}.txt`);toast('Text exportiert');}
+function wipeAll(){if(!confirm('Wirklich ALLE Einträge löschen? Mach vorher ein Backup!'))return;DB={entries:[],hcp:'',hcpHist:[]};persist();renderHome();renderHistory();renderStats();toast('Alles gelöscht');}
+function dl(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);}
+
+/* ===== UTIL ===== */
+function esc(s){return(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+let toastT;function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),1800);}
+
+/* boot */
+fillRoundForm();fillPracticeForm();setMode('round');renderHome();
+if(!storageOK)toast('Speicher eingeschränkt – nutze Backup-Export');
+</script>
+</body>
+</html>

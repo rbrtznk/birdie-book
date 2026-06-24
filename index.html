@@ -5,12 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0a0b0f">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Lowr">
-<link rel="apple-touch-icon" href="lowr-logo-transparent.png">
+<meta name="apple-mobile-web-app-title" content="Birdie Book">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="format-detection" content="telephone=no">
-<title>Lowr – Structure your notes. Lower your score.</title>
+<title>Birdie Book</title>
 <style>
 :root{
   --bg:#0a0b0f;          /* near-black app background */
@@ -50,15 +49,10 @@ input,textarea{-webkit-user-select:text;user-select:text;}
 #app{max-width:480px;margin:0 auto;height:100%;background:var(--bg);position:relative;display:flex;flex-direction:column;}
 #scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;padding-top:env(safe-area-inset-top);padding-bottom:calc(84px + env(safe-area-inset-bottom));}
 
-/* ---------- top brand / greeting ---------- */
-.greet{padding:18px 20px 8px;display:flex;align-items:center;justify-content:space-between;gap:12px;}
-.brandlock{display:flex;align-items:center;gap:12px;min-width:0;}
-.brandlogo{width:58px;height:58px;border-radius:17px;object-fit:cover;flex:none;box-shadow:0 8px 22px rgba(61,123,255,.2);background:var(--surface-2);}
-.brandcopy{min-width:0;}
-.brandname{font-size:27px;line-height:1;font-weight:800;letter-spacing:0;color:var(--text);}
-.brandtag{margin-top:4px;font-size:12px;line-height:1.25;color:var(--accent-text);font-weight:700;}
-.greet .hi{font-size:13px;color:var(--text-2);}
-.greet .sub{font-size:13px;font-weight:600;margin-top:6px;color:var(--text-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+/* ---------- top greeting ---------- */
+.greet{padding:22px 20px 8px;display:flex;align-items:center;justify-content:space-between;}
+.greet .hi{font-size:14px;color:var(--text-2);}
+.greet .sub{font-size:17px;font-weight:600;margin-top:2px;}
 .avatar{width:40px;height:40px;border-radius:50%;background:var(--accent-soft);color:var(--accent-text);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;}
 
 /* screen title (non-home) */
@@ -109,6 +103,12 @@ input,textarea{-webkit-user-select:text;user-select:text;}
 
 /* list rows (history) */
 .row-item{margin:0 16px 10px;background:var(--surface);border-radius:var(--radius-sm);padding:14px 16px;display:flex;align-items:center;gap:14px;border:1px solid var(--line);}
+.row-item.row-planned{background:var(--accent-soft);border-color:rgba(61,123,255,.35);}
+.row-item.row-live{background:var(--green-soft);border-color:rgba(31,199,123,.4);}
+.row-item.row-done{border-left:3px solid var(--green);}
+.ic.practice-planned{background:rgba(61,123,255,.18);color:var(--accent-text);}
+.ic.practice-live{background:rgba(31,199,123,.22);color:var(--green);}
+.ic.practice-done{background:var(--green-soft);color:var(--green);}
 .row-item .ic{width:44px;height:44px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:20px;flex:none;}
 .ic.round{background:var(--accent-soft);color:var(--accent-text);}
 .ic.practice{background:var(--green-soft);color:var(--green);}
@@ -174,8 +174,8 @@ input,textarea{-webkit-user-select:text;user-select:text;}
 .holesum b{color:var(--accent-text);}
 .holescore{font-size:26px;font-weight:700;letter-spacing:-1px;min-width:30px;text-align:right;color:var(--text);}
 .holebody{display:none;padding:4px 16px 14px;border-top:1px solid var(--line);}
-.holecard.empty{border-color:#34384a;border-style:dashed;padding:0;text-align:initial;color:inherit;}
-.holecard.empty .holenum{background:#1a1d26;color:var(--text-3);}
+.holecard.holeempty{border-color:#34384a;border-style:dashed;}
+.holecard.holeempty .holenum{background:#1a1d26;color:var(--text-3);}
 .needsentry{color:var(--amber);font-weight:600;}
 .statrow{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0;}
 .statbox{text-align:center;}
@@ -216,9 +216,9 @@ input,textarea{-webkit-user-select:text;user-select:text;}
 .statcard .n{font-size:30px;font-weight:700;margin-top:6px;letter-spacing:-1px;}
 .statcard .n.good{color:var(--green);}
 .chartcard{margin:0 16px 14px;background:var(--surface);border-radius:var(--radius);padding:18px;border:1px solid var(--line);}
-.chartcard .ch-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
-.chartcard .ch-head .ti{font-size:13px;font-weight:600;}
-.chartcard .ch-head .tr{font-size:12px;color:var(--green);}
+.chartcard .ch-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;gap:10px;}
+.chartcard .ch-head .ti{font-size:13px;font-weight:600;flex:1;}
+.chartcard .ch-head .tr{font-size:12px;color:var(--green);flex:none;white-space:nowrap;}
 
 /* ---------- buttons ---------- */
 .bigbtn{display:block;width:calc(100% - 32px);margin:16px;padding:16px;border-radius:14px;background:var(--accent);color:#fff;font-weight:700;font-size:15px;text-align:center;}
@@ -263,22 +263,62 @@ select.inp{appearance:none;-webkit-appearance:none;background-image:url("data:im
 #teePickLabel{flex:1;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .teechev{color:var(--text-3);font-size:12px;}
 .teepanel{display:none;}
-.teemodal{position:fixed;inset:0;z-index:180;display:none;align-items:flex-start;justify-content:center;padding:calc(74px + env(safe-area-inset-top)) 16px 16px;background:rgba(5,6,9,.62);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);}
-.teemodal.open{display:flex;}
-.teemodal-card{width:min(100%,360px);background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:0 18px 50px rgba(0,0,0,.55);}
-.teemodal-head{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--line);}
-.teemodal-title{font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--text-3);font-weight:700;}
-.teemodal-close{width:32px;height:32px;border-radius:10px;background:var(--surface-2);color:var(--text-2);font-size:18px;display:flex;align-items:center;justify-content:center;}
-.teemodal-list{max-height:min(56vh,360px);overflow-y:auto;-webkit-overflow-scrolling:touch;}
-.teeopt{display:flex;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid var(--line);}
+/* tee modal */
+.modal-overlay{display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:24px;}
+.modal-overlay.open{display:flex;}
+.modal-sheet{width:100%;max-width:380px;background:var(--surface-2);border:1px solid var(--line);border-radius:20px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.6);}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--line);font-size:14px;font-weight:700;letter-spacing:.5px;}
+.modal-x{color:var(--text-3);font-size:18px;padding:4px 8px;}
+.teeopt{display:flex;align-items:center;gap:12px;padding:15px 18px;border-bottom:1px solid var(--line);}
 .teeopt:last-child{border-bottom:none;}
-.teeopt:active{background:var(--surface-2);}
-.teeopt .sw{width:16px;height:16px;border-radius:50%;flex:none;border:1.5px solid rgba(255,255,255,.3);}
+.teeopt:active{background:var(--surface-3);}
+.teeopt .sw{width:18px;height:18px;border-radius:50%;flex:none;border:1.5px solid rgba(255,255,255,.3);}
 .teeopt .info{flex:1;}
-.teeopt .info .nm{font-size:14px;font-weight:600;}
-.teeopt .info .det{font-size:11px;color:var(--text-3);margin-top:1px;}
+.teeopt .info .nm{font-size:15px;font-weight:600;}
+.teeopt .info .det{font-size:12px;color:var(--text-3);margin-top:2px;}
 .teeopt.sel{background:var(--accent-soft);}
 .teeopt.sel .info .nm{color:var(--accent-text);}
+.teeopt .check{color:var(--accent-text);font-size:16px;}
+
+/* drill modal */
+.drillmodal-sheet{max-width:420px;max-height:80vh;display:flex;flex-direction:column;}
+.drillmodal-list{overflow-y:auto;-webkit-overflow-scrolling:touch;flex:1;}
+.drillcat-head{padding:12px 18px 6px;font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--accent-text);background:var(--surface-2);position:sticky;top:0;}
+.drillopt{padding:12px 18px;border-bottom:1px solid var(--line);}
+.drillopt:active{background:var(--surface-3);}
+.drillopt .dname{font-size:14px;font-weight:600;}
+.drillopt .ddesc{font-size:12px;color:var(--text-3);margin-top:3px;line-height:1.4;}
+.drillopt .dlast{font-size:11px;margin-top:4px;font-weight:600;}
+.drillopt .dlast.stale{color:var(--amber);}
+.drillopt .dlast.ok{color:var(--text-3);}
+.drillmodal-foot{padding:14px 18px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:8px;}
+
+/* drills in session list */
+.drillrow{display:flex;align-items:center;gap:10px;background:var(--surface-2);border-radius:12px;padding:12px 14px;margin-bottom:10px;flex-wrap:wrap;}
+.drillrow .di{flex:1;min-width:120px;}
+.drillrow .di .nm{font-size:14px;font-weight:600;}
+.drillrow .di .cat{font-size:11px;color:var(--accent-text);margin-top:1px;}
+.drillrow .dinput-wrap{display:flex;align-items:center;gap:6px;flex:none;}
+.drillrow .dinput-wrap .inp{width:54px;text-align:center;padding:10px 6px;}
+.drillrow .dinput-wrap.sg .inp{width:46px;}
+.drillrow .dinput-wrap .dunit{font-size:11px;color:var(--text-3);white-space:nowrap;}
+.drillrow .dinput-wrap .dx{font-size:13px;color:var(--text-3);}
+.drillrow .ddel{color:var(--text-3);font-size:16px;padding:4px 6px;flex:none;}
+
+/* home deficit warning */
+.deficitcard{margin:0 16px 12px;background:linear-gradient(135deg,#3a2e15,#2a1f10);border:1px solid #5a4520;border-radius:var(--radius-sm);padding:14px 16px;}
+.deficitcard .dt{font-size:13px;font-weight:700;color:var(--amber);margin-bottom:6px;}
+.deficitcard .dl{font-size:13px;color:#e8d4a8;line-height:1.5;}
+
+/* category breakdown bars */
+.catbars{padding:6px 4px 4px;}
+.catbar-row{display:grid;grid-template-columns:110px 1fr 32px 64px;align-items:center;gap:8px;margin-bottom:10px;}
+.catbar-lab{font-size:12px;color:var(--text-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.catbar-track{height:8px;background:var(--surface-3);border-radius:4px;overflow:hidden;}
+.catbar-fill{height:100%;background:linear-gradient(90deg,#3d7bff,#1fc77b);border-radius:4px;}
+.catbar-v{font-size:12px;font-weight:700;text-align:right;}
+.catbar-last{font-size:10px;color:var(--text-3);text-align:right;}
+.catbar-last.stale{color:var(--amber);font-weight:600;}
 
 /* hole par/index meta + stableford pts */
 .holepar{font-size:10px;color:var(--text-3);font-weight:600;margin-top:1px;}
@@ -286,15 +326,6 @@ select.inp{appearance:none;-webkit-appearance:none;background-image:url("data:im
 .holepts.zero{background:var(--red-soft);color:var(--red);}
 .holehead{grid-template-columns:40px 1fr auto auto;}
 .strokedots{color:var(--accent-text);font-size:11px;letter-spacing:1px;}
-.holecard.open{border-style:solid;}
-.holecard.open .holehead{padding:11px 14px;}
-.holecard.open .holebody{padding:8px 14px 12px;}
-.holecard.open .statrow{gap:7px;margin:8px 0 10px;}
-.holecard.open .statbox .lab{margin-bottom:4px;}
-.holecard.open .stepper button{width:28px;height:28px;border-radius:8px;font-size:17px;}
-.holecard.open .stepper .val{min-width:21px;font-size:17px;}
-.holecard.open .toggle2 button{padding:6px 0;font-size:12px;}
-.holecard.open .holenote{min-height:38px;padding:8px 10px;font-size:13px;}
 
 /* shot status toggle in map */
 .shotstatus{display:flex;gap:8px;margin:0 16px 10px;}
@@ -309,6 +340,7 @@ select.inp{appearance:none;-webkit-appearance:none;background-image:url("data:im
 
 /* practice volume */
 .durfield{display:flex;align-items:center;color:var(--text-2);font-weight:500;}
+.timeinp{font-variant-numeric:tabular-nums;letter-spacing:1px;text-align:center;font-size:17px;font-weight:600;}
 .addblock{width:100%;padding:12px;border-radius:12px;background:var(--surface-2);border:1px dashed var(--line);color:var(--accent-text);font-weight:600;font-size:14px;margin-top:4px;}
 .addblock:active{background:var(--surface-3);}
 .sblock{background:var(--surface-2);border-radius:12px;padding:12px 14px;margin-bottom:10px;}
@@ -325,9 +357,17 @@ select.inp{appearance:none;-webkit-appearance:none;background-image:url("data:im
 .volsum .l{font-size:10px;color:var(--accent-text);text-transform:uppercase;letter-spacing:.5px;margin-top:2px;}
 
 /* live session */
-.livestart{margin:14px 16px 0;}
+.livestart{margin:14px 16px 0;display:flex;flex-direction:column;gap:10px;}
 .livestart button{width:100%;padding:16px;border-radius:16px;background:var(--green);color:#06281a;font-weight:700;font-size:16px;display:flex;align-items:center;justify-content:center;gap:8px;}
 .livestart button:active{transform:scale(.99);}
+.livestart button.planbtn{background:var(--surface-2);color:var(--accent-text);border:1px solid var(--line);font-size:14px;padding:13px;}
+.planbanner{margin:14px 16px 0;background:linear-gradient(135deg,#3d7bff 0%,#2a5cd9 100%);border-radius:16px;padding:18px;box-shadow:0 8px 24px rgba(61,123,255,.25);}
+.planbanner .plan-top{color:#fff;font-size:13px;font-weight:700;letter-spacing:.5px;}
+.planbanner .plan-hint{color:#dce6ff;font-size:13px;margin:8px 0 14px;line-height:1.4;}
+.planbanner .lb-stop{margin-top:0;width:100%;padding:14px;border-radius:12px;font-weight:700;font-size:15px;display:flex;align-items:center;justify-content:center;gap:8px;}
+.planbanner .plan-startbtn{background:#06281a;color:#fff;}
+.planbanner .plan-discard{width:100%;margin-top:10px;padding:10px;background:transparent;color:#dce6ff;font-size:13px;font-weight:600;border-radius:10px;}
+.planbanner .plan-discard:active{background:rgba(255,255,255,.1);}
 .livebanner{margin:14px 16px 0;background:linear-gradient(135deg,#1fc77b 0%,#159e60 100%);border-radius:16px;padding:18px;box-shadow:0 8px 24px rgba(31,199,123,.25);}
 .livebanner .lb-top{display:flex;align-items:center;gap:8px;color:#06281a;font-size:13px;font-weight:700;}
 .livebanner .pulse{width:10px;height:10px;border-radius:50%;background:#06281a;animation:pulse 1.4s infinite;}
@@ -341,6 +381,7 @@ select.inp{appearance:none;-webkit-appearance:none;background-image:url("data:im
 .livebanner.stale .pulse{background:#3a2700;}
 .livebanner.stale .lb-stop{background:#3a2700;}
 .livetag{font-size:11px;color:var(--green);font-weight:700;margin-left:4px;}
+.plantag{font-size:11px;color:var(--accent-text);font-weight:700;margin-left:4px;}
 
 /* profile clubs */
 .clubrow{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
@@ -359,32 +400,20 @@ select.inp{appearance:none;-webkit-appearance:none;background-image:url("data:im
 </head>
 <body>
 <div id="app">
-  <div class="teemodal" id="teeModal" onclick="closeTeePanel()">
-    <div class="teemodal-card" onclick="event.stopPropagation()">
-      <div class="teemodal-head">
-        <div class="teemodal-title">Abschlag wählen</div>
-        <button class="teemodal-close" onclick="closeTeePanel()">×</button>
-      </div>
-      <div class="teemodal-list" id="teePanel"></div>
-    </div>
-  </div>
   <div id="scroll">
 
   <!-- =============== HOME =============== -->
   <section class="view active" id="view-home">
     <div class="greet">
-      <div class="brandlock">
-        <img class="brandlogo" src="lowr-logo-transparent.png" alt="Lowr Logo">
-        <div class="brandcopy">
-          <div class="brandname">Lowr</div>
-          <div class="brandtag">Structure your notes. Lower your score.</div>
-          <div class="sub" id="greetSub">Bereit für die nächste Runde?</div>
-        </div>
+      <div>
+        <div class="hi">Willkommen zurück</div>
+        <div class="sub" id="greetSub">Bereit für die nächste Runde?</div>
       </div>
       <div class="avatar" id="avatar" onclick="openProfile()">R</div>
     </div>
 
     <div id="heroSlot"></div>
+    <div id="deficitSlot"></div>
 
     <div class="hcp">
       <div>
@@ -432,7 +461,7 @@ select.inp{appearance:none;-webkit-appearance:none;background-image:url("data:im
           <div class="row">
             <div class="field"><label>Abschlag (Tee)</label>
               <div class="teepick" id="teePick">
-                <button class="inp teepick-btn" id="teePickBtn" onclick="toggleTeePanel(event)"><span class="teeswatch" id="teeSwatch"></span><span id="teePickLabel">Tee</span><span class="teechev">▾</span></button>
+                <button class="inp teepick-btn" id="teePickBtn" onclick="openTeeModal(event)"><span class="teeswatch" id="teeSwatch"></span><span id="teePickLabel">Tee</span><span class="teechev">▾</span></button>
               </div>
             </div>
             <div class="field"><label>Handicap-Index</label><input class="inp" id="r_hcpIndex" inputmode="decimal" placeholder="24.5"></div>
@@ -507,8 +536,8 @@ select.inp{appearance:none;-webkit-appearance:none;background-image:url("data:im
         <div class="sheet-body">
           <div class="datestrip"><div class="dow" id="dowP"></div><input class="inp" id="p_date" placeholder="Datum"></div>
           <div class="row">
-            <div class="field"><label>Von</label><input class="inp" id="p_from" type="time"></div>
-            <div class="field"><label>Bis</label><input class="inp" id="p_to" type="time"></div>
+            <div class="field"><label>Von</label><input class="inp timeinp" id="p_from" type="text" inputmode="numeric" placeholder="--:--" maxlength="5"></div>
+            <div class="field"><label>Bis</label><input class="inp timeinp" id="p_to" type="text" inputmode="numeric" placeholder="--:--" maxlength="5"></div>
           </div>
           <div class="field"><label>Dauer</label><div class="inp durfield" id="p_dur">–</div></div>
         </div>
@@ -525,12 +554,16 @@ select.inp{appearance:none;-webkit-appearance:none;background-image:url("data:im
       </div>
 
       <div class="sheet">
+        <div class="sheet-head"><h2>Übungen</h2><div class="hint">Was genau hast du trainiert?</div></div>
+        <div class="sheet-body">
+          <div id="drillList"></div>
+          <button class="addblock" onclick="openDrillModal()">+ Übung hinzufügen</button>
+        </div>
+      </div>
+
+      <div class="sheet">
         <div class="sheet-head"><h2>Practice Focus / Goals</h2><div class="hint">Was macht diese Session zum Erfolg?</div></div>
         <div class="sheet-body" id="pGoalsBox"></div>
-      </div>
-      <div class="sheet">
-        <div class="sheet-head"><h2>Practice Agenda</h2><div class="hint">Hak ab, was du durchgezogen hast</div></div>
-        <div class="sheet-body" id="pAgendaBox"></div>
       </div>
       <div class="sheet">
         <div class="sheet-head"><h2>Notizen</h2></div>
@@ -543,7 +576,7 @@ select.inp{appearance:none;-webkit-appearance:none;background-image:url("data:im
       </div>
     </div>
 
-    <button class="bigbtn" onclick="saveEntry()">In Lowr sichern</button>
+    <button class="bigbtn" onclick="saveEntry()">In die Birdie Book sichern</button>
     <button class="bigbtn ghost" onclick="newEntry()">Leeren / Neu</button>
   </section>
 
@@ -607,13 +640,75 @@ select.inp{appearance:none;-webkit-appearance:none;background-image:url("data:im
   </nav>
 </div>
 <div class="toast" id="toast"></div>
+<div class="modal-overlay" id="teeModal" onclick="closeTeeModal(event)">
+  <div class="modal-sheet" onclick="event.stopPropagation()">
+    <div class="modal-head"><span>Abschlag wählen</span><button class="modal-x" onclick="closeTeeModal()">✕</button></div>
+    <div id="teeModalList"></div>
+  </div>
+</div>
+<div class="modal-overlay" id="drillModal" onclick="closeDrillModal(event)">
+  <div class="modal-sheet drillmodal-sheet" onclick="event.stopPropagation()">
+    <div class="modal-head"><span>Übung hinzufügen</span><button class="modal-x" onclick="closeDrillModal()">✕</button></div>
+    <div id="drillModalList" class="drillmodal-list"></div>
+    <div class="drillmodal-foot">
+      <input class="inp" id="customDrillName" placeholder="Eigene Übung benennen…">
+      <select class="inp" id="customDrillCat"></select>
+      <button class="addblock" onclick="addCustomDrill()">+ Eigene Übung speichern</button>
+    </div>
+  </div>
+</div>
 
 <script>
 /* ===== STORAGE ===== */
 const KEY='birdiebook_v2';
-let DB={entries:[],hcp:'',hcpHist:[],profile:{name:'',clubs:[]}};
+let DB={entries:[],hcp:'',hcpHist:[],profile:{name:'',clubs:[]},customDrills:[]};
+
+/* ===== DRILL LIBRARY ===== */
+/* Quellen: PGA.com, Golf.com, Golf Digest, Golf Monthly, HackMotion (siehe Beschreibungen) */
+const DRILL_CATS=[
+  {id:'abschlaege',label:'Abschläge',icon:'🏌️'},
+  {id:'lange_eisen',label:'Lange Eisen',icon:'🎯'},
+  {id:'kurze_eisen',label:'Kurze Eisen',icon:'⛳'},
+  {id:'transport',label:'Transportschläge',icon:'↗️'},
+  {id:'kurzes_spiel',label:'Kurzes Spiel',icon:'🪃'},
+  {id:'putten',label:'Putten',icon:'🥅'}
+];
+const DRILL_LIB=[
+  // Abschläge
+  {id:'d_abschlag_1',cat:'abschlaege',name:'Start-Linie Gate-Drill',desc:'2 Alignment-Sticks ca. 3 Yards vor dem Ball als Tor aufstellen. Ziel: Ball startet exakt durch das Tor — trainiert die Startrichtung.'},
+  {id:'d_abschlag_2',cat:'abschlaege',name:'Headcover-Hochschlag',desc:'Headcover 3 Bälle-Längen vor den Ball legen. Ohne es zu berühren schlagen — trainiert den Aufwärtswinkel und verhindert "Sky"-Schläge.'},
+  {id:'d_abschlag_3',cat:'abschlaege',name:'3-Tee-Höhen-Drill',desc:'3 Bälle auf unterschiedlich hohen Tees (hoch/mittel/tief) hintereinander schlagen — schult den Tiefpunkt deines Schwungs.'},
+  {id:'d_abschlag_4',cat:'abschlaege',name:'Pause-Drill am Top',desc:'Rückschwung normal, am höchsten Punkt 1-2 Sekunden pausieren, dann durchschwingen. Verbessert Timing & Sequenzierung.'},
+  // Lange Eisen
+  {id:'d_lang_1',cat:'lange_eisen',name:'3-Tee-Tiefpunkt-Drill',desc:'3 Bälle in einer Reihe (Abstand 1 Ballbreite). Ziel: Divot beginnt erst nach dem ersten Ball — trainiert den Tiefpunkt vor dem Ball.'},
+  {id:'d_lang_2',cat:'lange_eisen',name:'Towel-Drill gegen fett',desc:'Handtuch ca. eine Griff-Länge hinter den Ball legen. Ball treffen ohne das Handtuch zu berühren — eliminiert fette Schläge.'},
+  {id:'d_lang_3',cat:'lange_eisen',name:'45°-Stick-Drill',desc:'Alignment-Stick im 45°-Winkel hinter dem Ball in den Boden stecken. Schwingen ohne ihn zu treffen — fördert einen flacheren Schwungweg von innen.'},
+  {id:'d_lang_4',cat:'lange_eisen',name:'Halbschwung-Kontrolle',desc:'10 Bälle mit 75%-Schwung, Fokus auf Kontakt-Qualität statt Distanz. Baut Konstanz vor Power auf.'},
+  // Kurze Eisen
+  {id:'d_kurz_1',cat:'kurze_eisen',name:'Ladder-Drill Distanz',desc:'Handtuch auf unterschiedliche Distanzen legen (z.B. 60/80/100m). Reihe nach anlanden — schult Gefühl für Teilschwünge.'},
+  {id:'d_kurz_2',cat:'kurze_eisen',name:'3-Ball Tiefpunkt-Reihe',desc:'3 Bälle in einer Linie hintereinander schlagen ohne Pause zwischen den Schlägen — trainiert sauberen, wiederholbaren Kontakt.'},
+  {id:'d_kurz_3',cat:'kurze_eisen',name:'Landespunkt-Test',desc:'Ziel definieren (z.B. Fahne), 10 Bälle schlagen und Landepunkt (nicht Endpunkt) bewerten — schärft Zielgenauigkeit.'},
+  {id:'d_kurz_4',cat:'kurze_eisen',name:'Ein-Klub-Konstanz-Test',desc:'10 Bälle mit demselben Eisen, gleicher Schwung — Streuung (Yards links/rechts, kurz/lang) notieren und vergleichen.'},
+  // Transportschläge
+  {id:'d_trans_1',cat:'transport',name:'Gleiche Distanz, andere Klubs',desc:'Eine feste Ziel-Distanz (z.B. 120m) mit 3 verschiedenen Klubs anspielen — schult Trajektorie- und Rollout-Gefühl.'},
+  {id:'d_trans_2',cat:'transport',name:'Lagezonen-Drill',desc:'3 Zielzonen in Klub-Länge-Abständen markieren. Bälle systematisch in jede Zone landen — Layout-Präzision für Platzierungsschläge.'},
+  {id:'d_trans_3',cat:'transport',name:'Knockdown-Schlag',desc:'Tiefer, kontrollierter Schlag: Ball mittig/hinten im Stand, ¾-Schwung, tiefe Durchschwung-Position — für Wind & Kontrolle.'},
+  {id:'d_trans_4',cat:'transport',name:'Rollverhalten-Test',desc:'Gleichen Landepunkt mit 2 Klubs anspielen, Rollout messen — verstehen wie viel Boden- vs. Luftanteil pro Klub realistisch ist.'},
+  // Kurzes Spiel
+  {id:'d_short_1',cat:'kurzes_spiel',name:'Towel-Drill (Chip)',desc:'Handtuch flach 2 Ballbreiten hinter den Ball legen. Chippen ohne es zu berühren — sauberer, absteigender Treffpunkt vor dem Boden-Kontakt.'},
+  {id:'d_short_2',cat:'kurzes_spiel',name:'Ein-Hand-Chip (Ochoa-Drill)',desc:'Chips nur mit der führenden Hand schlagen — trainiert das Handgelenk stabil zu halten für konstanten Kontakt.'},
+  {id:'d_short_3',cat:'kurzes_spiel',name:'Ladder-Drill Chip-Distanz',desc:'3 Zonen in Klub-Längen-Abständen vom Ball aus markieren. 2 Bälle nacheinander in jede Zone landen, bei Fehler von vorne — Distanzgefühl.'},
+  {id:'d_short_4',cat:'kurzes_spiel',name:'Verschiedene Lagen üben',desc:'Bewusst aus unperfekten Lagen chippen (Rough, eng, Hang) statt nur vom perfekten Fairway — baut Anpassungsfähigkeit auf dem Platz auf.'},
+  // Putten
+  {id:'d_putt_1',cat:'putten',name:'Gate-Drill',desc:'2 Tees knapp breiter als der Putterkopf aufstellen, ca. 4 Fuß vor dem Loch. Durchputten ohne die Tees zu berühren — Start-Linie & Face-Kontrolle.'},
+  {id:'d_putt_2',cat:'putten',name:'Lag-Putting / Clock-Drill',desc:'Aus 20+ Fuß putten, Ziel: Ball stoppt zwischen Loch und einem Schläger ~2 Fuß dahinter — schult Speedkontrolle für lange Putts.'},
+  {id:'d_putt_3',cat:'putten',name:'Around the World (3 Fuß)',desc:'6 Bälle im Kreis um das Loch, je 3 Fuß entfernt. Alle nacheinander einlochen, bei Fehlversuch von vorne — Drucksituation & kurze Putts.'},
+  {id:'d_putt_4',cat:'putten',name:'Speed-Ladder',desc:'Putts aus 10/20/30 Fuß. Vor jedem nächsten Versuch den vorherigen einlochen — baut systematisches Distanzgefühl auf.'}
+];
+function allDrills(){return DRILL_LIB.concat(DB.customDrills||[]);}
+function drillById(id){return allDrills().find(d=>d.id===id);}
 let storageOK=true;
-function load(){try{const r=localStorage.getItem(KEY);if(r)DB=Object.assign({entries:[],hcp:'',hcpHist:[],profile:{name:'',clubs:[]}},JSON.parse(r));}catch(e){storageOK=false;}}
+function load(){try{const r=localStorage.getItem(KEY);if(r)DB=Object.assign({entries:[],hcp:'',hcpHist:[],profile:{name:'',clubs:[]},customDrills:[]},JSON.parse(r));}catch(e){storageOK=false;}}
 function persist(){try{localStorage.setItem(KEY,JSON.stringify(DB));}catch(e){storageOK=false;toast('Speicher blockiert – nutze Backup!');}}
 load();
 
@@ -665,10 +760,10 @@ function blankRound(){return{type:'round',id:null,savedAt:null,date:fmtDate(new 
   holes:Array.from({length:18},()=>({score:'',fir:null,gir:null,putts:0,note:''})),
   shots:[],review:{tech:'',tact:'',ment:'',good:'',bad:''}};}
 function blankPractice(){return{type:'practice',id:null,savedAt:null,date:fmtDate(new Date()),dow:new Date().getDay(),
-  live:false,startTs:null,
-  timeFrom:'',timeTo:'',rangeBalls:'',shortBlocks:[],
+  live:false,startTs:null,status:'new',
+  timeFrom:'',timeTo:'',rangeBalls:'',shortBlocks:[],drills:[],
   pgoals:[{done:false,t:''},{done:false,t:''},{done:false,t:''}],
-  agenda:[{done:false,t:''},{done:false,t:''},{done:false,t:''},{done:false,t:''},{done:false,t:''},{done:false,t:''}],
+  agenda:[],
   pnotes:{tech:'',feel:''}};}
 let cur=blankRound(),curP=blankPractice();
 
@@ -683,15 +778,26 @@ function go(v){
   const sc=$('scroll');if(sc)sc.scrollTo(0,0);
 }
 function startRound(){editingId=null;mapHoleNum=1;cur=blankRound();setMode('round');fillRoundForm();go('play');document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));}
-function startPractice(){editingId=null;const open=DB.entries.find(e=>e.type==='practice'&&e.live);if(open){editingId=open.id;curP=JSON.parse(JSON.stringify(open));}else{curP=blankPractice();}setMode('practice');fillPracticeForm();go('play');document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));}
+function startPractice(){editingId=null;const open=DB.entries.find(e=>e.type==='practice'&&(e.live||e.status==='planned'));if(open){editingId=open.id;curP=JSON.parse(JSON.stringify(open));}else{curP=blankPractice();}setMode('practice');fillPracticeForm();go('play');document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));}
 function setMode(m){MODE=m;$('mode-round').classList.toggle('on',m==='round');$('mode-practice').classList.toggle('on',m==='practice');$('roundMode').style.display=m==='round'?'block':'none';$('practiceMode').style.display=m==='practice'?'block':'none';}
 
 /* ===== HOME ===== */
+function renderDeficitWarning(){
+  const slot=$('deficitSlot');if(!slot)return;
+  const hasPractice=DB.entries.some(e=>e.type==='practice'&&(e.drills||[]).length);
+  if(!hasPractice){slot.innerHTML='';return;}
+  const last=lastTrainedByCat();
+  const stale=DRILL_CATS.filter(c=>{const d=daysSince(last[c.id]);return d==null||d>=10;});
+  if(!stale.length){slot.innerHTML='';return;}
+  const lines=stale.map(c=>{const d=daysSince(last[c.id]);return `${c.icon} ${c.label} — ${d==null?'noch nie trainiert':`seit ${d} Tagen nicht trainiert`}`;}).join('<br>');
+  slot.innerHTML=`<div class="deficitcard"><div class="dt">⚠️ Trainingslücke</div><div class="dl">${lines}</div></div>`;
+}
 function renderHome(){
   // personalize from profile
   const nm=(DB.profile&&DB.profile.name||'').trim();
   $('avatar').textContent=nm?nm[0].toUpperCase():'R';
   $('greetSub').textContent=nm?`Bereit für die nächste Runde, ${nm}?`:'Bereit für die nächste Runde?';
+  renderDeficitWarning();
   // hero = latest round
   const slot=$('heroSlot');
   const lastRound=DB.entries.find(e=>e.type==='round');
@@ -750,9 +856,13 @@ function rowItem(e,withDelete){
       <div class="meta"><div class="crs">${esc(e.course||'Runde')}</div><div class="dt">${e.date} · ${esc(e.tees||'–')} · ${entryStableford(e)} Pkt</div></div>
       <div class="big">${s.score||'–'}</div>`;
   }else{
-    const done=e.agenda.filter(a=>a.done&&a.t).length,total=e.agenda.filter(a=>a.t).length;
-    card.innerHTML=`<div class="ic practice">🎯</div>
-      <div class="meta"><div class="crs">Training${e.live?' <span class="livetag">● läuft</span>':''}</div><div class="dt">${e.date}${practiceVolumes(e).total?` · ${practiceVolumes(e).total} Bälle`:''}${total?` · ${done}/${total} Übungen`:''}</div></div>
+    const drillCount=(e.drills||[]).length;
+    let statusTag='',iconCls='practice';
+    if(e.live){statusTag=' <span class="livetag">● läuft</span>';card.classList.add('row-live');iconCls='practice-live';}
+    else if(e.status==='planned'){statusTag=' <span class="plantag">📋 geplant</span>';card.classList.add('row-planned');iconCls='practice-planned';}
+    else{card.classList.add('row-done');iconCls='practice-done';}
+    card.innerHTML=`<div class="ic ${iconCls}">🎯</div>
+      <div class="meta"><div class="crs">Training${statusTag}</div><div class="dt">${e.date}${practiceVolumes(e).total?` · ${practiceVolumes(e).total} Bälle`:''}${drillCount?` · ${drillCount} Übung${drillCount===1?'':'en'}`:''}</div></div>
       <span class="ti chev"><svg viewBox="0 0 24 24"><path d="M9 6l6 6l-6 6"/></svg></span>`;
   }
   card.onclick=()=>editEntry(e.id);
@@ -764,7 +874,6 @@ function rowItem(e,withDelete){
 function buildDow(elId,active){const el=$(elId);el.innerHTML='';const labs=['S','M','D','M','D','F','S'];for(let i=0;i<7;i++){const s=document.createElement('span');s.textContent=labs[i];if(i===active)s.classList.add('on');s.onclick=()=>{(MODE==='round'?cur:curP).dow=i;buildDow(elId,i);};el.appendChild(s);}}
 function buildGoals(){const box=$('goalsBox');box.innerHTML='';cur.goals.forEach((g,i)=>{const row=document.createElement('div');row.className='goal';const chk=document.createElement('div');chk.className='chk'+(g.done?' on':'');chk.onclick=()=>{g.done=!g.done;chk.classList.toggle('on');};const inp=document.createElement('input');inp.placeholder='Ziel '+(i+1);inp.value=g.t;inp.oninput=()=>g.t=inp.value;row.appendChild(chk);row.appendChild(inp);box.appendChild(row);});}
 function buildPGoals(){const box=$('pGoalsBox');box.innerHTML='';curP.pgoals.forEach((g,i)=>{const row=document.createElement('div');row.className='goal';const chk=document.createElement('div');chk.className='chk'+(g.done?' on':'');chk.onclick=()=>{g.done=!g.done;chk.classList.toggle('on');autosaveLive();};const inp=document.createElement('input');inp.placeholder='Fokus '+(i+1);inp.value=g.t;inp.oninput=()=>{g.t=inp.value;autosaveLive();};row.appendChild(chk);row.appendChild(inp);box.appendChild(row);});}
-function buildAgenda(){const box=$('pAgendaBox');box.innerHTML='';curP.agenda.forEach((g,i)=>{const row=document.createElement('div');row.className='goal';const chk=document.createElement('div');chk.className='chk round'+(g.done?' on':'');chk.onclick=()=>{g.done=!g.done;chk.classList.toggle('on');autosaveLive();};const inp=document.createElement('input');inp.placeholder='Übung '+(i+1);inp.value=g.t;inp.oninput=()=>{g.t=inp.value;autosaveLive();};row.appendChild(chk);row.appendChild(inp);box.appendChild(row);});}
 
 /* ===== CURRENT COURSE CONTEXT ===== */
 function curCourse(){return COURSES[cur.courseKey]||COURSES.mettmann;}
@@ -774,11 +883,11 @@ function curStrokes(){const ch=curCH();return strokeAllocation(ch==null?0:ch,cur
 function totalStableford(){const c=curCourse(),strokes=curStrokes();let tot=0;cur.holes.forEach((h,i)=>{const p=stablefordHole(Number(h.score),c.holePar[i],strokes[i]);if(p!=null)tot+=p;});return tot;}
 
 function setNine(n){nine=n;$('front9').classList.toggle('on',n===1);$('back9').classList.toggle('on',n===2);buildHoles();}
-function buildHoles(){const box=$('holes');box.innerHTML='';const c=curCourse();const strokes=curStrokes();const start=nine===1?0:9,end=nine===1?9:18;for(let i=start;i<end;i++){const h=cur.holes[i];const card=document.createElement('div');card.className='holecard'+(h.score?'':' empty');const head=document.createElement('div');head.className='holehead';const dots=strokes[i]>0?'•'.repeat(strokes[i]):'';const len=(c.holeLen&&c.holeLen[i])?`${c.holeLen[i]} m · `:'';head.innerHTML=`<div class="holenum">${i+1}</div><div><div class="holesum" id="sum${i}">${holeSummary(h,i)}</div><div class="holepar">${len}Par ${c.holePar[i]} · Idx ${c.holeIdx[i]} <span class="strokedots">${dots}</span></div></div><div class="holepts ${ptsClass(h,i)}" id="pts${i}">${ptsLabel(h,i)}</div><div class="holescore">${h.score||'–'}</div>`;head.onclick=()=>card.classList.toggle('open');const body=document.createElement('div');body.className='holebody';const sr=document.createElement('div');sr.className='statrow';sr.appendChild(stepBox('Score',h.score===''?0:h.score,v=>{h.score=v;refreshHole(i,card);},1,15));sr.appendChild(stepBox('Putts',h.putts,v=>{h.putts=v;refreshHole(i,card);},0,10));sr.appendChild(toggleBox('Fairway',h.fir,v=>{h.fir=v;refreshHole(i,card);}));sr.appendChild(toggleBox('GIR',h.gir,v=>{h.gir=v;refreshHole(i,card);}));body.appendChild(sr);const note=document.createElement('textarea');note.className='holenote';note.placeholder='Notiz zum Loch…';note.value=h.note;note.oninput=()=>h.note=note.value;body.appendChild(note);card.appendChild(head);card.appendChild(body);box.appendChild(card);}}
+function buildHoles(){const box=$('holes');box.innerHTML='';const c=curCourse();const strokes=curStrokes();const start=nine===1?0:9,end=nine===1?9:18;for(let i=start;i<end;i++){const h=cur.holes[i];const card=document.createElement('div');card.className='holecard'+(h.score?'':' holeempty');const head=document.createElement('div');head.className='holehead';const dots=strokes[i]>0?'•'.repeat(strokes[i]):'';const len=(c.holeLen&&c.holeLen[i])?`${c.holeLen[i]} m · `:'';head.innerHTML=`<div class="holenum">${i+1}</div><div><div class="holesum" id="sum${i}">${holeSummary(h,i)}</div><div class="holepar">${len}Par ${c.holePar[i]} · Idx ${c.holeIdx[i]} <span class="strokedots">${dots}</span></div></div><div class="holepts ${ptsClass(h,i)}" id="pts${i}">${ptsLabel(h,i)}</div><div class="holescore">${h.score||'–'}</div>`;head.onclick=()=>card.classList.toggle('open');const body=document.createElement('div');body.className='holebody';const sr=document.createElement('div');sr.className='statrow';sr.appendChild(stepBox('Score',h.score===''?0:h.score,v=>{h.score=v;refreshHole(i,card);},1,15));sr.appendChild(stepBox('Putts',h.putts,v=>{h.putts=v;refreshHole(i,card);},0,10));sr.appendChild(toggleBox('Fairway',h.fir,v=>{h.fir=v;refreshHole(i,card);}));sr.appendChild(toggleBox('GIR',h.gir,v=>{h.gir=v;refreshHole(i,card);}));body.appendChild(sr);const note=document.createElement('textarea');note.className='holenote';note.placeholder='Notiz zum Loch…';note.value=h.note;note.oninput=()=>h.note=note.value;body.appendChild(note);card.appendChild(head);card.appendChild(body);box.appendChild(card);}}
 function ptsLabel(h,i){const c=curCourse(),strokes=curStrokes();const p=stablefordHole(Number(h.score),c.holePar[i],strokes[i]);return p==null?'':p+'P';}
 function ptsClass(h,i){const c=curCourse(),strokes=curStrokes();const p=stablefordHole(Number(h.score),c.holePar[i],strokes[i]);return p===0?'zero':'';}
 function holeSummary(h,i){let p=[];if(h.putts)p.push(`Putts <b>${h.putts}</b>`);if(h.fir===true)p.push('FIR ✓');if(h.fir===false)p.push('FIR ✗');if(h.gir===true)p.push('GIR ✓');if(h.gir===false)p.push('GIR ✗');if(p.length)return p.join(' · ');return h.score?'':'<span class="needsentry">○ noch offen</span>';}
-function refreshHole(i,card){const h=cur.holes[i];card.querySelector('.holescore').textContent=h.score||'–';$('sum'+i).innerHTML=holeSummary(h,i);card.classList.toggle('empty',!h.score);const pe=$('pts'+i);if(pe){pe.textContent=ptsLabel(h,i);pe.className='holepts '+ptsClass(h,i);}updateCHBanner();}
+function refreshHole(i,card){const h=cur.holes[i];card.querySelector('.holescore').textContent=h.score||'–';$('sum'+i).innerHTML=holeSummary(h,i);card.classList.toggle('holeempty',!h.score);const pe=$('pts'+i);if(pe){pe.textContent=ptsLabel(h,i);pe.className='holepts '+ptsClass(h,i);}updateCHBanner();}
 function stepBox(lab,val,cb,min,max){const b=document.createElement('div');b.className='statbox';b.innerHTML=`<div class="lab">${lab}</div>`;const st=document.createElement('div');st.className='stepper';const minus=document.createElement('button');minus.textContent='–';const v=document.createElement('div');v.className='val';v.textContent=val||(min===0?'0':'–');const plus=document.createElement('button');plus.textContent='+';let cv=typeof val==='number'?val:(val===''?min:val);minus.onclick=()=>{cv=Math.max(min,(cv||min)-1);v.textContent=cv;cb(cv);};plus.onclick=()=>{cv=Math.min(max,(cv||min)+1);v.textContent=cv;cb(cv);};st.appendChild(minus);st.appendChild(v);st.appendChild(plus);b.appendChild(st);return b;}
 function toggleBox(lab,val,cb){const b=document.createElement('div');b.className='statbox';b.innerHTML=`<div class="lab">${lab}</div>`;const t=document.createElement('div');t.className='toggle2';const yes=document.createElement('button');yes.className='yes';yes.textContent='✓';if(val===true)yes.classList.add('on');const no=document.createElement('button');no.className='no';no.textContent='✗';if(val===false)no.classList.add('on');yes.onclick=()=>{const nv=val===true?null:true;val=nv;yes.classList.toggle('on',nv===true);no.classList.remove('on');cb(nv);};no.onclick=()=>{const nv=val===false?null:false;val=nv;no.classList.toggle('on',nv===false);yes.classList.remove('on');cb(nv);};t.appendChild(yes);t.appendChild(no);b.appendChild(t);return b;}
 
@@ -814,14 +923,13 @@ function mapHole(d){mapHoleNum=Math.min(18,Math.max(1,mapHoleNum+d));$('mapHoleN
 
 /* ===== FORM SYNC ===== */
 function populateCourseSelect(){const cs=$('r_courseKey');cs.innerHTML='';Object.keys(COURSES).forEach(k=>{const o=document.createElement('option');o.value=k;o.textContent=COURSES[k].name;if(k===cur.courseKey)o.selected=true;cs.appendChild(o);});populateTeeSelect();}
-function populateTeeSelect(){const c=COURSES[cur.courseKey]||COURSES.mettmann;const panel=$('teePanel');panel.innerHTML='';if(!c.tees.find(t=>t.id===cur.teeId))cur.teeId=c.tees[0].id;c.tees.forEach(t=>{const o=document.createElement('div');o.className='teeopt'+(t.id===cur.teeId?' sel':'');o.innerHTML=`<span class="sw" style="background:${t.color}"></span><div class="info"><div class="nm">${t.label}</div><div class="det">CR ${t.cr} · Slope ${t.slope} · Par ${t.par}</div></div>`;o.onclick=()=>{cur.teeId=t.id;updateTeeButton();populateTeeSelect();closeTeePanel();buildHoles();updateCHBanner();};panel.appendChild(o);});updateTeeButton();}
+function populateTeeSelect(){const c=COURSES[cur.courseKey]||COURSES.mettmann;if(!c.tees.find(t=>t.id===cur.teeId))cur.teeId=c.tees[0].id;updateTeeButton();}
 function updateTeeButton(){const c=COURSES[cur.courseKey]||COURSES.mettmann;const t=c.tees.find(x=>x.id===cur.teeId)||c.tees[0];$('teeSwatch').style.background=t.color;$('teePickLabel').textContent=t.label;}
-function toggleTeePanel(e){e.stopPropagation();$('teeModal').classList.toggle('open');}
-function closeTeePanel(){$('teeModal').classList.remove('open');}
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeTeePanel();});
+function openTeeModal(e){if(e)e.stopPropagation();const c=COURSES[cur.courseKey]||COURSES.mettmann;const list=$('teeModalList');list.innerHTML='';c.tees.forEach(t=>{const o=document.createElement('div');o.className='teeopt'+(t.id===cur.teeId?' sel':'');o.innerHTML=`<span class="sw" style="background:${t.color}"></span><div class="info"><div class="nm">${t.label}</div><div class="det">CR ${t.cr} · Slope ${t.slope} · Par ${t.par}</div></div>${t.id===cur.teeId?'<span class="check">✓</span>':''}`;o.onclick=()=>{cur.teeId=t.id;updateTeeButton();buildHoles();updateCHBanner();closeTeeModal();};list.appendChild(o);});$('teeModal').classList.add('open');}
+function closeTeeModal(e){$('teeModal').classList.remove('open');}
 function updateCHBanner(){const b=$('chBanner');const ch=curCH();if(ch==null){b.classList.remove('show');return;}b.classList.add('show');const pts=totalStableford();b.innerHTML=`<div><div class="ch-l">Course Handicap</div><div class="ch-v">${ch}</div></div><div class="ch-r"><div class="ch-pts">${pts}</div><div class="ch-pl">Stableford-Punkte</div></div>`;}
 function fillRoundForm(){$('r_date').value=cur.date;$('r_hcpIndex').value=cur.hcpIndex||'';populateCourseSelect();$('k_tech').value=cur.keys.tech;$('k_tact').value=cur.keys.tact;$('k_ment').value=cur.keys.ment;$('rv_tech').value=cur.review.tech;$('rv_tact').value=cur.review.tact;$('rv_ment').value=cur.review.ment;$('rv_good').value=cur.review.good;$('rv_bad').value=cur.review.bad;buildDow('dow',cur.dow);buildGoals();setNine(1);setMapView('single');buildGreen();$('mapHoleNum').textContent=mapHoleNum;updateCHBanner();}
-function fillPracticeForm(){$('p_date').value=curP.date;$('p_from').value=curP.timeFrom||'';$('p_to').value=curP.timeTo||'';$('p_rangeBalls').value=curP.rangeBalls||'';$('p_tech').value=curP.pnotes.tech;$('p_feel').value=curP.pnotes.feel;buildDow('dowP',curP.dow);buildPGoals();buildAgenda();buildShortBlocks();updateDuration();updateVolSum();renderLiveBox();}
+function fillPracticeForm(){if(!curP.drills)curP.drills=[];$('p_date').value=curP.date;$('p_from').value=curP.timeFrom||'';$('p_to').value=curP.timeTo||'';$('p_rangeBalls').value=curP.rangeBalls||'';$('p_tech').value=curP.pnotes.tech;$('p_feel').value=curP.pnotes.feel;buildDow('dowP',curP.dow);buildPGoals();buildShortBlocks();buildDrillList();updateDuration();updateVolSum();renderLiveBox();}
 
 /* ===== PRACTICE VOLUME ===== */
 function addShortBlock(){curP.shortBlocks.push({balls:'',rounds:1});buildShortBlocks();updateVolSum();autosaveLive();}
@@ -839,37 +947,120 @@ function buildShortBlocks(){const box=$('shortBlocks');box.innerHTML='';curP.sho
   div.querySelector('.sb-del').onclick=()=>{curP.shortBlocks.splice(i,1);buildShortBlocks();updateVolSum();autosaveLive();};
   box.appendChild(div);
 });}
-function practiceVolumes(p){const long=Number(p.rangeBalls)||0;let short=0;(p.shortBlocks||[]).forEach(b=>short+=(Number(b.balls)||0)*(Number(b.rounds)||0));return{long,short,total:long+short};}
+function practiceVolumes(p){const long=Number(p.rangeBalls)||0;let short=0;(p.shortBlocks||[]).forEach(b=>short+=(Number(b.balls)||0)*(Number(b.rounds)||0));let drillBalls=0;(p.drills||[]).forEach(d=>drillBalls+=drillShots(d));return{long,short,drillBalls,total:long+short+drillBalls};}
+
+/* ===== DRILLS ===== */
+function lastTrainedByCat(){
+  const last={};DRILL_CATS.forEach(c=>last[c.id]=null);
+  DB.entries.filter(e=>e.type==='practice').forEach(e=>{
+    (e.drills||[]).forEach(d=>{const dr=drillById(d.drillId);if(!dr)return;const ts=e.savedAt||0;if(!last[dr.cat]||ts>last[dr.cat])last[dr.cat]=ts;});
+  });
+  return last;
+}
+function daysSince(ts){if(!ts)return null;return Math.floor((Date.now()-ts)/864e5);}
+function openDrillModal(){
+  const list=$('drillModalList');list.innerHTML='';
+  const last=lastTrainedByCat();
+  DRILL_CATS.forEach(cat=>{
+    const head=document.createElement('div');head.className='drillcat-head';head.textContent=`${cat.icon} ${cat.label}`;list.appendChild(head);
+    allDrills().filter(d=>d.cat===cat.id).forEach(d=>{
+      const o=document.createElement('div');o.className='drillopt';
+      const days=daysSince(last[cat.id]);
+      const lastTxt=days==null?'<span class="dlast ok">noch nie trainiert</span>':days>=10?`<span class="dlast stale">zuletzt vor ${days} Tagen</span>`:`<span class="dlast ok">zuletzt vor ${days} Tag${days===1?'':'en'}</span>`;
+      o.innerHTML=`<div class="dname">${esc(d.name)}</div><div class="ddesc">${esc(d.desc)}</div><div class="dlastwrap">${lastTxt}</div>`;
+      o.onclick=()=>{addDrillToSession(d.id);closeDrillModal();};
+      list.appendChild(o);
+    });
+  });
+  // populate custom drill category select
+  const sel=$('customDrillCat');sel.innerHTML='';DRILL_CATS.forEach(c=>{const o=document.createElement('option');o.value=c.id;o.textContent=c.label;sel.appendChild(o);});
+  $('drillModal').classList.add('open');
+}
+function closeDrillModal(){$('drillModal').classList.remove('open');}
+function addCustomDrill(){
+  const nameInp=$('customDrillName');const name=nameInp.value.trim();if(!name){toast('Bitte einen Namen eingeben');return;}
+  const cat=$('customDrillCat').value;
+  const id='cd'+Date.now();
+  if(!DB.customDrills)DB.customDrills=[];
+  DB.customDrills.push({id,cat,name,desc:'Eigene Übung'});
+  persist();
+  nameInp.value='';
+  addDrillToSession(id);
+  closeDrillModal();
+}
+function addDrillToSession(drillId){const d=drillById(drillId);const entry={drillId};if(d&&d.cat==='putten')entry.minutes='';else if(d&&d.cat==='kurzes_spiel'){entry.balls='';entry.rounds=1;}else entry.balls='';curP.drills.push(entry);buildDrillList();autosaveLive();}
+function drillShots(entry){const d=drillById(entry.drillId);if(!d)return 0;if(d.cat==='putten')return 0;if(d.cat==='kurzes_spiel')return(Number(entry.balls)||0)*(Number(entry.rounds)||1);return Number(entry.balls)||0;}
+function buildDrillList(){
+  const box=$('drillList');box.innerHTML='';
+  curP.drills.forEach((entry,i)=>{
+    const d=drillById(entry.drillId);if(!d)return;
+    const cat=DRILL_CATS.find(c=>c.id===d.cat);
+    const row=document.createElement('div');row.className='drillrow';
+    let inputsHtml='';
+    if(d.cat==='putten'){
+      inputsHtml=`<div class="dinput-wrap"><input class="inp dmin" inputmode="numeric" placeholder="0" value="${entry.minutes||''}"><span class="dunit">min</span></div>`;
+    }else if(d.cat==='kurzes_spiel'){
+      inputsHtml=`<div class="dinput-wrap sg"><input class="inp dballs" inputmode="numeric" placeholder="Bälle" value="${entry.balls||''}"><span class="dx">×</span><input class="inp drounds" inputmode="numeric" placeholder="1" value="${entry.rounds||1}"><span class="dunit">×aufges.</span></div>`;
+    }else{
+      inputsHtml=`<div class="dinput-wrap"><input class="inp dballs" inputmode="numeric" placeholder="0" value="${entry.balls||''}"><span class="dunit">Bälle</span></div>`;
+    }
+    row.innerHTML=`<div class="di"><div class="nm">${esc(d.name)}</div><div class="cat">${cat?cat.icon+' '+cat.label:''}</div></div>${inputsHtml}<button class="ddel">✕</button>`;
+    const minI=row.querySelector('.dmin'),ballI=row.querySelector('.dballs'),roundI=row.querySelector('.drounds');
+    if(minI)minI.oninput=e=>{entry.minutes=e.target.value;autosaveLive();};
+    if(ballI)ballI.oninput=e=>{entry.balls=e.target.value;updateVolSum();autosaveLive();};
+    if(roundI)roundI.oninput=e=>{entry.rounds=e.target.value;updateVolSum();autosaveLive();};
+    row.querySelector('.ddel').onclick=()=>{curP.drills.splice(i,1);buildDrillList();updateVolSum();autosaveLive();};
+    box.appendChild(row);
+  });
+}
+function drillPuttMinutes(p){let m=0;(p.drills||[]).forEach(d=>{const dr=drillById(d.drillId);if(dr&&dr.cat==='putten')m+=Number(d.minutes)||0;});return m;}
 function updateVolSum(){const v=practiceVolumes(curP);$('volSum').innerHTML=`<div><div class="v">${v.long}</div><div class="l">Vollschwung</div></div><div><div class="v">${v.short}</div><div class="l">Short Game</div></div><div><div class="v tot">${v.total}</div><div class="l">Gesamt Schläge</div></div>`;}
 function durationMinutes(from,to){if(!from||!to)return null;const[fh,fm]=from.split(':').map(Number),[th,tm]=to.split(':').map(Number);let d=(th*60+tm)-(fh*60+fm);if(d<0)d+=1440;return d;}
 function fmtDur(min){if(min==null)return'–';const h=Math.floor(min/60),m=min%60;return h?`${h}h ${m}min`:`${m}min`;}
 function updateDuration(){$('p_dur').textContent=fmtDur(durationMinutes(curP.timeFrom,curP.timeTo));}
 
-/* ===== LIVE SESSION ===== */
+/* ===== SESSION: PLAN / LIVE / DONE ===== */
 function pad2(n){return String(n).padStart(2,'0');}
 function hhmm(ts){const d=new Date(ts);return pad2(d.getHours())+':'+pad2(d.getMinutes());}
-function startLiveSession(){
-  // fresh open session, persisted immediately so it survives app close
-  curP=blankPractice();
-  curP.live=true;curP.startTs=Date.now();curP.timeFrom=hhmm(curP.startTs);
-  curP.id='e'+Date.now();curP.savedAt=curP.startTs;
+function savePlan(){
+  curP.status='planned';curP.live=false;
+  if(!curP.id){curP.id='e'+Date.now();curP.savedAt=Date.now();DB.entries.unshift(JSON.parse(JSON.stringify(curP)));}
+  else{const idx=DB.entries.findIndex(e=>e.id===curP.id);if(idx>=0)DB.entries[idx]=JSON.parse(JSON.stringify(curP));else DB.entries.unshift(JSON.parse(JSON.stringify(curP)));}
   editingId=curP.id;
-  DB.entries.unshift(JSON.parse(JSON.stringify(curP)));
+  persist();
+  fillPracticeForm();
+  toast('Training geplant 📋');
+}
+function startLiveSession(){
+  // if a plan is already open, keep its goals/drills and just attach a start time
+  if(!curP.id){curP=blankPractice();curP.id='e'+Date.now();curP.savedAt=Date.now();}
+  curP.live=true;curP.status='live';curP.startTs=Date.now();curP.timeFrom=hhmm(curP.startTs);
+  editingId=curP.id;
+  const idx=DB.entries.findIndex(e=>e.id===curP.id);
+  if(idx>=0)DB.entries[idx]=JSON.parse(JSON.stringify(curP));else DB.entries.unshift(JSON.parse(JSON.stringify(curP)));
   persist();
   fillPracticeForm();
   toast('Training läuft ▶');
 }
 function stopLiveSession(){
-  curP.live=false;
+  curP.live=false;curP.status='done';
   const now=Date.now();
   curP.timeTo=hhmm(now);
   if(!curP.timeFrom&&curP.startTs)curP.timeFrom=hhmm(curP.startTs);
-  // persist into the existing entry
   const idx=DB.entries.findIndex(e=>e.id===curP.id);
   if(idx>=0)DB.entries[idx]=JSON.parse(JSON.stringify(curP));
   persist();
   fillPracticeForm();
   toast('Training beendet ■ · Endzeit anpassbar');
+}
+function discardPlan(){
+  if(!confirm('Geplantes Training verwerfen?'))return;
+  const idx=DB.entries.findIndex(e=>e.id===curP.id);
+  if(idx>=0)DB.entries.splice(idx,1);
+  persist();
+  editingId=null;curP=blankPractice();
+  fillPracticeForm();
+  toast('Plan verworfen');
 }
 function renderLiveBox(){
   const box=$('liveBox');if(!box)return;
@@ -883,15 +1074,24 @@ function renderLiveBox(){
       <div class="lb-since">gestartet um ${hhmm(curP.startTs)}${stale?' · gestern? Endzeit danach anpassbar':''}</div>
       <button class="lb-stop" onclick="stopLiveSession()">■ Training beenden</button>
     </div>`;
+  }else if(curP.status==='planned'){
+    box.innerHTML=`<div class="planbanner">
+      <div class="lb-top plan-top">📋 GEPLANTES TRAINING</div>
+      <div class="plan-hint">Ziele & Übungen sind gespeichert — starte, wenn du am Platz bist.</div>
+      <button class="lb-stop plan-startbtn" onclick="startLiveSession()">▶ Training jetzt starten</button>
+      <button class="plan-discard" onclick="discardPlan()">Plan verwerfen</button>
+    </div>`;
   }else{
-    const hasOpen=DB.entries.some(e=>e.type==='practice'&&e.live&&e.id!==curP.id);
-    box.innerHTML=`<div class="livestart"><button onclick="startLiveSession()">▶ Training jetzt starten</button></div>`;
+    box.innerHTML=`<div class="livestart">
+      <button onclick="startLiveSession()">▶ Training jetzt starten</button>
+      <button class="planbtn" onclick="savePlan()">📋 Erstmal nur planen</button>
+    </div>`;
   }
 }
 let liveTimer=setInterval(()=>{if(MODE==='practice'&&curP.live)renderLiveBox();},20000);
-/* keep an open live session continuously saved so nothing is lost */
+/* keep an open live or planned session continuously saved so nothing is lost */
 let autosaveT;
-function autosaveLive(){if(!(MODE==='practice'&&curP.live&&curP.id))return;clearTimeout(autosaveT);autosaveT=setTimeout(()=>{const idx=DB.entries.findIndex(e=>e.id===curP.id);if(idx>=0){DB.entries[idx]=JSON.parse(JSON.stringify(curP));persist();}},600);}
+function autosaveLive(){if(!(MODE==='practice'&&(curP.live||curP.status==='planned')&&curP.id))return;clearTimeout(autosaveT);autosaveT=setTimeout(()=>{const idx=DB.entries.findIndex(e=>e.id===curP.id);if(idx>=0){DB.entries[idx]=JSON.parse(JSON.stringify(curP));persist();}},600);}
 const bind=(id,fn)=>$(id).addEventListener('input',e=>fn(e.target.value));
 bind('r_date',v=>cur.date=v);
 bind('r_hcpIndex',v=>{cur.hcpIndex=v;buildHoles();updateCHBanner();});
@@ -899,12 +1099,38 @@ $('r_courseKey').addEventListener('change',e=>{cur.courseKey=e.target.value;cur.
 bind('k_tech',v=>cur.keys.tech=v);bind('k_tact',v=>cur.keys.tact=v);bind('k_ment',v=>cur.keys.ment=v);
 bind('rv_tech',v=>cur.review.tech=v);bind('rv_tact',v=>cur.review.tact=v);bind('rv_ment',v=>cur.review.ment=v);bind('rv_good',v=>cur.review.good=v);bind('rv_bad',v=>cur.review.bad=v);
 bind('p_date',v=>{curP.date=v;autosaveLive();});bind('p_tech',v=>{curP.pnotes.tech=v;autosaveLive();});bind('p_feel',v=>{curP.pnotes.feel=v;autosaveLive();});
-bind('p_from',v=>{curP.timeFrom=v;updateDuration();autosaveLive();});bind('p_to',v=>{curP.timeTo=v;updateDuration();autosaveLive();});
+function setupTimeInput(id,onChange){
+  const el=$(id);
+  el.addEventListener('input',e=>{
+    let v=e.target.value.replace(/[^0-9]/g,'').slice(0,4);
+    if(v.length>=3)v=v.slice(0,2)+':'+v.slice(2);
+    e.target.value=v;
+    if(v.length===5){
+      let[h,m]=v.split(':').map(Number);
+      if(h>23)h=23;if(m>59)m=59;
+      v=pad2(h)+':'+pad2(m);
+      e.target.value=v;
+    }
+    onChange(v);
+  });
+  el.addEventListener('blur',e=>{
+    let v=e.target.value;
+    if(v&&v.length<5){
+      const digits=v.replace(/[^0-9]/g,'');
+      if(digits.length<=2&&digits.length>0){v=pad2(Math.min(23,Number(digits)))+':00';}
+      else if(digits.length===3){v=pad2(Math.min(23,Number(digits.slice(0,2))))+':'+pad2(Math.min(59,Number(digits.slice(2))*10));}
+      else{v='';}
+      e.target.value=v;onChange(v);
+    }
+  });
+}
+setupTimeInput('p_from',v=>{curP.timeFrom=v;updateDuration();autosaveLive();});
+setupTimeInput('p_to',v=>{curP.timeTo=v;updateDuration();autosaveLive();});
 bind('p_rangeBalls',v=>{curP.rangeBalls=v;updateVolSum();autosaveLive();});
 bind('pr_name',v=>{if(!DB.profile)DB.profile={name:'',clubs:[]};DB.profile.name=v;saveProfile();});
 
 /* ===== SAVE / EDIT ===== */
-function saveEntry(){const entry=MODE==='round'?JSON.parse(JSON.stringify(cur)):JSON.parse(JSON.stringify(curP));entry.type=MODE;if(MODE==='practice')entry.live=false;if(MODE==='round'){const c=curCourse(),t=curTee();entry.course=c.name;entry.tees=t.label;entry.courseKey=cur.courseKey;entry.teeId=cur.teeId;entry.stableford=totalStableford();entry.ch=curCH();}if(editingId){entry.id=editingId;const idx=DB.entries.findIndex(e=>e.id===editingId);entry.savedAt=DB.entries[idx].savedAt;DB.entries[idx]=entry;}else{entry.id='e'+Date.now();entry.savedAt=Date.now();DB.entries.unshift(entry);}persist();editingId=null;toast(MODE==='round'?'Runde gesichert ⛳':'Session gesichert 🎯');go('home');}
+function saveEntry(){const entry=MODE==='round'?JSON.parse(JSON.stringify(cur)):JSON.parse(JSON.stringify(curP));entry.type=MODE;if(MODE==='practice'){entry.live=false;entry.status='done';}if(MODE==='round'){const c=curCourse(),t=curTee();entry.course=c.name;entry.tees=t.label;entry.courseKey=cur.courseKey;entry.teeId=cur.teeId;entry.stableford=totalStableford();entry.ch=curCH();}if(editingId){entry.id=editingId;const idx=DB.entries.findIndex(e=>e.id===editingId);entry.savedAt=DB.entries[idx].savedAt;DB.entries[idx]=entry;}else{entry.id='e'+Date.now();entry.savedAt=Date.now();DB.entries.unshift(entry);}persist();editingId=null;toast(MODE==='round'?'Runde gesichert ⛳':'Session gesichert 🎯');go('home');}
 function newEntry(){editingId=null;mapHoleNum=1;cur=blankRound();curP=blankPractice();fillRoundForm();fillPracticeForm();setMode('round');toast('Neues Blatt');}
 function editEntry(id){const e=DB.entries.find(x=>x.id===id);if(!e)return;editingId=id;if(e.type==='round'){cur=JSON.parse(JSON.stringify(e));setMode('round');fillRoundForm();}else{curP=JSON.parse(JSON.stringify(e));setMode('practice');fillPracticeForm();}go('play');document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));toast('Zum Bearbeiten geladen');}
 function delEntry(id){if(!confirm('Diesen Eintrag löschen?'))return;DB.entries=DB.entries.filter(e=>e.id!==id);persist();renderHistory();renderHome();toast('Gelöscht');}
@@ -951,14 +1177,34 @@ function renderStats(){const body=$('statsBody');const rounds=DB.entries.filter(
       </div>`;
     body.appendChild(sec);
     body.appendChild(chartBlock('Schläge je Session',practices.slice().reverse().map(e=>practiceVolumes(e).total||null),'#ffb23d'));
+    body.appendChild(catBreakdownBlock(practices));
   }
+}
+function catBreakdownBlock(practices){
+  const monthAgo=Date.now()-30*864e5;
+  const sums={};DRILL_CATS.forEach(c=>sums[c.id]=0);
+  practices.forEach(e=>{if((e.savedAt||0)<monthAgo)return;(e.drills||[]).forEach(d=>{const dr=drillById(d.drillId);if(!dr)return;const v=dr.cat==='putten'?(Number(d.minutes)||0):drillShots(d);sums[dr.cat]=(sums[dr.cat]||0)+v;});});
+  const last=lastTrainedByCat();
+  const maxV=Math.max(...Object.values(sums),1);
+  const wrap=document.createElement('div');wrap.className='chartcard';
+  let rows='';
+  DRILL_CATS.forEach(c=>{
+    const v=sums[c.id]||0;const pct=Math.round(v/maxV*100);
+    const unit=c.id==='putten'?'min':'Bälle';
+    const days=daysSince(last[c.id]);
+    const lastTxt=days==null?'noch nie':days===0?'heute':`vor ${days} Tg`;
+    const staleClass=(days==null||days>=10)?'stale':'';
+    rows+=`<div class="catbar-row"><div class="catbar-lab">${c.icon} ${c.label}</div><div class="catbar-track"><div class="catbar-fill" style="width:${pct}%"></div></div><div class="catbar-v">${v} ${unit}</div><div class="catbar-last ${staleClass}">${lastTxt}</div></div>`;
+  });
+  wrap.innerHTML=`<div class="ch-head"><span class="ti">Training pro Kategorie · 30 Tage</span></div><div class="catbars">${rows}</div>`;
+  return wrap;
 }
 function chartBlock(title,data,color){const wrap=document.createElement('div');wrap.className='chartcard';const valid=data.filter(v=>v!=null);const avg=valid.length?Math.round(valid.reduce((a,b)=>a+b,0)/valid.length):'–';wrap.innerHTML=`<div class="ch-head"><span class="ti">${title}</span><span class="tr">Ø ${avg}</span></div>`;const W=440,H=132,padX=14,padTop=26,padBot=16;const max=Math.max(...valid,1),min=Math.min(...valid,0),span=Math.max(max-min,1);const svg=document.createElementNS(NS,'svg');svg.setAttribute('viewBox',`0 0 ${W} ${H}`);svg.setAttribute('width','100%');let pts=[];data.forEach((v,i)=>{if(v==null)return;const x=padX+(data.length<=1?W/2-padX:i/(data.length-1)*(W-2*padX));const y=H-padBot-((v-min)/span)*(H-padTop-padBot);pts.push([x,y,v]);});if(pts.length>1){const path=document.createElementNS(NS,'polyline');path.setAttribute('points',pts.map(p=>p[0]+','+p[1]).join(' '));path.setAttribute('fill','none');path.setAttribute('stroke',color);path.setAttribute('stroke-width',2.5);path.setAttribute('stroke-linejoin','round');svg.appendChild(path);}pts.forEach(p=>{const c=document.createElementNS(NS,'circle');c.setAttribute('cx',p[0]);c.setAttribute('cy',p[1]);c.setAttribute('r',4);c.setAttribute('fill','#15171f');c.setAttribute('stroke',color);c.setAttribute('stroke-width',2.5);svg.appendChild(c);const t=document.createElementNS(NS,'text');t.setAttribute('x',p[0]);t.setAttribute('y',p[1]-9);t.setAttribute('text-anchor','middle');t.setAttribute('font-size',11);t.setAttribute('font-weight',700);t.setAttribute('fill',color);t.textContent=p[2];svg.appendChild(t);});wrap.appendChild(svg);return wrap;}
 
 /* ===== BACKUP ===== */
 function exportData(){dl(new Blob([JSON.stringify(DB,null,2)],{type:'application/json'}),`birdiebook-backup-${new Date().toISOString().slice(0,10)}.json`);toast('Backup exportiert');}
-function importData(ev){const f=ev.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(d.entries){DB=Object.assign({entries:[],hcp:'',hcpHist:[],profile:{name:'',clubs:[]}},d);persist();renderHome();renderHistory();renderStats();toast('Backup importiert ✓');go('home');}else toast('Keine gültige Datei');}catch(e){toast('Datei konnte nicht gelesen werden');}};r.readAsText(f);ev.target.value='';}
-function exportText(){let out='⛳ BIRDIE BOOK — Export '+new Date().toLocaleString('de-DE')+'\n\n';DB.entries.forEach(e=>{if(e.type==='round'){const s=roundStats(e);out+=`════════\nRUNDE · ${e.date}\nKurs: ${e.course} (${e.tees})\nScore ${s.score} (${s.played} Löcher) · Stableford ${entryStableford(e)} · Putts ${s.putts} · GIR ${s.gir} · FIR ${s.fir}\nZiele: ${e.goals.filter(g=>g.t).map(g=>(g.done?'[x] ':'[ ] ')+g.t).join(' | ')}\nReview Gut: ${e.review.good}\nReview Schlecht: ${e.review.bad}\n\n`;}else{out+=`════════\nTRAINING · ${e.date}${e.timeFrom?` · ${e.timeFrom}–${e.timeTo} (${fmtDur(durationMinutes(e.timeFrom,e.timeTo))})`:''}\nVolumen: Vollschwung ${practiceVolumes(e).long} · Short Game ${practiceVolumes(e).short} · Gesamt ${practiceVolumes(e).total} Schläge\nFokus: ${e.pgoals.filter(g=>g.t).map(g=>(g.done?'[x] ':'[ ] ')+g.t).join(' | ')}\nAgenda: ${e.agenda.filter(a=>a.t).map(a=>(a.done?'[x] ':'[ ] ')+a.t).join(' | ')}\n\n`;}});dl(new Blob([out],{type:'text/plain'}),`birdiebook-${new Date().toISOString().slice(0,10)}.txt`);toast('Text exportiert');}
+function importData(ev){const f=ev.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(d.entries){DB=Object.assign({entries:[],hcp:'',hcpHist:[],profile:{name:'',clubs:[]},customDrills:[]},d);persist();renderHome();renderHistory();renderStats();toast('Backup importiert ✓');go('home');}else toast('Keine gültige Datei');}catch(e){toast('Datei konnte nicht gelesen werden');}};r.readAsText(f);ev.target.value='';}
+function exportText(){let out='⛳ BIRDIE BOOK — Export '+new Date().toLocaleString('de-DE')+'\n\n';DB.entries.forEach(e=>{if(e.type==='round'){const s=roundStats(e);out+=`════════\nRUNDE · ${e.date}\nKurs: ${e.course} (${e.tees})\nScore ${s.score} (${s.played} Löcher) · Stableford ${entryStableford(e)} · Putts ${s.putts} · GIR ${s.gir} · FIR ${s.fir}\nZiele: ${e.goals.filter(g=>g.t).map(g=>(g.done?'[x] ':'[ ] ')+g.t).join(' | ')}\nReview Gut: ${e.review.good}\nReview Schlecht: ${e.review.bad}\n\n`;}else{out+=`════════\nTRAINING · ${e.date}${e.timeFrom?` · ${e.timeFrom}–${e.timeTo} (${fmtDur(durationMinutes(e.timeFrom,e.timeTo))})`:''}\nVolumen: Vollschwung ${practiceVolumes(e).long} · Short Game ${practiceVolumes(e).short} · Gesamt ${practiceVolumes(e).total} Schläge\nÜbungen: ${(e.drills||[]).map(d=>{const dr=drillById(d.drillId);if(!dr)return null;if(dr.cat==='putten')return dr.name+' ('+(d.minutes||0)+' min)';if(dr.cat==='kurzes_spiel')return dr.name+' ('+(d.balls||0)+'×'+(d.rounds||1)+'='+drillShots(d)+' Bälle)';return dr.name+' ('+(d.balls||0)+' Bälle)';}).filter(Boolean).join(' | ')||'–'}\nFokus: ${e.pgoals.filter(g=>g.t).map(g=>(g.done?'[x] ':'[ ] ')+g.t).join(' | ')}\n\n`;}});dl(new Blob([out],{type:'text/plain'}),`birdiebook-${new Date().toISOString().slice(0,10)}.txt`);toast('Text exportiert');}
 function wipeAll(){if(!confirm('Wirklich ALLE Einträge löschen? Mach vorher ein Backup!'))return;DB={entries:[],hcp:'',hcpHist:[],profile:DB.profile||{name:'',clubs:[]}};persist();renderHome();renderHistory();renderStats();toast('Alles gelöscht');}
 function dl(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);}
 
@@ -973,7 +1219,7 @@ document.addEventListener('focusin',e=>{const t=e.target;if(t&&(t.tagName==='INP
 let lastTouch=0;document.addEventListener('touchend',e=>{const now=Date.now();if(now-lastTouch<=300){const tag=(e.target.tagName||'').toLowerCase();if(tag!=='input'&&tag!=='textarea'&&tag!=='select')e.preventDefault();}lastTouch=now;},{passive:false});
 
 /* boot */
-(function resumeLive(){const open=DB.entries.find(e=>e.type==='practice'&&e.live);if(open){curP=JSON.parse(JSON.stringify(open));editingId=open.id;}})();
+(function resumeLive(){const open=DB.entries.find(e=>e.type==='practice'&&(e.live||e.status==='planned'));if(open){curP=JSON.parse(JSON.stringify(open));editingId=open.id;}})();
 fillRoundForm();fillPracticeForm();setMode('round');renderHome();
 if(!storageOK)toast('Speicher eingeschränkt – nutze Backup-Export');
 </script>

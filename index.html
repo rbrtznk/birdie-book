@@ -114,6 +114,7 @@ input,textarea{-webkit-user-select:text;user-select:text;}
 .row-item.row-done{border-left:3px solid var(--green);}
 .ic.practice-planned{background:rgba(61,123,255,.18);color:var(--accent-text);}
 .ic.practice-live{background:rgba(31,199,123,.22);color:var(--green);}
+.ic.round-live{background:rgba(31,199,123,.22);color:var(--green);}
 .ic.practice-done{background:var(--green-soft);color:var(--green);}
 .row-item .ic{width:44px;height:44px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:20px;flex:none;}
 .ic.round{background:var(--accent-soft);color:var(--accent-text);}
@@ -170,6 +171,22 @@ input,textarea{-webkit-user-select:text;user-select:text;}
 
 /* ---------- scorecard ---------- */
 .ninetabs{display:flex;gap:8px;margin:0 16px 10px;}
+.lentoggle{display:flex;gap:6px;}
+.lentoggle button{flex:1;padding:11px 4px;border-radius:11px;background:var(--surface-2);border:1px solid var(--line);color:var(--text-2);font-weight:600;font-size:13px;}
+.lentoggle button.on{background:var(--accent);color:#fff;border-color:var(--accent);}
+
+/* review/goal pills (Konzept C) */
+.pillrow{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:10px 14px 10px 10px;border-radius:22px;background:var(--surface-2);border:1.5px solid var(--line);font-size:13px;color:var(--text-2);font-weight:600;}
+.pill .pico{width:20px;height:20px;border-radius:50%;background:var(--surface-3);display:flex;align-items:center;justify-content:center;font-size:11px;flex:none;}
+.pill.bad.on{background:rgba(255,92,92,.14);border-color:var(--red);color:#ffb4b4;}
+.pill.bad.on .pico{background:var(--red);}
+.pill.good.on{background:rgba(31,199,123,.14);border-color:var(--green);color:#a8f0cd;}
+.pill.good.on .pico{background:var(--green);}
+.pill.neutral.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-text);}
+.pill.neutral.on .pico{background:var(--accent);}
+.addnote-link{font-size:12px;color:var(--accent-text);font-weight:600;display:inline-block;margin-bottom:4px;}
+.freenote{width:100%;margin-top:10px;min-height:60px;}
 
 /* round sub-tabs */
 .subtabs{position:sticky;top:0;z-index:40;display:flex;gap:6px;margin:0 0 14px;padding:10px 16px;background:var(--bg);border-bottom:1px solid var(--line);}
@@ -343,6 +360,7 @@ select.inp{appearance:none;-webkit-appearance:none;background-image:url("data:im
 .reco-cat{font-size:13px;font-weight:600;color:#fff;}
 .reco-reason{font-size:12px;color:#a8d4e8;margin-top:2px;}
 .reco-drill{font-size:12px;color:#5fc8e8;font-weight:600;margin-top:4px;}
+.reco-confirmed{font-size:10px;color:var(--green);font-weight:700;margin-left:4px;}
 .reco-btn{width:100%;padding:12px;border-radius:11px;background:#5fc8e8;color:#06222e;font-weight:700;font-size:14px;}
 .reco-btn:active{opacity:.85;}
 
@@ -537,19 +555,31 @@ select.inp{appearance:none;-webkit-appearance:none;background-image:url("data:im
             </div>
             <div class="field"><label>Handicap-Index</label><input class="inp" id="r_hcpIndex" inputmode="decimal" placeholder="24.5"></div>
           </div>
+          <div class="field"><label>Rundenlänge</label>
+            <div class="lentoggle" id="lenToggle">
+              <button data-len="front9" onclick="setRoundLength('front9')">Front 9</button>
+              <button data-len="back9" onclick="setRoundLength('back9')">Back 9</button>
+              <button data-len="18" class="on" onclick="setRoundLength('18')">18 Loch</button>
+            </div>
+          </div>
           <div id="chBanner" class="chbanner"></div>
         </div>
       </div>
 
       <div class="sheet">
         <div class="sheet-head"><h2>Focus / Goals</h2><div class="hint">Was macht diese Runde zum Erfolg?</div></div>
-        <div class="sheet-body" id="goalsBox"></div>
+        <div class="sheet-body">
+          <div class="pillrow" id="goalPillRow"></div>
+          <div id="goalsBox"></div>
+        </div>
       </div>
 
       <div class="sheet">
         <div class="sheet-head"><h2>Keys to Success</h2><div class="hint">Was hilft dir, die Ziele zu erreichen?</div></div>
         <div class="sheet-body">
-          <div class="keys">
+          <div class="pillrow" id="keysPillRow"></div>
+          <span class="addnote-link" id="keysNoteToggle" onclick="toggleKeysNote()">+ Eigene Notiz hinzufügen</span>
+          <div class="keys" id="keysFreeBlock" style="display:none">
             <div class="kcol"><h3>Technisch</h3><textarea id="k_tech" placeholder="Lockerer Griff…"></textarea></div>
             <div class="kcol"><h3>Taktisch</h3><textarea id="k_tact" placeholder="Wind beachten…"></textarea></div>
             <div class="kcol"><h3>Mental</h3><textarea id="k_ment" placeholder="Positiv bleiben…"></textarea></div>
@@ -561,7 +591,7 @@ select.inp{appearance:none;-webkit-appearance:none;background-image:url("data:im
 
       <div id="rtab-card" class="rtab-panel" style="display:none">
       <div class="sechead"><h2>Scorecard</h2></div>
-      <div class="ninetabs">
+      <div class="ninetabs" id="ninetabsRow">
         <button id="front9" class="on" onclick="setNine(1)">Front 9</button>
         <button id="back9" onclick="setNine(2)">Back 9</button>
       </div>
@@ -591,16 +621,28 @@ select.inp{appearance:none;-webkit-appearance:none;background-image:url("data:im
 
       <div id="rtab-review" class="rtab-panel" style="display:none">
       <div class="sheet" style="margin-top:0">
-        <div class="sheet-head"><h2>Post-Round Review</h2><div class="hint">Wie lief es in den 3 Bereichen?</div></div>
+        <div class="sheet-head"><h2><span class="dot-good">●</span> Was lief gut</h2></div>
+        <div class="sheet-body">
+          <div class="pillrow" id="goodPillRow"></div>
+          <span class="addnote-link" id="goodNoteToggle" onclick="toggleReviewNote('good')">+ Eigene Notiz hinzufügen</span>
+          <textarea class="inp freenote" id="rv_good" placeholder="Unter 90 bei viel Wind…" style="display:none"></textarea>
+        </div>
+      </div>
+      <div class="sheet">
+        <div class="sheet-head"><h2><span class="dot-bad">●</span> Was nicht lief</h2></div>
+        <div class="sheet-body">
+          <div class="pillrow" id="badPillRow"></div>
+          <span class="addnote-link" id="badNoteToggle" onclick="toggleReviewNote('bad')">+ Eigene Notiz hinzufügen</span>
+          <textarea class="inp freenote" id="rv_bad" placeholder="2 O.B. an Loch 13…" style="display:none"></textarea>
+        </div>
+      </div>
+      <div class="sheet">
+        <div class="sheet-head"><h2>Mehr Details</h2><div class="hint">Optional, falls du genauer werden willst</div></div>
         <div class="sheet-body">
           <div class="keys">
             <div class="kcol"><h3>Technisch</h3><textarea id="rv_tech" placeholder="gute Gewichtsverlagerung…"></textarea></div>
             <div class="kcol"><h3>Taktisch</h3><textarea id="rv_tact" placeholder="Drives oft rechts…"></textarea></div>
             <div class="kcol"><h3>Mental</h3><textarea id="rv_ment" placeholder="ruhig nach Doppelbogey…"></textarea></div>
-          </div>
-          <div class="wellbad">
-            <div class="field"><label><span class="dot-good">●</span> Was gut lief</label><textarea class="inp" id="rv_good" placeholder="Unter 90 bei viel Wind…"></textarea></div>
-            <div class="field"><label><span class="dot-bad">●</span> Was nicht lief</label><textarea class="inp" id="rv_bad" placeholder="2 O.B. an Loch 13…"></textarea></div>
           </div>
         </div>
       </div>
@@ -799,6 +841,51 @@ const DRILL_CATS=[
   {id:'kurzes_spiel',label:'Kurzes Spiel',icon:'🪃'},
   {id:'putten',label:'Putten',icon:'🥅'}
 ];
+
+/* ===== REVIEW-PILLS (vorformulierte Sätze, je Sentiment + Kategorie) ===== */
+const REVIEW_PILLS={
+  bad:[
+    {id:'b_putt1',cat:'putten',icon:'🥅',text:'Putts oft zu lang/kurz'},
+    {id:'b_putt2',cat:'putten',icon:'🥅',text:'Viele 3-Putts'},
+    {id:'b_tee1',cat:'abschlaege',icon:'🏌️',text:'Slice/Hook off Tee'},
+    {id:'b_tee2',cat:'abschlaege',icon:'🏌️',text:'Fairways oft verpasst'},
+    {id:'b_iron1',cat:'lange_eisen',icon:'🎯',text:'Lange Eisen unsauber'},
+    {id:'b_iron2',cat:'kurze_eisen',icon:'⛳',text:'Annäherungen verpasst'},
+    {id:'b_short1',cat:'kurzes_spiel',icon:'🪃',text:'Chips/Pitches unsauber'},
+    {id:'b_short2',cat:'kurzes_spiel',icon:'🪃',text:'Bunkerschläge schwach'},
+    {id:'b_trans1',cat:'transport',icon:'↗️',text:'Distanzkontrolle unsicher'},
+    {id:'b_mental1',cat:null,icon:'🧠',text:'Nach Fehlern aus dem Rhythmus'}
+  ],
+  good:[
+    {id:'g_putt1',cat:'putten',icon:'🥅',text:'Putten stabil'},
+    {id:'g_tee1',cat:'abschlaege',icon:'🏌️',text:'Fairways getroffen'},
+    {id:'g_tee2',cat:'abschlaege',icon:'🏌️',text:'Driver konstant'},
+    {id:'g_iron1',cat:'lange_eisen',icon:'🎯',text:'Lange Eisen konstant'},
+    {id:'g_iron2',cat:'kurze_eisen',icon:'⛳',text:'Annäherungen präzise'},
+    {id:'g_short1',cat:'kurzes_spiel',icon:'🪃',text:'Kurzes Spiel gerettet'},
+    {id:'g_trans1',cat:'transport',icon:'↗️',text:'Gute Platzierung'},
+    {id:'g_mental1',cat:null,icon:'🧠',text:'Ruhig geblieben'},
+    {id:'g_mental2',cat:null,icon:'🧠',text:'Gut nach Fehlern erholt'}
+  ]
+};
+/* Kurz-Pills für Goals/Keys (rein thematisch, kein Sentiment) */
+const GOAL_PILLS=[
+  {id:'gl_score',icon:'🎯',text:'Score-Ziel halten'},
+  {id:'gl_putt',icon:'🥅',text:'Weniger 3-Putts'},
+  {id:'gl_fairway',icon:'🏌️',text:'Mehr Fairways treffen'},
+  {id:'gl_calm',icon:'🧠',text:'Ruhig bei Fehlern bleiben'},
+  {id:'gl_short',icon:'🪃',text:'Kurzes Spiel nutzen'},
+  {id:'gl_tempo',icon:'⏱️',text:'Tempo halten'}
+];
+const KEYS_PILLS=[
+  {id:'k_grip',icon:'🤝',text:'Lockerer Griff'},
+  {id:'k_wind',icon:'💨',text:'Wind beachten'},
+  {id:'k_tempo',icon:'⏱️',text:'Schwungtempo halten'},
+  {id:'k_routine',icon:'🔁',text:'Pre-Shot-Routine'},
+  {id:'k_target',icon:'🎯',text:'Ziel klar visualisieren'},
+  {id:'k_breathe',icon:'🌬️',text:'Tief durchatmen'}
+];
+
 const DRILL_LIB=[
   // Abschläge
   {id:'d_abschlag_1',cat:'abschlaege',name:'Start-Linie Gate-Drill',desc:'2 Alignment-Sticks ca. 3 Yards vor dem Ball als Tor aufstellen. Ziel: Ball startet exakt durch das Tor — trainiert die Startrichtung.'},
@@ -872,10 +959,23 @@ function statAnalysis(rounds){
   return{roundsUsed:recent.length,threePuttPct,firPct,girPct};
 }
 /* gibt eine priorisierte Liste {cat, reason, severity} zurück */
+function scanReviewPills(entries){
+  const bad={},good={};DRILL_CATS.forEach(c=>{bad[c.id]=0;good[c.id]=0;});
+  entries.forEach(e=>{
+    (e.reviewPills&&e.reviewPills.bad||[]).forEach(id=>{
+      const p=REVIEW_PILLS.bad.find(x=>x.id===id);if(p&&p.cat)bad[p.cat]=(bad[p.cat]||0)+1;
+    });
+    (e.reviewPills&&e.reviewPills.good||[]).forEach(id=>{
+      const p=REVIEW_PILLS.good.find(x=>x.id===id);if(p&&p.cat)good[p.cat]=(good[p.cat]||0)+1;
+    });
+  });
+  return{bad,good};
+}
 function buildRecommendations(){
-  const rounds=DB.entries.filter(e=>e.type==='round');
+  const rounds=DB.entries.filter(e=>e.type==='round'&&e.status!=='live');
   const stats=statAnalysis(rounds);
   const kw=scanReviewKeywords(rounds.slice(0,5));
+  const pills=scanReviewPills(rounds.slice(0,5));
   const recs=[];
   if(stats){
     if(stats.threePuttPct!=null&&stats.threePuttPct>15){
@@ -894,10 +994,23 @@ function buildRecommendations(){
   Object.keys(kw).forEach(cat=>{
     if(kw[cat]>0)recs.push({cat,severity:kw[cat]*3,reason:`In deinen Notizen mehrfach erwähnt`,fromText:true});
   });
+  // Pill-Treffer: garantierte, von dir selbst bestätigte Signale (stärker gewichtet als reiner Text)
+  Object.keys(pills.bad).forEach(cat=>{
+    if(pills.bad[cat]>0)recs.push({cat,severity:pills.bad[cat]*8,reason:`Im Review als Schwachpunkt markiert`,fromPill:true});
+  });
   // pro Kategorie nur den stärksten Grund behalten, nach severity sortieren
   const byCat={};
   recs.forEach(r=>{if(!byCat[r.cat]||r.severity>byCat[r.cat].severity)byCat[r.cat]=r;});
-  return Object.values(byCat).sort((a,b)=>b.severity-a.severity);
+  // Positive Pills dämpfen: wenn du "lief gut" markiert hast, senkt das die Dringlichkeit dieser Kategorie
+  Object.keys(byCat).forEach(cat=>{
+    const goodCount=pills.good[cat]||0;
+    if(goodCount>0){
+      byCat[cat].severity=Math.max(0,byCat[cat].severity-goodCount*6);
+      byCat[cat].dampened=true;
+    }
+  });
+  // Kategorien mit auf 0 gedämpfter Dringlichkeit ganz raus
+  return Object.values(byCat).filter(r=>r.severity>0).sort((a,b)=>b.severity-a.severity);
 }
 function topDrillForCat(catId){return allDrills().find(d=>d.cat===catId);}
 let storageOK=true;
@@ -946,12 +1059,14 @@ const $=id=>document.getElementById(id);
 function fmtDate(d){return d.toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'});}
 
 function blankRound(){return{type:'round',id:null,savedAt:null,date:fmtDate(new Date()),dow:new Date().getDay(),
+  status:'new',roundLength:'18',
   courseKey:'mettmann',teeId:'gelb',hcpIndex:DB.hcp||'',
   course:'',tees:'',yards:'',rating:'',slope:'',hcp:'',
   goals:[{done:false,t:''},{done:false,t:''},{done:false,t:''}],
+  goalPills:[],keysPills:[],
   keys:{tech:'',tact:'',ment:''},
   holes:Array.from({length:18},()=>({score:'',fir:null,gir:null,putts:0,note:''})),
-  shots:[],review:{tech:'',tact:'',ment:'',good:'',bad:''}};}
+  shots:[],review:{tech:'',tact:'',ment:'',good:'',bad:''},reviewPills:{good:[],bad:[]}};}
 function blankPractice(){return{type:'practice',id:null,savedAt:null,date:fmtDate(new Date()),dow:new Date().getDay(),
   live:false,startTs:null,status:'new',
   timeFrom:'',timeTo:'',rangeBalls:'',shortBlocks:[],drills:[],
@@ -975,7 +1090,31 @@ function go(v){
 }
 function openNewSheet(e){if(e)e.stopPropagation();$('newModal').classList.add('open');}
 function closeNewSheet(){$('newModal').classList.remove('open');}
-function startRound(){editingId=null;mapHoleNum=1;cur=blankRound();setMode('round');fillRoundForm();go('play');document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));}
+function startRound(){
+  mapHoleNum=1;
+  const open=DB.entries.find(e=>e.type==='round'&&e.status==='live');
+  if(open){
+    editingId=open.id;cur=JSON.parse(JSON.stringify(open));
+  }else{
+    cur=blankRound();cur.status='live';
+    cur.id='e'+Date.now();cur.savedAt=Date.now();
+    editingId=cur.id;
+    DB.entries.unshift(JSON.parse(JSON.stringify(cur)));
+    persist();
+  }
+  setMode('round');fillRoundForm();go('play');
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+}
+/* fortlaufendes Sichern, solange eine Runde noch nicht fertig gespeichert ist */
+let roundSaveT;
+function autosaveRound(){
+  if(!(MODE==='round'&&cur.status==='live'&&cur.id))return;
+  clearTimeout(roundSaveT);
+  roundSaveT=setTimeout(()=>{
+    const idx=DB.entries.findIndex(e=>e.id===cur.id);
+    if(idx>=0){DB.entries[idx]=JSON.parse(JSON.stringify(cur));persist();}
+  },600);
+}
 function startPractice(){editingId=null;const open=DB.entries.find(e=>e.type==='practice'&&(e.live||e.status==='planned'));if(open){editingId=open.id;curP=JSON.parse(JSON.stringify(open));}else{curP=blankPractice();}setMode('practice');fillPracticeForm();go('play');document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));}
 function startNote(id){
   if(id){editingId=id;const e=DB.entries.find(x=>x.id===id);curN=e?JSON.parse(JSON.stringify(e)):blankNote();}
@@ -1064,8 +1203,9 @@ function renderRecoCard(){
     const cat=DRILL_CATS.find(c=>c.id===r.cat);
     const drill=topDrillForCat(r.cat);
     if(drill)drillIds.push(drill.id);
+    const confirmedTag=r.fromPill?'<span class="reco-confirmed">✓ von dir bestätigt</span>':'';
     return `<div class="reco-row">
-      <div class="reco-cat">${cat.icon} ${cat.label}</div>
+      <div class="reco-cat">${cat.icon} ${cat.label} ${confirmedTag}</div>
       <div class="reco-reason">${esc(r.reason)}</div>
       ${drill?`<div class="reco-drill">→ ${esc(drill.name)}</div>`:''}
     </div>`;
@@ -1121,7 +1261,7 @@ function renderHome(){
   renderCalcHcp();
   // hero = latest round
   const slot=$('heroSlot');
-  const lastRound=DB.entries.find(e=>e.type==='round');
+  const lastRound=DB.entries.find(e=>e.type==='round'&&e.status!=='live');
   if(lastRound){
     const s=roundStats(lastRound);
     slot.innerHTML=`<div class="hero" onclick="editEntry('${lastRound.id}')">
@@ -1173,8 +1313,11 @@ function rowItem(e,withDelete){
   const card=document.createElement('div');card.className='row-item';
   if(e.type==='round'){
     const s=roundStats(e);
-    card.innerHTML=`<div class="ic round">⛳</div>
-      <div class="meta"><div class="crs">${esc(e.course||'Runde')}</div><div class="dt">${e.date} · ${esc(e.tees||'–')} · ${entryStableford(e)} Pkt</div></div>
+    const isLive=e.status==='live';
+    if(isLive){card.classList.add('row-live');}else{card.classList.add('row-done');}
+    const statusTag=isLive?' <span class="livetag">● läuft</span>':'';
+    card.innerHTML=`<div class="ic round${isLive?'-live':''}">⛳</div>
+      <div class="meta"><div class="crs">${esc(e.course||'Runde')}${statusTag}</div><div class="dt">${e.date} · ${esc(e.tees||'–')} · ${entryStableford(e)} Pkt</div></div>
       <div class="big">${s.score||'–'}</div>`;
   }else{
     const drillCount=(e.drills||[]).length;
@@ -1193,18 +1336,55 @@ function rowItem(e,withDelete){
 
 /* ===== BUILDERS ===== */
 function buildDow(elId,active){const el=$(elId);el.innerHTML='';const labs=['S','M','D','M','D','F','S'];for(let i=0;i<7;i++){const s=document.createElement('span');s.textContent=labs[i];if(i===active)s.classList.add('on');s.onclick=()=>{(MODE==='round'?cur:curP).dow=i;buildDow(elId,i);};el.appendChild(s);}}
-function buildGoals(){const box=$('goalsBox');box.innerHTML='';cur.goals.forEach((g,i)=>{const row=document.createElement('div');row.className='goal';const chk=document.createElement('div');chk.className='chk'+(g.done?' on':'');chk.onclick=()=>{g.done=!g.done;chk.classList.toggle('on');};const inp=document.createElement('input');inp.placeholder='Ziel '+(i+1);inp.value=g.t;inp.oninput=()=>g.t=inp.value;row.appendChild(chk);row.appendChild(inp);box.appendChild(row);});}
+function buildGoals(){const box=$('goalsBox');box.innerHTML='';cur.goals.forEach((g,i)=>{const row=document.createElement('div');row.className='goal';const chk=document.createElement('div');chk.className='chk'+(g.done?' on':'');chk.onclick=()=>{g.done=!g.done;chk.classList.toggle('on');autosaveRound();};const inp=document.createElement('input');inp.placeholder='Ziel '+(i+1);inp.value=g.t;inp.oninput=()=>{g.t=inp.value;autosaveRound();};row.appendChild(chk);row.appendChild(inp);box.appendChild(row);});}
+
+/* ===== PILLS (Konzept C: Tap = Text + Kategorie gleichzeitig) ===== */
+function buildPillRow(rowId,lib,selectedArr,sentimentClass,onToggle){
+  const row=$(rowId);if(!row)return;row.innerHTML='';
+  lib.forEach(p=>{
+    const on=selectedArr.includes(p.id);
+    const el=document.createElement('span');
+    el.className='pill '+sentimentClass+(on?' on':'');
+    el.innerHTML=`<span class="pico">${p.icon}</span>${esc(p.text)}`;
+    el.onclick=()=>{
+      const idx=selectedArr.indexOf(p.id);
+      if(idx>=0)selectedArr.splice(idx,1);else selectedArr.push(p.id);
+      el.classList.toggle('on');
+      onToggle&&onToggle();
+      autosaveRound();
+    };
+    row.appendChild(el);
+  });
+}
+function buildGoalPills(){buildPillRow('goalPillRow',GOAL_PILLS,cur.goalPills,'neutral');}
+function buildKeysPills(){buildPillRow('keysPillRow',KEYS_PILLS,cur.keysPills,'neutral');}
+function buildReviewPills(){
+  buildPillRow('goodPillRow',REVIEW_PILLS.good,cur.reviewPills.good,'good',()=>renderRecoPreview());
+  buildPillRow('badPillRow',REVIEW_PILLS.bad,cur.reviewPills.bad,'bad',()=>renderRecoPreview());
+}
+function toggleKeysNote(){const b=$('keysFreeBlock');const open=b.style.display!=='none';b.style.display=open?'none':'grid';$('keysNoteToggle').textContent=open?'+ Eigene Notiz hinzufügen':'– Notiz ausblenden';}
+function toggleReviewNote(kind){const ta=$('rv_'+kind);const link=$(kind+'NoteToggle');const open=ta.style.display!=='none';ta.style.display=open?'none':'block';link.textContent=open?'+ Eigene Notiz hinzufügen':'– Notiz ausblenden';}
+function renderRecoPreview(){/* Platzhalter: Live-Vorschau könnte hier später ergänzt werden */}
 function buildPGoals(){const box=$('pGoalsBox');box.innerHTML='';curP.pgoals.forEach((g,i)=>{const row=document.createElement('div');row.className='goal';const chk=document.createElement('div');chk.className='chk'+(g.done?' on':'');chk.onclick=()=>{g.done=!g.done;chk.classList.toggle('on');autosaveLive();};const inp=document.createElement('input');inp.placeholder='Fokus '+(i+1);inp.value=g.t;inp.oninput=()=>{g.t=inp.value;autosaveLive();};row.appendChild(chk);row.appendChild(inp);box.appendChild(row);});}
 
 /* ===== CURRENT COURSE CONTEXT ===== */
 function curCourse(){return COURSES[cur.courseKey]||COURSES.mettmann;}
 function curTee(){const c=curCourse();return c.tees.find(t=>t.id===cur.teeId)||c.tees[0];}
-function curCH(){return courseHandicap(cur.hcpIndex,curTee());}
+function curCH(){const full=courseHandicap(cur.hcpIndex,curTee());if(full==null)return null;if(cur.roundLength==='front9'||cur.roundLength==='back9')return Math.round(full/2);return full;}
 function curStrokes(){const ch=curCH();return strokeAllocation(ch==null?0:ch,curCourse().holeIdx);}
-function totalStableford(){const c=curCourse(),strokes=curStrokes();let tot=0;cur.holes.forEach((h,i)=>{const p=stablefordHole(Number(h.score),c.holePar[i],strokes[i]);if(p!=null)tot+=p;});return tot;}
+function holeRangeFor(roundLength){if(roundLength==='front9')return[0,9];if(roundLength==='back9')return[9,18];return[0,18];}
+function totalStableford(){const c=curCourse(),strokes=curStrokes();const[start,end]=holeRangeFor(cur.roundLength);let tot=0;cur.holes.slice(start,end).forEach((h,idx)=>{const i=start+idx;const p=stablefordHole(Number(h.score),c.holePar[i],strokes[i]);if(p!=null)tot+=p;});return tot;}
 
+function setRoundLength(len){
+  cur.roundLength=len;
+  document.querySelectorAll('#lenToggle button').forEach(b=>b.classList.toggle('on',b.dataset.len===len));
+  if(len==='front9'){nine=1;}else if(len==='back9'){nine=2;}
+  buildHoles();updateCHBanner();autosaveRound();
+  // im 9-Loch-Modus den Front/Back9-Umschalter in der Scorecard ausblenden, da die Wahl schon fest steht
+  const nt=$('ninetabsRow');if(nt)nt.style.display=(len==='18')?'flex':'none';
+}
 function setNine(n){nine=n;$('front9').classList.toggle('on',n===1);$('back9').classList.toggle('on',n===2);buildHoles();}
-function buildHoles(){const box=$('holes');box.innerHTML='';const c=curCourse();const strokes=curStrokes();const start=nine===1?0:9,end=nine===1?9:18;for(let i=start;i<end;i++){const h=cur.holes[i];const card=document.createElement('div');card.className='holecard'+(h.score?'':' holeempty');const head=document.createElement('div');head.className='holehead';const dots=strokes[i]>0?'•'.repeat(strokes[i]):'';const len=(c.holeLen&&c.holeLen[i])?`${c.holeLen[i]} m · `:'';head.innerHTML=`<div class="holenum">${i+1}</div><div><div class="holesum" id="sum${i}">${holeSummary(h,i)}</div><div class="holepar">${len}Par ${c.holePar[i]} · Idx ${c.holeIdx[i]} <span class="strokedots">${dots}</span></div></div><div class="holepts ${ptsClass(h,i)}" id="pts${i}">${ptsLabel(h,i)}</div><div class="holescore">${h.score||'–'}</div>`;head.onclick=()=>card.classList.toggle('open');const body=document.createElement('div');body.className='holebody';const sr=document.createElement('div');sr.className='statrow';sr.appendChild(stepBox('Score',h.score===''?0:h.score,v=>{h.score=v;refreshHole(i,card);},1,15));sr.appendChild(stepBox('Putts',h.putts,v=>{h.putts=v;refreshHole(i,card);},0,10));sr.appendChild(toggleBox('Fairway',h.fir,v=>{h.fir=v;refreshHole(i,card);}));sr.appendChild(toggleBox('GIR',h.gir,v=>{h.gir=v;refreshHole(i,card);}));body.appendChild(sr);const note=document.createElement('textarea');note.className='holenote';note.placeholder='Notiz zum Loch…';note.value=h.note;note.oninput=()=>h.note=note.value;body.appendChild(note);card.appendChild(head);card.appendChild(body);box.appendChild(card);}}
+function buildHoles(){const box=$('holes');box.innerHTML='';const c=curCourse();const strokes=curStrokes();const start=nine===1?0:9,end=nine===1?9:18;for(let i=start;i<end;i++){const h=cur.holes[i];const card=document.createElement('div');card.className='holecard'+(h.score?'':' holeempty');const head=document.createElement('div');head.className='holehead';const dots=strokes[i]>0?'•'.repeat(strokes[i]):'';const len=(c.holeLen&&c.holeLen[i])?`${c.holeLen[i]} m · `:'';head.innerHTML=`<div class="holenum">${i+1}</div><div><div class="holesum" id="sum${i}">${holeSummary(h,i)}</div><div class="holepar">${len}Par ${c.holePar[i]} · Idx ${c.holeIdx[i]} <span class="strokedots">${dots}</span></div></div><div class="holepts ${ptsClass(h,i)}" id="pts${i}">${ptsLabel(h,i)}</div><div class="holescore">${h.score||'–'}</div>`;head.onclick=()=>card.classList.toggle('open');const body=document.createElement('div');body.className='holebody';const sr=document.createElement('div');sr.className='statrow';sr.appendChild(stepBox('Score',h.score===''?0:h.score,v=>{h.score=v;refreshHole(i,card);autosaveRound();},1,15));sr.appendChild(stepBox('Putts',h.putts,v=>{h.putts=v;refreshHole(i,card);autosaveRound();},0,10));sr.appendChild(toggleBox('Fairway',h.fir,v=>{h.fir=v;refreshHole(i,card);autosaveRound();}));sr.appendChild(toggleBox('GIR',h.gir,v=>{h.gir=v;refreshHole(i,card);autosaveRound();}));body.appendChild(sr);const note=document.createElement('textarea');note.className='holenote';note.placeholder='Notiz zum Loch…';note.value=h.note;note.oninput=()=>{h.note=note.value;autosaveRound();};body.appendChild(note);card.appendChild(head);card.appendChild(body);box.appendChild(card);}}
 function ptsLabel(h,i){const c=curCourse(),strokes=curStrokes();const p=stablefordHole(Number(h.score),c.holePar[i],strokes[i]);return p==null?'':p+'P';}
 function ptsClass(h,i){const c=curCourse(),strokes=curStrokes();const p=stablefordHole(Number(h.score),c.holePar[i],strokes[i]);return p===0?'zero':'';}
 function holeSummary(h,i){let p=[];if(h.putts)p.push(`Putts <b>${h.putts}</b>`);if(h.fir===true)p.push('FIR ✓');if(h.fir===false)p.push('FIR ✗');if(h.gir===true)p.push('GIR ✓');if(h.gir===false)p.push('GIR ✗');if(p.length)return p.join(' · ');return h.score?'':'<span class="needsentry">○ noch offen</span>';}
@@ -1228,8 +1408,8 @@ function buildGreen(){const svg=$('green');svg.innerHTML='';
   svg.onclick=e=>{
     if(mapView==='all')return;
     const pt=svgPoint(svg,e);
-    if(tool==='place'){cur.shots=cur.shots.filter(s=>s.hole!==mapHoleNum);cur.shots.push({hole:mapHoleNum,x:pt.x,y:pt.y,status:shotStatus});buildGreen();}
-    else if(tool==='erase'){cur.shots=cur.shots.filter(s=>Math.hypot(s.x-pt.x,s.y-pt.y)>14);buildGreen();}
+    if(tool==='place'){cur.shots=cur.shots.filter(s=>s.hole!==mapHoleNum);cur.shots.push({hole:mapHoleNum,x:pt.x,y:pt.y,status:shotStatus});buildGreen();autosaveRound();}
+    else if(tool==='erase'){cur.shots=cur.shots.filter(s=>Math.hypot(s.x-pt.x,s.y-pt.y)>14);buildGreen();autosaveRound();}
   };
 }
 function circle(svg,cx,cy,r,fill,stroke,sw){const c=document.createElementNS(NS,'circle');c.setAttribute('cx',cx);c.setAttribute('cy',cy);c.setAttribute('r',r);c.setAttribute('fill',fill);if(stroke){c.setAttribute('stroke',stroke);c.setAttribute('stroke-width',sw);}svg.appendChild(c);}
@@ -1239,17 +1419,22 @@ function drawShot(svg,s){const g=document.createElementNS(NS,'g');const col=s.st
 function setTool(t){tool=t;$('tool-place').classList.toggle('on',t==='place');$('tool-erase').classList.toggle('on',t==='erase');}
 function setShotStatus(s){shotStatus=s;$('ss-hit').classList.toggle('on',s==='hit');$('ss-miss').classList.toggle('on',s==='miss');}
 function setMapView(v){mapView=v;$('mv-single').classList.toggle('on',v==='single');$('mv-all').classList.toggle('on',v==='all');const single=v==='single';$('mapToolRow').style.display=single?'flex':'none';$('shotStatusRow').style.display=single?'flex':'none';$('mapLegend').textContent=single?'Tippe aufs Grün, wo dein Approach landete · grün = getroffen, rot = daneben':'Alle Einschläge der Runde · Zahl = Loch · grün getroffen, rot daneben';buildGreen();}
-function clearMap(){cur.shots=cur.shots.filter(s=>s.hole!==mapHoleNum);buildGreen();}
+function clearMap(){cur.shots=cur.shots.filter(s=>s.hole!==mapHoleNum);buildGreen();autosaveRound();}
 function mapHole(d){mapHoleNum=Math.min(18,Math.max(1,mapHoleNum+d));$('mapHoleNum').textContent=mapHoleNum;buildGreen();}
 
 /* ===== FORM SYNC ===== */
 function populateCourseSelect(){const cs=$('r_courseKey');cs.innerHTML='';Object.keys(COURSES).forEach(k=>{const o=document.createElement('option');o.value=k;o.textContent=COURSES[k].name;if(k===cur.courseKey)o.selected=true;cs.appendChild(o);});populateTeeSelect();}
 function populateTeeSelect(){const c=COURSES[cur.courseKey]||COURSES.mettmann;if(!c.tees.find(t=>t.id===cur.teeId))cur.teeId=c.tees[0].id;updateTeeButton();}
 function updateTeeButton(){const c=COURSES[cur.courseKey]||COURSES.mettmann;const t=c.tees.find(x=>x.id===cur.teeId)||c.tees[0];$('teeSwatch').style.background=t.color;$('teePickLabel').textContent=t.label;}
-function openTeeModal(e){if(e)e.stopPropagation();const c=COURSES[cur.courseKey]||COURSES.mettmann;const list=$('teeModalList');list.innerHTML='';c.tees.forEach(t=>{const o=document.createElement('div');o.className='teeopt'+(t.id===cur.teeId?' sel':'');o.innerHTML=`<span class="sw" style="background:${t.color}"></span><div class="info"><div class="nm">${t.label}</div><div class="det">CR ${t.cr} · Slope ${t.slope} · Par ${t.par}</div></div>${t.id===cur.teeId?'<span class="check">✓</span>':''}`;o.onclick=()=>{cur.teeId=t.id;updateTeeButton();buildHoles();updateCHBanner();closeTeeModal();};list.appendChild(o);});$('teeModal').classList.add('open');}
+function openTeeModal(e){if(e)e.stopPropagation();const c=COURSES[cur.courseKey]||COURSES.mettmann;const list=$('teeModalList');list.innerHTML='';c.tees.forEach(t=>{const o=document.createElement('div');o.className='teeopt'+(t.id===cur.teeId?' sel':'');o.innerHTML=`<span class="sw" style="background:${t.color}"></span><div class="info"><div class="nm">${t.label}</div><div class="det">CR ${t.cr} · Slope ${t.slope} · Par ${t.par}</div></div>${t.id===cur.teeId?'<span class="check">✓</span>':''}`;o.onclick=()=>{cur.teeId=t.id;updateTeeButton();buildHoles();updateCHBanner();closeTeeModal();autosaveRound();};list.appendChild(o);});$('teeModal').classList.add('open');}
 function closeTeeModal(e){$('teeModal').classList.remove('open');}
 function updateCHBanner(){const b=$('chBanner');const ch=curCH();if(ch==null){b.classList.remove('show');return;}b.classList.add('show');const pts=totalStableford();b.innerHTML=`<div><div class="ch-l">Course Handicap</div><div class="ch-v">${ch}</div></div><div class="ch-r"><div class="ch-pts">${pts}</div><div class="ch-pl">Stableford-Punkte</div></div>`;}
-function fillRoundForm(){$('r_date').value=cur.date;$('r_hcpIndex').value=cur.hcpIndex||'';populateCourseSelect();$('k_tech').value=cur.keys.tech;$('k_tact').value=cur.keys.tact;$('k_ment').value=cur.keys.ment;$('rv_tech').value=cur.review.tech;$('rv_tact').value=cur.review.tact;$('rv_ment').value=cur.review.ment;$('rv_good').value=cur.review.good;$('rv_bad').value=cur.review.bad;buildDow('dow',cur.dow);buildGoals();setNine(1);setMapView('single');buildGreen();$('mapHoleNum').textContent=mapHoleNum;updateCHBanner();}
+function fillRoundForm(){if(!cur.roundLength)cur.roundLength='18';if(!cur.goalPills)cur.goalPills=[];if(!cur.keysPills)cur.keysPills=[];if(!cur.reviewPills)cur.reviewPills={good:[],bad:[]};$('r_date').value=cur.date;$('r_hcpIndex').value=cur.hcpIndex||'';populateCourseSelect();$('k_tech').value=cur.keys.tech;$('k_tact').value=cur.keys.tact;$('k_ment').value=cur.keys.ment;$('rv_tech').value=cur.review.tech;$('rv_tact').value=cur.review.tact;$('rv_ment').value=cur.review.ment;$('rv_good').value=cur.review.good;$('rv_bad').value=cur.review.bad;buildDow('dow',cur.dow);buildGoals();buildGoalPills();buildKeysPills();buildReviewPills();
+  // bestehende Freitexte sichtbar lassen, falls schon was drinsteht
+  if(cur.keys.tech||cur.keys.tact||cur.keys.ment){$('keysFreeBlock').style.display='grid';$('keysNoteToggle').textContent='– Notiz ausblenden';}
+  if(cur.review.good){$('rv_good').style.display='block';$('goodNoteToggle').textContent='– Notiz ausblenden';}
+  if(cur.review.bad){$('rv_bad').style.display='block';$('badNoteToggle').textContent='– Notiz ausblenden';}
+  document.querySelectorAll('#lenToggle button').forEach(b=>b.classList.toggle('on',b.dataset.len===cur.roundLength));nine=(cur.roundLength==='back9')?2:1;const nt=$('ninetabsRow');if(nt)nt.style.display=(cur.roundLength==='18')?'flex':'none';setNine(nine);setMapView('single');buildGreen();$('mapHoleNum').textContent=mapHoleNum;updateCHBanner();}
 function fillPracticeForm(){if(!curP.drills)curP.drills=[];$('p_date').value=curP.date;$('p_from').value=curP.timeFrom||'';$('p_to').value=curP.timeTo||'';$('p_rangeBalls').value=curP.rangeBalls||'';$('p_tech').value=curP.pnotes.tech;$('p_feel').value=curP.pnotes.feel;buildDow('dowP',curP.dow);buildPGoals();buildShortBlocks();buildDrillList();updateDuration();updateVolSum();renderLiveBox();}
 
 /* ===== PRACTICE VOLUME ===== */
@@ -1414,11 +1599,11 @@ let liveTimer=setInterval(()=>{if(MODE==='practice'&&curP.live)renderLiveBox();}
 let autosaveT;
 function autosaveLive(){if(!(MODE==='practice'&&(curP.live||curP.status==='planned')&&curP.id))return;clearTimeout(autosaveT);autosaveT=setTimeout(()=>{const idx=DB.entries.findIndex(e=>e.id===curP.id);if(idx>=0){DB.entries[idx]=JSON.parse(JSON.stringify(curP));persist();}},600);}
 const bind=(id,fn)=>$(id).addEventListener('input',e=>fn(e.target.value));
-bind('r_date',v=>cur.date=v);
-bind('r_hcpIndex',v=>{cur.hcpIndex=v;buildHoles();updateCHBanner();});
-$('r_courseKey').addEventListener('change',e=>{cur.courseKey=e.target.value;cur.teeId=(COURSES[cur.courseKey]||COURSES.mettmann).tees[0].id;populateTeeSelect();buildHoles();updateCHBanner();});
-bind('k_tech',v=>cur.keys.tech=v);bind('k_tact',v=>cur.keys.tact=v);bind('k_ment',v=>cur.keys.ment=v);
-bind('rv_tech',v=>cur.review.tech=v);bind('rv_tact',v=>cur.review.tact=v);bind('rv_ment',v=>cur.review.ment=v);bind('rv_good',v=>cur.review.good=v);bind('rv_bad',v=>cur.review.bad=v);
+bind('r_date',v=>{cur.date=v;autosaveRound();});
+bind('r_hcpIndex',v=>{cur.hcpIndex=v;buildHoles();updateCHBanner();autosaveRound();});
+$('r_courseKey').addEventListener('change',e=>{cur.courseKey=e.target.value;cur.teeId=(COURSES[cur.courseKey]||COURSES.mettmann).tees[0].id;populateTeeSelect();buildHoles();updateCHBanner();autosaveRound();});
+bind('k_tech',v=>{cur.keys.tech=v;autosaveRound();});bind('k_tact',v=>{cur.keys.tact=v;autosaveRound();});bind('k_ment',v=>{cur.keys.ment=v;autosaveRound();});
+bind('rv_tech',v=>{cur.review.tech=v;autosaveRound();});bind('rv_tact',v=>{cur.review.tact=v;autosaveRound();});bind('rv_ment',v=>{cur.review.ment=v;autosaveRound();});bind('rv_good',v=>{cur.review.good=v;autosaveRound();});bind('rv_bad',v=>{cur.review.bad=v;autosaveRound();});
 bind('p_date',v=>{curP.date=v;autosaveLive();});bind('p_tech',v=>{curP.pnotes.tech=v;autosaveLive();});bind('p_feel',v=>{curP.pnotes.feel=v;autosaveLive();});
 function setupTimeInput(id,onChange){
   const el=$(id);
@@ -1451,13 +1636,19 @@ bind('p_rangeBalls',v=>{curP.rangeBalls=v;updateVolSum();autosaveLive();});
 bind('pr_name',v=>{if(!DB.profile)DB.profile={name:'',clubs:[]};DB.profile.name=v;saveProfile();});
 
 /* ===== SAVE / EDIT ===== */
-function saveEntry(){const entry=MODE==='round'?JSON.parse(JSON.stringify(cur)):JSON.parse(JSON.stringify(curP));entry.type=MODE;if(MODE==='practice'){entry.live=false;entry.status='done';}if(MODE==='round'){const c=curCourse(),t=curTee();entry.course=c.name;entry.tees=t.label;entry.courseKey=cur.courseKey;entry.teeId=cur.teeId;entry.stableford=totalStableford();entry.ch=curCH();}if(editingId){entry.id=editingId;const idx=DB.entries.findIndex(e=>e.id===editingId);entry.savedAt=DB.entries[idx].savedAt;DB.entries[idx]=entry;}else{entry.id='e'+Date.now();entry.savedAt=Date.now();DB.entries.unshift(entry);}persist();editingId=null;toast(MODE==='round'?'Runde gesichert ⛳':'Session gesichert 🎯');go('home');}
-function newEntry(){editingId=null;mapHoleNum=1;cur=blankRound();curP=blankPractice();fillRoundForm();fillPracticeForm();setMode('round');toast('Neues Blatt');}
+function saveEntry(){const entry=MODE==='round'?JSON.parse(JSON.stringify(cur)):JSON.parse(JSON.stringify(curP));entry.type=MODE;if(MODE==='practice'){entry.live=false;entry.status='done';}if(MODE==='round'){entry.status='done';const c=curCourse(),t=curTee();entry.course=c.name;entry.tees=t.label;entry.courseKey=cur.courseKey;entry.teeId=cur.teeId;entry.stableford=totalStableford();entry.ch=curCH();}if(editingId){entry.id=editingId;const idx=DB.entries.findIndex(e=>e.id===editingId);entry.savedAt=DB.entries[idx].savedAt;DB.entries[idx]=entry;}else{entry.id='e'+Date.now();entry.savedAt=Date.now();DB.entries.unshift(entry);}persist();editingId=null;toast(MODE==='round'?'Runde gesichert ⛳':'Session gesichert 🎯');go('home');}
+function newEntry(){
+  // falls eine Live-Runde offen war und nicht gespeichert wurde, fragen statt verwerfen
+  if(MODE==='round'&&cur.status==='live'&&editingId){
+    if(!confirm('Die aktuelle Runde ist nicht als fertig markiert. Trotzdem leeren und neu beginnen? (Die Runde bleibt im Verlauf als "läuft" stehen.)'))return;
+  }
+  editingId=null;mapHoleNum=1;cur=blankRound();curP=blankPractice();fillRoundForm();fillPracticeForm();setMode('round');toast('Neues Blatt');
+}
 function editEntry(id){const e=DB.entries.find(x=>x.id===id);if(!e)return;editingId=id;if(e.type==='round'){cur=JSON.parse(JSON.stringify(e));setMode('round');fillRoundForm();}else{curP=JSON.parse(JSON.stringify(e));setMode('practice');fillPracticeForm();}go('play');document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));toast('Zum Bearbeiten geladen');}
 function delEntry(id){if(!confirm('Diesen Eintrag löschen?'))return;DB.entries=DB.entries.filter(e=>e.id!==id);persist();renderHistory();renderHome();toast('Gelöscht');}
 
 /* ===== STATS ===== */
-function entryStableford(e){if(e.stableford!=null)return e.stableford;const c=COURSES[e.courseKey];if(!c)return null;const ch=e.ch!=null?e.ch:courseHandicap(e.hcpIndex,(c.tees.find(t=>t.id===e.teeId)||c.tees[0]));const strokes=strokeAllocation(ch==null?0:ch,c.holeIdx);let tot=0;e.holes.forEach((h,i)=>{const p=stablefordHole(Number(h.score),c.holePar[i],strokes[i]);if(p!=null)tot+=p;});return tot;}
+function entryStableford(e){if(e.stableford!=null)return e.stableford;const c=COURSES[e.courseKey];if(!c)return null;const ch=e.ch!=null?e.ch:courseHandicap(e.hcpIndex,(c.tees.find(t=>t.id===e.teeId)||c.tees[0]));const strokes=strokeAllocation(ch==null?0:ch,c.holeIdx);const[start,end]=holeRangeFor(e.roundLength);let tot=0;e.holes.slice(start,end).forEach((h,idx)=>{const i=start+idx;const p=stablefordHole(Number(h.score),c.holePar[i],strokes[i]);if(p!=null)tot+=p;});return tot;}
 
 /* ===== BERECHNETES HANDICAP (vereinfachtes WHS-Prinzip) ===== */
 function scoreDifferential(e){
@@ -1469,7 +1660,7 @@ function scoreDifferential(e){
   return(grossOn18-tee.cr)*113/tee.slope;
 }
 function calculatedHandicap(){
-  const rounds=DB.entries.filter(e=>e.type==='round');
+  const rounds=DB.entries.filter(e=>e.type==='round'&&e.status!=='live');
   const diffs=rounds.map(scoreDifferential).filter(d=>d!=null);
   if(diffs.length<3)return null;
   const last=diffs.slice(0,8); // letzte bis zu 8 Differentials (neueste zuerst, da entries unshift)
@@ -1479,11 +1670,11 @@ function calculatedHandicap(){
   const avg=best.reduce((a,b)=>a+b,0)/best.length;
   return{value:Math.round(avg*10)/10,roundsUsed:last.length};
 }
-function roundStats(e){let score=0,putts=0,gir=0,fir=0,played=0;e.holes.forEach(h=>{if(h.score){score+=Number(h.score);played++;}putts+=Number(h.putts||0);if(h.gir===true)gir++;if(h.fir===true)fir++;});return{score,putts,gir,fir,played};}
+function roundStats(e){let score=0,putts=0,gir=0,fir=0,played=0;const[start,end]=holeRangeFor(e.roundLength);e.holes.slice(start,end).forEach(h=>{if(h.score){score+=Number(h.score);played++;}putts+=Number(h.putts||0);if(h.gir===true)gir++;if(h.fir===true)fir++;});return{score,putts,gir,fir,played};}
 
 function renderHistory(){const list=$('histList');list.innerHTML='';const entries=DB.entries.filter(e=>e.type!=='note');$('histCount').textContent=entries.length?`${entries.length} Einträge`:'Noch nichts gespeichert';if(!entries.length){list.innerHTML='<div class="empty"><div class="ic">📖</div><p>Noch nichts gespeichert.<br>Tippe unten auf ➕, um zu starten.</p></div>';return;}entries.forEach(e=>list.appendChild(rowItem(e,true)));}
 
-function renderStats(){const body=$('statsBody');const rounds=DB.entries.filter(e=>e.type==='round');const practices=DB.entries.filter(e=>e.type==='practice');
+function renderStats(){const body=$('statsBody');const rounds=DB.entries.filter(e=>e.type==='round'&&e.status!=='live');const practices=DB.entries.filter(e=>e.type==='practice');
   if(!rounds.length&&!practices.length){body.innerHTML='<div class="empty"><div class="ic">📊</div><p>Noch nichts gespeichert.<br>Spiele eine Runde oder logge ein Training.</p></div>';return;}
   body.innerHTML='';
   // ROUNDS section
@@ -1540,9 +1731,10 @@ function recoBlock(rounds){
     recsHtml=recs.map(r=>{
       const cat=DRILL_CATS.find(c=>c.id===r.cat);
       const drill=topDrillForCat(r.cat);
+      const tags=[r.fromText?'aus deinen Notizen':null,r.fromPill?'✓ von dir bestätigt':null,r.dampened?'(abgeschwächt durch positive Rückmeldung)':null].filter(Boolean).join(' · ');
       return `<div class="reco-row2">
         <div class="reco-cat">${cat.icon} ${cat.label}</div>
-        <div class="reco-reason">${esc(r.reason)}${r.fromText?' · aus deinen Notizen':''}</div>
+        <div class="reco-reason">${esc(r.reason)}${tags?' · '+tags:''}</div>
         ${drill?`<div class="reco-drill">→ ${esc(drill.name)}: ${esc(drill.desc)}</div>`:''}
       </div>`;
     }).join('');
@@ -1591,7 +1783,15 @@ document.addEventListener('focusin',e=>{const t=e.target;if(t&&(t.tagName==='INP
 let lastTouch=0;document.addEventListener('touchend',e=>{const now=Date.now();if(now-lastTouch<=300){const tag=(e.target.tagName||'').toLowerCase();if(tag!=='input'&&tag!=='textarea'&&tag!=='select')e.preventDefault();}lastTouch=now;},{passive:false});
 
 /* boot */
-(function resumeLive(){const open=DB.entries.find(e=>e.type==='practice'&&(e.live||e.status==='planned'));if(open){curP=JSON.parse(JSON.stringify(open));editingId=open.id;}})();
+(function resumeLive(){
+  const openPractice=DB.entries.find(e=>e.type==='practice'&&(e.live||e.status==='planned'));
+  if(openPractice){curP=JSON.parse(JSON.stringify(openPractice));}
+  const openRound=DB.entries.find(e=>e.type==='round'&&e.status==='live');
+  if(openRound){cur=JSON.parse(JSON.stringify(openRound));}
+  // editingId zeigt auf den jeweils zuletzt aktualisierten offenen Eintrag
+  const candidates=[openPractice,openRound].filter(Boolean).sort((a,b)=>(b.savedAt||0)-(a.savedAt||0));
+  if(candidates.length)editingId=candidates[0].id;
+})();
 fillRoundForm();fillPracticeForm();setMode('round');renderHome();
 if(!storageOK)toast('Speicher eingeschränkt – nutze Backup-Export');
 </script>

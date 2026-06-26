@@ -555,12 +555,14 @@ select.inp{appearance:none;-webkit-appearance:none;background-image:url("data:im
       </div>
 
       <div id="rtab-setup" class="rtab-panel">
+      <div id="roundStatusBox"></div>
       <div class="sheet">
         <div class="sheet-body">
           <div class="datestrip">
             <div class="dow" id="dow"></div>
             <input class="inp" id="r_date" placeholder="Datum">
           </div>
+          <div class="field"><label>Titel <span class="optlab">(optional)</span></label><input class="inp" id="r_title" placeholder="z.B. Sonntagsrunde mit Papa"></div>
           <div class="field"><label>Platz</label>
             <select class="inp" id="r_courseKey"></select>
           </div>
@@ -1117,6 +1119,31 @@ const COURSES={
       {id:'hrot',label:'Herren Rot',color:'#e2574a',cr:67.5,slope:121,par:69},
       {id:'drot',label:'Damen Rot',color:'#e2574a',cr:72.9,slope:128,par:71}
     ]
+  },
+  hummelbach18:{
+    name:'Hummelbachaue (18-Loch)', par:74,
+    holePar:[4,5,5,3,4,4,4,3,5,3,4,4,4,5,4,3,5,5],
+    holeIdx:[11,5,7,17,1,3,13,15,9,18,2,10,14,4,12,16,6,8],
+    holeLen:[319,462,484,135,386,364,300,172,454,174,346,334,341,469,353,136,461,449],
+    tees:[
+      {id:'weiss',label:'Herren Weiß',color:'#e8e8e8',cr:76.6,slope:147,par:74},
+      {id:'gelb',label:'Herren Gelb',color:'#e8d44d',cr:74.4,slope:149,par:74},
+      {id:'hblau',label:'Herren Blau',color:'#4a90e2',cr:72.6,slope:144,par:73},
+      {id:'dgelb',label:'Damen Gelb',color:'#e8d44d',cr:80.9,slope:150,par:74},
+      {id:'dblau',label:'Damen Blau',color:'#4a90e2',cr:79.0,slope:148,par:74},
+      {id:'rot',label:'Damen Rot',color:'#e2574a',cr:76.3,slope:143,par:74}
+    ]
+  },
+  hummelbach9:{
+    name:'Hummelbachaue (9-Loch)', par:70, holes:9,
+    holePar:[3,4,4,5,3,4,4,4,4],
+    holeIdx:[13,7,11,3,15,1,17,9,5],
+    holeLen:[128,236,272,427,125,373,246,311,367],
+    tees:[
+      {id:'gelb',label:'Herren Gelb',color:'#e8d44d',cr:67.2,slope:125,par:70},
+      {id:'rot',label:'Damen Rot',color:'#e2574a',cr:68.4,slope:126,par:70},
+      {id:'gruen',label:'Allrounder Grün',color:'#1fc77b',cr:59.8,slope:103,par:64}
+    ]
   }
 };
 /* Course Handicap = Index × Slope/113 + (CR − Par), rounded */
@@ -1132,7 +1159,7 @@ const $=id=>document.getElementById(id);
 function fmtDate(d){return d.toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'});}
 
 function blankRound(){return{type:'round',id:null,savedAt:null,date:fmtDate(new Date()),dow:new Date().getDay(),
-  status:'new',roundLength:'18',
+  status:'new',roundLength:'18',title:'',
   courseKey:'mettmann',teeId:'gelb',hcpIndex:DB.hcp||'',
   course:'',tees:'',yards:'',rating:'',slope:'',hcp:'',
   goals:[{done:false,t:''},{done:false,t:''},{done:false,t:''}],
@@ -1164,24 +1191,47 @@ function go(v){
 function openNewSheet(e){if(e)e.stopPropagation();$('newModal').classList.add('open');}
 function closeNewSheet(){$('newModal').classList.remove('open');}
 function startRound(){
-  mapHoleNum=1;
-  const open=DB.entries.find(e=>e.type==='round'&&e.status==='live');
-  if(open){
-    editingId=open.id;cur=JSON.parse(JSON.stringify(open));
-  }else{
-    cur=blankRound();cur.status='live';
-    cur.id='e'+Date.now();cur.savedAt=Date.now();
-    editingId=cur.id;
-    DB.entries.unshift(JSON.parse(JSON.stringify(cur)));
-    persist();
-  }
+  mapHoleNum=1;editingId=null;
+  cur=blankRound();
   setMode('round');fillRoundForm();go('play');
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+}
+function stampCourseInfo(){const c=curCourse(),t=curTee();cur.course=c.name;cur.tees=t.label;}
+function goLiveRound(){
+  stampCourseInfo();
+  cur.status='live';
+  if(!cur.id){cur.id='e'+Date.now();cur.savedAt=Date.now();DB.entries.unshift(JSON.parse(JSON.stringify(cur)));}
+  else{const idx=DB.entries.findIndex(e=>e.id===cur.id);if(idx>=0)DB.entries[idx]=JSON.parse(JSON.stringify(cur));else DB.entries.unshift(JSON.parse(JSON.stringify(cur)));}
+  editingId=cur.id;
+  persist();
+  renderRoundStatusBox();
+  toast('Runde gestartet ⛳');
+}
+function savePlanRound(){
+  stampCourseInfo();
+  cur.status='planned';
+  if(!cur.id){cur.id='e'+Date.now();cur.savedAt=Date.now();DB.entries.unshift(JSON.parse(JSON.stringify(cur)));}
+  else{const idx=DB.entries.findIndex(e=>e.id===cur.id);if(idx>=0)DB.entries[idx]=JSON.parse(JSON.stringify(cur));else DB.entries.unshift(JSON.parse(JSON.stringify(cur)));}
+  editingId=cur.id;
+  persist();
+  toast('Runde geplant 📋');
+  go('home');
+}
+function discardPlanRound(){
+  if(!confirm('Geplante Runde wirklich verwerfen?'))return;
+  const idx=DB.entries.findIndex(e=>e.id===cur.id);
+  if(idx>=0)DB.entries.splice(idx,1);
+  persist();
+  editingId=null;cur=blankRound();
+  fillRoundForm();
+  toast('Plan verworfen');
+  go('home');
 }
 /* fortlaufendes Sichern, solange eine Runde noch nicht fertig gespeichert ist */
 let roundSaveT;
 function autosaveRound(){
-  if(!(MODE==='round'&&cur.status==='live'&&cur.id))return;
+  if(!(MODE==='round'&&(cur.status==='live'||cur.status==='planned')&&cur.id))return;
+  stampCourseInfo();
   clearTimeout(roundSaveT);
   roundSaveT=setTimeout(()=>{
     const idx=DB.entries.findIndex(e=>e.id===cur.id);
@@ -1387,10 +1437,13 @@ function rowItem(e,withDelete){
   if(e.type==='round'){
     const s=roundStats(e);
     const isLive=e.status==='live';
-    if(isLive){card.classList.add('row-live');}else{card.classList.add('row-done');}
-    const statusTag=isLive?' <span class="livetag">● läuft</span>':'';
-    card.innerHTML=`<div class="ic round${isLive?'-live':''}">⛳</div>
-      <div class="meta"><div class="crs">${esc(e.course||'Runde')}${statusTag}</div><div class="dt">${e.date} · ${esc(e.tees||'–')} · ${entryStableford(e)} Pkt</div></div>
+    const isPlanned=e.status==='planned';
+    if(isLive){card.classList.add('row-live');}else if(isPlanned){card.classList.add('row-planned');}else{card.classList.add('row-done');}
+    const statusTag=isLive?' <span class="livetag">● läuft</span>':isPlanned?' <span class="plantag">📋 geplant</span>':'';
+    const titlePrefix=e.title?`${esc(e.title)} · `:'';
+    const iconCls=isLive?'round-live':isPlanned?'practice-planned':'round';
+    card.innerHTML=`<div class="ic ${iconCls}">⛳</div>
+      <div class="meta"><div class="crs">${titlePrefix}${esc(e.course||'Runde')}${statusTag}</div><div class="dt">${e.date} · ${esc(e.tees||'–')} · ${entryStableford(e)} Pkt</div></div>
       <div class="big">${s.score||'–'}</div>`;
   }else{
     const drillCount=(e.drills||[]).length;
@@ -1443,11 +1496,26 @@ function buildPGoals(){const box=$('pGoalsBox');box.innerHTML='';curP.pgoals.for
 /* ===== CURRENT COURSE CONTEXT ===== */
 function curCourse(){return COURSES[cur.courseKey]||COURSES.mettmann;}
 function curTee(){const c=curCourse();return c.tees.find(t=>t.id===cur.teeId)||c.tees[0];}
-function curCH(){const full=courseHandicap(cur.hcpIndex,curTee());if(full==null)return null;if(cur.roundLength==='front9'||cur.roundLength==='back9')return Math.round(full/2);return full;}
+function curCH(){const full=courseHandicap(cur.hcpIndex,curTee());if(full==null)return null;const c=curCourse();if(c&&c.holes===9)return full;if(cur.roundLength==='front9'||cur.roundLength==='back9')return Math.round(full/2);return full;}
 function curStrokes(){const ch=curCH();return strokeAllocation(ch==null?0:ch,curCourse().holeIdx);}
-function holeRangeFor(roundLength){if(roundLength==='front9')return[0,9];if(roundLength==='back9')return[9,18];return[0,18];}
-function totalStableford(){const c=curCourse(),strokes=curStrokes();const[start,end]=holeRangeFor(cur.roundLength);let tot=0;cur.holes.slice(start,end).forEach((h,idx)=>{const i=start+idx;const p=stablefordHole(Number(h.score),c.holePar[i],strokes[i]);if(p!=null)tot+=p;});return tot;}
+function holeRangeFor(roundLength,courseKey){
+  const c=COURSES[courseKey];
+  if(c&&c.holes===9)return[0,9]; // 9-Loch-Platz hat grundsätzlich nur 9 Bahnen
+  if(roundLength==='front9')return[0,9];
+  if(roundLength==='back9')return[9,18];
+  return[0,18];
+}
+function totalStableford(){const c=curCourse(),strokes=curStrokes();const[start,end]=holeRangeFor(cur.roundLength,cur.courseKey);let tot=0;cur.holes.slice(start,end).forEach((h,idx)=>{const i=start+idx;const p=stablefordHole(Number(h.score),c.holePar[i],strokes[i]);if(p!=null)tot+=p;});return tot;}
 
+function syncRoundLengthUI(){
+  const c=curCourse();
+  const is9HoleCourse=c&&c.holes===9;
+  const lenField=$('lenToggle')?.closest('.field');
+  if(lenField)lenField.style.display=is9HoleCourse?'none':'block';
+  if(is9HoleCourse){cur.roundLength='front9';nine=1;}
+  document.querySelectorAll('#lenToggle button').forEach(b=>b.classList.toggle('on',b.dataset.len===cur.roundLength));
+  const nt=$('ninetabsRow');if(nt)nt.style.display=(is9HoleCourse||cur.roundLength!=='18')?'none':'flex';
+}
 function setRoundLength(len){
   cur.roundLength=len;
   document.querySelectorAll('#lenToggle button').forEach(b=>b.classList.toggle('on',b.dataset.len===len));
@@ -1502,12 +1570,12 @@ function updateTeeButton(){const c=COURSES[cur.courseKey]||COURSES.mettmann;cons
 function openTeeModal(e){if(e)e.stopPropagation();const c=COURSES[cur.courseKey]||COURSES.mettmann;const list=$('teeModalList');list.innerHTML='';c.tees.forEach(t=>{const o=document.createElement('div');o.className='teeopt'+(t.id===cur.teeId?' sel':'');o.innerHTML=`<span class="sw" style="background:${t.color}"></span><div class="info"><div class="nm">${t.label}</div><div class="det">CR ${t.cr} · Slope ${t.slope} · Par ${t.par}</div></div>${t.id===cur.teeId?'<span class="check">✓</span>':''}`;o.onclick=()=>{cur.teeId=t.id;updateTeeButton();buildHoles();updateCHBanner();closeTeeModal();autosaveRound();};list.appendChild(o);});$('teeModal').classList.add('open');}
 function closeTeeModal(e){$('teeModal').classList.remove('open');}
 function updateCHBanner(){const b=$('chBanner');const ch=curCH();if(ch==null){b.classList.remove('show');return;}b.classList.add('show');const pts=totalStableford();b.innerHTML=`<div><div class="ch-l">Course Handicap</div><div class="ch-v">${ch}</div></div><div class="ch-r"><div class="ch-pts">${pts}</div><div class="ch-pl">Stableford-Punkte</div></div>`;}
-function fillRoundForm(){if(!cur.roundLength)cur.roundLength='18';if(!cur.goalPills)cur.goalPills=[];if(!cur.keysPills)cur.keysPills=[];if(!cur.reviewPills)cur.reviewPills={good:[],bad:[]};$('r_date').value=cur.date;$('r_hcpIndex').value=cur.hcpIndex||'';populateCourseSelect();$('k_tech').value=cur.keys.tech;$('k_tact').value=cur.keys.tact;$('k_ment').value=cur.keys.ment;$('rv_tech').value=cur.review.tech;$('rv_tact').value=cur.review.tact;$('rv_ment').value=cur.review.ment;$('rv_good').value=cur.review.good;$('rv_bad').value=cur.review.bad;buildDow('dow',cur.dow);buildGoals();buildGoalPills();buildKeysPills();buildReviewPills();
+function fillRoundForm(){if(!cur.roundLength)cur.roundLength='18';if(!cur.title)cur.title='';if(!cur.goalPills)cur.goalPills=[];if(!cur.keysPills)cur.keysPills=[];if(!cur.reviewPills)cur.reviewPills={good:[],bad:[]};$('r_date').value=cur.date;$('r_title').value=cur.title||'';$('r_hcpIndex').value=cur.hcpIndex||'';populateCourseSelect();$('k_tech').value=cur.keys.tech;$('k_tact').value=cur.keys.tact;$('k_ment').value=cur.keys.ment;$('rv_tech').value=cur.review.tech;$('rv_tact').value=cur.review.tact;$('rv_ment').value=cur.review.ment;$('rv_good').value=cur.review.good;$('rv_bad').value=cur.review.bad;buildDow('dow',cur.dow);buildGoals();buildGoalPills();buildKeysPills();buildReviewPills();renderRoundStatusBox();
   // bestehende Freitexte sichtbar lassen, falls schon was drinsteht
   if(cur.keys.tech||cur.keys.tact||cur.keys.ment){$('keysFreeBlock').style.display='grid';$('keysNoteToggle').textContent='– Notiz ausblenden';}
   if(cur.review.good){$('rv_good').style.display='block';$('goodNoteToggle').textContent='– Notiz ausblenden';}
   if(cur.review.bad){$('rv_bad').style.display='block';$('badNoteToggle').textContent='– Notiz ausblenden';}
-  document.querySelectorAll('#lenToggle button').forEach(b=>b.classList.toggle('on',b.dataset.len===cur.roundLength));nine=(cur.roundLength==='back9')?2:1;const nt=$('ninetabsRow');if(nt)nt.style.display=(cur.roundLength==='18')?'flex':'none';setNine(nine);setMapView('single');buildGreen();$('mapHoleNum').textContent=mapHoleNum;updateCHBanner();}
+  syncRoundLengthUI();nine=(cur.roundLength==='back9')?2:1;setNine(nine);setMapView('single');buildGreen();$('mapHoleNum').textContent=mapHoleNum;updateCHBanner();}
 function fillPracticeForm(){if(!curP.drills)curP.drills=[];$('p_date').value=curP.date;$('p_from').value=curP.timeFrom||'';$('p_to').value=curP.timeTo||'';$('p_rangeBalls').value=curP.rangeBalls||'';$('p_tech').value=curP.pnotes.tech;$('p_feel').value=curP.pnotes.feel;buildDow('dowP',curP.dow);buildPGoals();buildShortBlocks();buildDrillList();updateDuration();updateVolSum();renderLiveBox();}
 
 /* ===== PRACTICE VOLUME ===== */
@@ -1641,6 +1709,27 @@ function discardPlan(){
   fillPracticeForm();
   toast('Plan verworfen');
 }
+function renderRoundStatusBox(){
+  const box=$('roundStatusBox');if(!box)return;
+  if(cur.status==='live'){
+    box.innerHTML=`<div class="livebanner">
+      <div class="lb-top"><span class="pulse"></span> RUNDE LÄUFT</div>
+      <div class="lb-since">Trag deine Scores in der Scorecard ein — wird laufend gespeichert.</div>
+    </div>`;
+  }else if(cur.status==='planned'){
+    box.innerHTML=`<div class="planbanner">
+      <div class="lb-top plan-top">📋 GEPLANTE RUNDE</div>
+      <div class="plan-hint">Setup ist gespeichert — starte, wenn du am Platz bist.</div>
+      <button class="lb-stop plan-startbtn" onclick="goLiveRound()">▶ Runde jetzt starten</button>
+      <button class="plan-discard" onclick="discardPlanRound()">Plan verwerfen</button>
+    </div>`;
+  }else{
+    box.innerHTML=`<div class="livestart">
+      <button onclick="goLiveRound()">▶ Runde jetzt starten</button>
+      <button class="planbtn" onclick="savePlanRound()">📋 Erstmal nur planen</button>
+    </div>`;
+  }
+}
 function renderLiveBox(){
   const box=$('liveBox');if(!box)return;
   if(curP.live&&curP.startTs){
@@ -1673,8 +1762,9 @@ let autosaveT;
 function autosaveLive(){if(!(MODE==='practice'&&(curP.live||curP.status==='planned')&&curP.id))return;clearTimeout(autosaveT);autosaveT=setTimeout(()=>{const idx=DB.entries.findIndex(e=>e.id===curP.id);if(idx>=0){DB.entries[idx]=JSON.parse(JSON.stringify(curP));persist();}},600);}
 const bind=(id,fn)=>$(id).addEventListener('input',e=>fn(e.target.value));
 bind('r_date',v=>{cur.date=v;autosaveRound();});
+bind('r_title',v=>{cur.title=v;autosaveRound();});
 bind('r_hcpIndex',v=>{cur.hcpIndex=v;buildHoles();updateCHBanner();autosaveRound();});
-$('r_courseKey').addEventListener('change',e=>{cur.courseKey=e.target.value;cur.teeId=(COURSES[cur.courseKey]||COURSES.mettmann).tees[0].id;populateTeeSelect();buildHoles();updateCHBanner();autosaveRound();});
+$('r_courseKey').addEventListener('change',e=>{cur.courseKey=e.target.value;cur.teeId=(COURSES[cur.courseKey]||COURSES.mettmann).tees[0].id;populateTeeSelect();syncRoundLengthUI();buildHoles();updateCHBanner();autosaveRound();});
 bind('k_tech',v=>{cur.keys.tech=v;autosaveRound();});bind('k_tact',v=>{cur.keys.tact=v;autosaveRound();});bind('k_ment',v=>{cur.keys.ment=v;autosaveRound();});
 bind('rv_tech',v=>{cur.review.tech=v;autosaveRound();});bind('rv_tact',v=>{cur.review.tact=v;autosaveRound();});bind('rv_ment',v=>{cur.review.ment=v;autosaveRound();});bind('rv_good',v=>{cur.review.good=v;autosaveRound();});bind('rv_bad',v=>{cur.review.bad=v;autosaveRound();});
 bind('p_date',v=>{curP.date=v;autosaveLive();});bind('p_tech',v=>{curP.pnotes.tech=v;autosaveLive();});bind('p_feel',v=>{curP.pnotes.feel=v;autosaveLive();});
@@ -1721,7 +1811,7 @@ function editEntry(id){const e=DB.entries.find(x=>x.id===id);if(!e)return;editin
 function delEntry(id){if(!confirm('Diesen Eintrag löschen?'))return;DB.entries=DB.entries.filter(e=>e.id!==id);persist();renderHistory();renderHome();toast('Gelöscht');}
 
 /* ===== STATS ===== */
-function entryStableford(e){if(e.stableford!=null)return e.stableford;const c=COURSES[e.courseKey];if(!c)return null;const ch=e.ch!=null?e.ch:courseHandicap(e.hcpIndex,(c.tees.find(t=>t.id===e.teeId)||c.tees[0]));const strokes=strokeAllocation(ch==null?0:ch,c.holeIdx);const[start,end]=holeRangeFor(e.roundLength);let tot=0;e.holes.slice(start,end).forEach((h,idx)=>{const i=start+idx;const p=stablefordHole(Number(h.score),c.holePar[i],strokes[i]);if(p!=null)tot+=p;});return tot;}
+function entryStableford(e){if(e.stableford!=null)return e.stableford;const c=COURSES[e.courseKey];if(!c)return null;const ch=e.ch!=null?e.ch:courseHandicap(e.hcpIndex,(c.tees.find(t=>t.id===e.teeId)||c.tees[0]));const strokes=strokeAllocation(ch==null?0:ch,c.holeIdx);const[start,end]=holeRangeFor(e.roundLength,e.courseKey);let tot=0;e.holes.slice(start,end).forEach((h,idx)=>{const i=start+idx;const p=stablefordHole(Number(h.score),c.holePar[i],strokes[i]);if(p!=null)tot+=p;});return tot;}
 
 /* ===== BERECHNETES HANDICAP (vereinfachtes WHS-Prinzip) ===== */
 function scoreDifferential(e){
@@ -1743,7 +1833,7 @@ function calculatedHandicap(){
   const avg=best.reduce((a,b)=>a+b,0)/best.length;
   return{value:Math.round(avg*10)/10,roundsUsed:last.length};
 }
-function roundStats(e){let score=0,putts=0,gir=0,fir=0,played=0;const[start,end]=holeRangeFor(e.roundLength);e.holes.slice(start,end).forEach(h=>{if(h.score){score+=Number(h.score);played++;}putts+=Number(h.putts||0);if(h.gir===true)gir++;if(h.fir===true)fir++;});return{score,putts,gir,fir,played};}
+function roundStats(e){let score=0,putts=0,gir=0,fir=0,played=0;const[start,end]=holeRangeFor(e.roundLength,e.courseKey);e.holes.slice(start,end).forEach(h=>{if(h.score){score+=Number(h.score);played++;}putts+=Number(h.putts||0);if(h.gir===true)gir++;if(h.fir===true)fir++;});return{score,putts,gir,fir,played};}
 
 function renderHistory(){const list=$('histList');list.innerHTML='';const entries=DB.entries.filter(e=>e.type!=='note');$('histCount').textContent=entries.length?`${entries.length} Einträge`:'Noch nichts gespeichert';if(!entries.length){list.innerHTML='<div class="empty"><div class="ic">📖</div><p>Noch nichts gespeichert.<br>Tippe unten auf ➕, um zu starten.</p></div>';return;}entries.forEach(e=>list.appendChild(rowItem(e,true)));}
 
@@ -1886,12 +1976,7 @@ let lastTouch=0;document.addEventListener('touchend',e=>{const now=Date.now();if
 /* boot */
 (function resumeLive(){
   const openPractice=DB.entries.find(e=>e.type==='practice'&&(e.live||e.status==='planned'));
-  if(openPractice){curP=JSON.parse(JSON.stringify(openPractice));}
-  const openRound=DB.entries.find(e=>e.type==='round'&&e.status==='live');
-  if(openRound){cur=JSON.parse(JSON.stringify(openRound));}
-  // editingId zeigt auf den jeweils zuletzt aktualisierten offenen Eintrag
-  const candidates=[openPractice,openRound].filter(Boolean).sort((a,b)=>(b.savedAt||0)-(a.savedAt||0));
-  if(candidates.length)editingId=candidates[0].id;
+  if(openPractice){curP=JSON.parse(JSON.stringify(openPractice));editingId=openPractice.id;}
 })();
 fillRoundForm();fillPracticeForm();setMode('round');renderHome();
 if(!storageOK)toast('Speicher eingeschränkt – nutze Backup-Export');

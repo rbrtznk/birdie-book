@@ -174,6 +174,16 @@ input,textarea{-webkit-user-select:text;user-select:text;}
 .lentoggle{display:flex;gap:6px;}
 .lentoggle button{flex:1;padding:11px 4px;border-radius:11px;background:var(--surface-2);border:1px solid var(--line);color:var(--text-2);font-weight:600;font-size:13px;}
 .lentoggle button.on{background:var(--accent);color:#fff;border-color:var(--accent);}
+.hcprel-toggle{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 14px;border-radius:12px;background:var(--surface-2);border:1px solid var(--line);cursor:pointer;}
+.hcprel-toggle.on{background:var(--green-soft);border-color:var(--green);}
+.hcprel-info{flex:1;min-width:0;}
+.hcprel-title{font-size:14px;font-weight:600;color:var(--text);}
+.hcprel-toggle.on .hcprel-title{color:var(--green);}
+.hcprel-sub{font-size:12px;color:var(--text-3);margin-top:2px;}
+.hcprel-switch{width:46px;height:28px;border-radius:14px;background:var(--surface-3);position:relative;flex-shrink:0;transition:background .2s;}
+.hcprel-toggle.on .hcprel-switch{background:var(--green);}
+.hcprel-knob{position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.3);}
+.hcprel-toggle.on .hcprel-knob{left:21px;}
 
 /* review/goal pills (Konzept C) */
 .pillrow{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;}
@@ -313,6 +323,28 @@ input,textarea{-webkit-user-select:text;user-select:text;}
 .chbanner .ch-r{text-align:right;}
 .chbanner .ch-pts{font-size:22px;font-weight:700;color:var(--green);letter-spacing:-1px;}
 .chbanner .ch-pl{font-size:11px;color:var(--accent-text);}
+/* ===== HANDICAP ANALYTICS ===== */
+.hcpi-hero{margin:12px 16px;background:linear-gradient(135deg,#1fc77b 0%,#138f56 100%);border-radius:var(--radius);padding:22px 20px;position:relative;overflow:hidden;box-shadow:0 10px 30px rgba(31,199,123,.22);}
+.hcpi-hero::after{content:'';position:absolute;right:-30px;top:-30px;width:140px;height:140px;border-radius:50%;background:rgba(255,255,255,.08);}
+.hcpi-hero .lab{font-size:12px;letter-spacing:.8px;text-transform:uppercase;color:rgba(255,255,255,.85);font-weight:600;position:relative;z-index:1;}
+.hcpi-hero .val{font-size:54px;font-weight:800;line-height:1;color:#fff;margin:6px 0 0;letter-spacing:-2px;position:relative;z-index:1;}
+.hcpi-hero .meta{font-size:13px;color:rgba(255,255,255,.9);margin-top:12px;position:relative;z-index:1;}
+.hcpi-sec{margin:0 16px 12px;background:var(--surface);border-radius:var(--radius-sm);border:1px solid var(--line);overflow:hidden;}
+.hcpi-sec h3{margin:0;padding:14px 16px 8px;font-size:13px;letter-spacing:.5px;text-transform:uppercase;color:var(--text-3);font-weight:600;}
+.sdrow{display:flex;align-items:center;gap:10px;padding:11px 16px;border-top:1px solid var(--line);}
+.sdrow .date{font-size:13px;color:var(--text-2);width:84px;flex-shrink:0;}
+.sdrow .ttl{font-size:13px;color:var(--text);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sdrow .badge{font-size:10px;font-weight:700;padding:2px 6px;border-radius:6px;background:var(--surface-3);color:var(--text-3);flex-shrink:0;}
+.sdrow .sd{font-size:17px;font-weight:700;width:52px;text-align:right;flex-shrink:0;letter-spacing:-.5px;}
+.sdrow.best{background:var(--green-soft);}
+.sdrow.best .sd{color:var(--green);}
+.sdrow.best .star{color:var(--green);font-size:12px;}
+.hcpi-calc{padding:14px 16px;border-top:1px solid var(--line);font-size:13px;color:var(--text-2);line-height:1.7;}
+.hcpi-calc b{color:var(--text);}
+.hcpi-calc .formula{font-family:'SF Mono',Menlo,monospace;font-size:12px;background:var(--surface-2);padding:8px 10px;border-radius:8px;margin:6px 0;color:var(--accent-text);}
+.sddetail{margin:0 16px 12px;background:var(--surface);border-radius:var(--radius-sm);border:1px solid var(--line);padding:14px 16px;}
+.sddetail .sdline{display:flex;justify-content:space-between;font-size:13px;padding:4px 0;color:var(--text-2);}
+.sddetail .sdline b{color:var(--text);}
 select.inp{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23a0a6b4' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:34px;}
 
 /* custom tee picker */
@@ -581,6 +613,16 @@ select.inp{appearance:none;-webkit-appearance:none;background-image:url("data:im
               <button data-len="18" class="on" onclick="setRoundLength('18')">18 Loch</button>
             </div>
           </div>
+          <div class="field">
+            <label>Handicap-relevant?</label>
+            <div class="hcprel-toggle" id="hcpRelToggle" onclick="toggleHcpRel()">
+              <div class="hcprel-info">
+                <div class="hcprel-title" id="hcpRelTitle">Zählt nicht fürs Handicap</div>
+                <div class="hcprel-sub" id="hcpRelSub">Privatrunde / Übungsrunde</div>
+              </div>
+              <div class="hcprel-switch" id="hcpRelSwitch"><div class="hcprel-knob"></div></div>
+            </div>
+          </div>
           <div id="chBanner" class="chbanner"></div>
         </div>
       </div>
@@ -729,7 +771,8 @@ select.inp{appearance:none;-webkit-appearance:none;background-image:url("data:im
 
   <!-- =============== ANALYTICS =============== -->
   <section class="view" id="view-stats">
-    <div class="scrhead"><h1>Analytics</h1><p>Deine Form über die letzten Runden</p></div>
+    <div class="scrhead"><h1>Analytics</h1><p>Dein Handicap &amp; deine Form</p></div>
+    <div id="hcpiBody"></div>
     <div id="statsBody">
       <div class="empty"><div class="ic">📊</div><p>Noch keine Runden gespeichert.<br>Spiele eine Runde, dann erscheinen hier deine Trends.</p></div>
     </div>
@@ -848,7 +891,7 @@ select.inp{appearance:none;-webkit-appearance:none;background-image:url("data:im
 <script>
 /* ===== STORAGE ===== */
 const KEY='birdiebook_v2';
-let DB={entries:[],hcp:'',hcpHist:[],profile:{name:'',clubs:[]},customDrills:[]};
+let DB={entries:[],hcp:'',hcpHist:[],profile:{name:'',clubs:[]},customDrills:[],seeded:false};
 
 /* ===== DRILL LIBRARY ===== */
 /* Quellen: PGA.com, Golf.com, Golf Digest, Golf Monthly, HackMotion (siehe Beschreibungen) */
@@ -1089,7 +1132,7 @@ function buildRecommendations(){
 }
 function topDrillForCat(catId){return allDrills().find(d=>d.cat===catId);}
 let storageOK=true;
-function load(){try{const r=localStorage.getItem(KEY);if(r)DB=Object.assign({entries:[],hcp:'',hcpHist:[],profile:{name:'',clubs:[]},customDrills:[]},JSON.parse(r));}catch(e){storageOK=false;}}
+function load(){try{const r=localStorage.getItem(KEY);if(r)DB=Object.assign({entries:[],hcp:'',hcpHist:[],profile:{name:'',clubs:[]},customDrills:[],seeded:false},JSON.parse(r));}catch(e){storageOK=false;}}
 function persist(){try{localStorage.setItem(KEY,JSON.stringify(DB));}catch(e){storageOK=false;toast('Speicher blockiert – nutze Backup!');}}
 load();
 
@@ -1151,7 +1194,290 @@ function courseHandicap(index,tee){if(index===''||index==null||isNaN(parseFloat(
 /* distribute CH strokes across holes by difficulty index (1=hardest) */
 function strokeAllocation(ch,holeIdx){if(ch==null||ch<0)ch=0;const base=Math.floor(ch/18),rem=ch-base*18;const strokes=holeIdx.map(()=>base);const order=holeIdx.map((idx,i)=>[idx,i]).sort((a,b)=>a[0]-b[0]);for(let k=0;k<rem;k++)strokes[order[k][1]]++;return strokes;}
 /* stableford points for one hole */
-function stablefordHole(gross,par,strokes){if(!gross||gross<=0)return null;const net=gross-strokes;const pts=2-(net-par);return Math.max(0,pts);}
+function stablefordHole(gross,par,strokes){if(!gross||gross<=0)return null;const net=gross-strokes;const pts=2+(par-net);return Math.max(0,pts);}
+
+/* ============================================================
+   ===== DGV HANDICAP-BERECHNUNG (World Handicap System) =====
+   ============================================================ */
+
+/* DGV 9-Löcher SD-Ergänzungstabelle: HCPI -> SD(9 berechnet) */
+const HANDICAP_9H_TABLE={
+  '-6.0': -1.9, '-5.9': -1.9, '-5.8': -1.8, '-5.7': -1.8, '-5.6': -1.7, '-5.5': -1.7, '-5.4': -1.6, '-5.3': -1.6, '-5.2': -1.5, '-5.1': -1.5,
+  '-5.0': -1.4, '-4.9': -1.3, '-4.8': -1.3, '-4.7': -1.2, '-4.6': -1.2, '-4.5': -1.1, '-4.4': -1.1, '-4.3': -1.0, '-4.2': -1.0, '-4.1': -0.9,
+  '-4.0': -0.9, '-3.9': -0.8, '-3.8': -0.8, '-3.7': -0.7, '-3.6': -0.7, '-3.5': -0.6, '-3.4': -0.6, '-3.3': -0.5, '-3.2': -0.5, '-3.1': -0.4,
+  '-3.0': -0.4, '-2.9': -0.3, '-2.8': -0.3, '-2.7': -0.2, '-2.6': -0.2, '-2.5': -0.1, '-2.4': 0.0, '-2.3': 0.0, '-2.2': 0.1, '-2.1': 0.1,
+  '-2.0': 0.2, '-1.9': 0.2, '-1.8': 0.3, '-1.7': 0.3, '-1.6': 0.4, '-1.5': 0.4, '-1.4': 0.5, '-1.3': 0.5, '-1.2': 0.6, '-1.1': 0.6,
+  '-1.0': 0.7, '-0.9': 0.7, '-0.8': 0.8, '-0.7': 0.8, '-0.6': 0.9, '-0.5': 0.9, '-0.4': 1.0, '-0.3': 1.0, '-0.2': 1.1, '-0.1': 1.1,
+  '0.0': 1.2, '0.1': 1.3, '0.2': 1.3, '0.3': 1.4, '0.4': 1.4, '0.5': 1.5, '0.6': 1.5, '0.7': 1.6, '0.8': 1.6, '0.9': 1.7,
+  '1.0': 1.7, '1.1': 1.8, '1.2': 1.8, '1.3': 1.9, '1.4': 1.9, '1.5': 2.0, '1.6': 2.0, '1.7': 2.1, '1.8': 2.1, '1.9': 2.2,
+  '2.0': 2.2, '2.1': 2.3, '2.2': 2.3, '2.3': 2.4, '2.4': 2.4, '2.5': 2.5, '2.6': 2.6, '2.7': 2.6, '2.8': 2.7, '2.9': 2.7,
+  '3.0': 2.8, '3.1': 2.8, '3.2': 2.9, '3.3': 2.9, '3.4': 3.0, '3.5': 3.0, '3.6': 3.1, '3.7': 3.1, '3.8': 3.2, '3.9': 3.2,
+  '4.0': 3.3, '4.1': 3.3, '4.2': 3.4, '4.3': 3.4, '4.4': 3.5, '4.5': 3.5, '4.6': 3.6, '4.7': 3.6, '4.8': 3.7, '4.9': 3.7,
+  '5.0': 3.8, '5.1': 3.9, '5.2': 3.9, '5.3': 4.0, '5.4': 4.0, '5.5': 4.1, '5.6': 4.1, '5.7': 4.2, '5.8': 4.2, '5.9': 4.3,
+  '6.0': 4.3, '6.1': 4.4, '6.2': 4.4, '6.3': 4.5, '6.4': 4.5, '6.5': 4.6, '6.6': 4.6, '6.7': 4.7, '6.8': 4.7, '6.9': 4.8,
+  '7.0': 4.8, '7.1': 4.9, '7.2': 4.9, '7.3': 5.0, '7.4': 5.0, '7.5': 5.1, '7.6': 5.2, '7.7': 5.2, '7.8': 5.3, '7.9': 5.3,
+  '8.0': 5.4, '8.1': 5.4, '8.2': 5.5, '8.3': 5.5, '8.4': 5.6, '8.5': 5.6, '8.6': 5.7, '8.7': 5.7, '8.8': 5.8, '8.9': 5.8,
+  '9.0': 5.9, '9.1': 5.9, '9.2': 6.0, '9.3': 6.0, '9.4': 6.1, '9.5': 6.1, '9.6': 6.2, '9.7': 6.2, '9.8': 6.3, '9.9': 6.3,
+  '10.0': 6.4, '10.1': 6.5, '10.2': 6.5, '10.3': 6.6, '10.4': 6.6, '10.5': 6.7, '10.6': 6.7, '10.7': 6.8, '10.8': 6.8, '10.9': 6.9,
+  '11.0': 6.9, '11.1': 7.0, '11.2': 7.0, '11.3': 7.1, '11.4': 7.1, '11.5': 7.2, '11.6': 7.2, '11.7': 7.3, '11.8': 7.3, '11.9': 7.4,
+  '12.0': 7.4, '12.1': 7.5, '12.2': 7.5, '12.3': 7.6, '12.4': 7.6, '12.5': 7.7, '12.6': 7.8, '12.7': 7.8, '12.8': 7.9, '12.9': 7.9,
+  '13.0': 8.0, '13.1': 8.0, '13.2': 8.1, '13.3': 8.1, '13.4': 8.2, '13.5': 8.2, '13.6': 8.3, '13.7': 8.3, '13.8': 8.4, '13.9': 8.4,
+  '14.0': 8.5, '14.1': 8.5, '14.2': 8.6, '14.3': 8.6, '14.4': 8.7, '14.5': 8.7, '14.6': 8.8, '14.7': 8.8, '14.8': 8.9, '14.9': 8.9,
+  '15.0': 9.0, '15.1': 9.1, '15.2': 9.1, '15.3': 9.2, '15.4': 9.2, '15.5': 9.3, '15.6': 9.3, '15.7': 9.4, '15.8': 9.4, '15.9': 9.5,
+  '16.0': 9.5, '16.1': 9.6, '16.2': 9.6, '16.3': 9.7, '16.4': 9.7, '16.5': 9.8, '16.6': 9.8, '16.7': 9.9, '16.8': 9.9, '16.9': 10.0,
+  '17.0': 10.0, '17.1': 10.1, '17.2': 10.1, '17.3': 10.2, '17.4': 10.2, '17.5': 10.3, '17.6': 10.4, '17.7': 10.4, '17.8': 10.5, '17.9': 10.5,
+  '18.0': 10.6, '18.1': 10.6, '18.2': 10.7, '18.3': 10.7, '18.4': 10.8, '18.5': 10.8, '18.6': 10.9, '18.7': 10.9, '18.8': 11.0, '18.9': 11.0,
+  '19.0': 11.1, '19.1': 11.1, '19.2': 11.2, '19.3': 11.2, '19.4': 11.3, '19.5': 11.3, '19.6': 11.4, '19.7': 11.4, '19.8': 11.5, '19.9': 11.5,
+  '20.0': 11.6, '20.1': 11.7, '20.2': 11.7, '20.3': 11.8, '20.4': 11.8, '20.5': 11.9, '20.6': 11.9, '20.7': 12.0, '20.8': 12.0, '20.9': 12.1,
+  '21.0': 12.1, '21.1': 12.2, '21.2': 12.2, '21.3': 12.3, '21.4': 12.3, '21.5': 12.4, '21.6': 12.4, '21.7': 12.5, '21.8': 12.5, '21.9': 12.6,
+  '22.0': 12.6, '22.1': 12.7, '22.2': 12.7, '22.3': 12.8, '22.4': 12.8, '22.5': 12.9, '22.6': 13.0, '22.7': 13.0, '22.8': 13.1, '22.9': 13.1,
+  '23.0': 13.2, '23.1': 13.2, '23.2': 13.3, '23.3': 13.3, '23.4': 13.4, '23.5': 13.4, '23.6': 13.5, '23.7': 13.5, '23.8': 13.6, '23.9': 13.6,
+  '24.0': 13.7, '24.1': 13.7, '24.2': 13.8, '24.3': 13.8, '24.4': 13.9, '24.5': 13.9, '24.6': 14.0, '24.7': 14.0, '24.8': 14.1, '24.9': 14.1,
+  '25.0': 14.2, '25.1': 14.3, '25.2': 14.3, '25.3': 14.4, '25.4': 14.4, '25.5': 14.5, '25.6': 14.5, '25.7': 14.6, '25.8': 14.6, '25.9': 14.7,
+  '26.0': 14.7, '26.1': 14.8, '26.2': 14.8, '26.3': 14.9, '26.4': 14.9, '26.5': 15.0, '26.6': 15.0, '26.7': 15.1, '26.8': 15.1, '26.9': 15.2,
+  '27.0': 15.2, '27.1': 15.3, '27.2': 15.3, '27.3': 15.4, '27.4': 15.4, '27.5': 15.5, '27.6': 15.6, '27.7': 15.6, '27.8': 15.7, '27.9': 15.7,
+  '28.0': 15.8, '28.1': 15.8, '28.2': 15.9, '28.3': 15.9, '28.4': 16.0, '28.5': 16.0, '28.6': 16.1, '28.7': 16.1, '28.8': 16.2, '28.9': 16.2,
+  '29.0': 16.3, '29.1': 16.3, '29.2': 16.4, '29.3': 16.4, '29.4': 16.5, '29.5': 16.5, '29.6': 16.6, '29.7': 16.6, '29.8': 16.7, '29.9': 16.7,
+  '30.0': 16.8, '30.1': 16.9, '30.2': 16.9, '30.3': 17.0, '30.4': 17.0, '30.5': 17.1, '30.6': 17.1, '30.7': 17.2, '30.8': 17.2, '30.9': 17.3,
+  '31.0': 17.3, '31.1': 17.4, '31.2': 17.4, '31.3': 17.5, '31.4': 17.5, '31.5': 17.6, '31.6': 17.6, '31.7': 17.7, '31.8': 17.7, '31.9': 17.8,
+  '32.0': 17.8, '32.1': 17.9, '32.2': 17.9, '32.3': 18.0, '32.4': 18.0, '32.5': 18.1, '32.6': 18.2, '32.7': 18.2, '32.8': 18.3, '32.9': 18.3,
+  '33.0': 18.4, '33.1': 18.4, '33.2': 18.5, '33.3': 18.5, '33.4': 18.6, '33.5': 18.6, '33.6': 18.7, '33.7': 18.7, '33.8': 18.8, '33.9': 18.8,
+  '34.0': 18.9, '34.1': 18.9, '34.2': 19.0, '34.3': 19.0, '34.4': 19.1, '34.5': 19.1, '34.6': 19.2, '34.7': 19.2, '34.8': 19.3, '34.9': 19.3,
+  '35.0': 19.4, '35.1': 19.5, '35.2': 19.5, '35.3': 19.6, '35.4': 19.6, '35.5': 19.7, '35.6': 19.7, '35.7': 19.8, '35.8': 19.8, '35.9': 19.9,
+  '36.0': 19.9, '36.1': 20.0, '36.2': 20.0, '36.3': 20.1, '36.4': 20.1, '36.5': 20.2, '36.6': 20.2, '36.7': 20.3, '36.8': 20.3, '36.9': 20.4,
+  '37.0': 20.4, '37.1': 20.5, '37.2': 20.5, '37.3': 20.6, '37.4': 20.6, '37.5': 20.7, '37.6': 20.8, '37.7': 20.8, '37.8': 20.9, '37.9': 20.9,
+  '38.0': 21.0, '38.1': 21.0, '38.2': 21.1, '38.3': 21.1, '38.4': 21.2, '38.5': 21.2, '38.6': 21.3, '38.7': 21.3, '38.8': 21.4, '38.9': 21.4,
+  '39.0': 21.5, '39.1': 21.5, '39.2': 21.6, '39.3': 21.6, '39.4': 21.7, '39.5': 21.7, '39.6': 21.8, '39.7': 21.8, '39.8': 21.9, '39.9': 21.9,
+  '40.0': 22.0, '40.1': 22.1, '40.2': 22.1, '40.3': 22.2, '40.4': 22.2, '40.5': 22.3, '40.6': 22.3, '40.7': 22.4, '40.8': 22.4, '40.9': 22.5,
+  '41.0': 22.5, '41.1': 22.6, '41.2': 22.6, '41.3': 22.7, '41.4': 22.7, '41.5': 22.8, '41.6': 22.8, '41.7': 22.9, '41.8': 22.9, '41.9': 23.0,
+  '42.0': 23.0, '42.1': 23.1, '42.2': 23.1, '42.3': 23.2, '42.4': 23.2, '42.5': 23.3, '42.6': 23.4, '42.7': 23.4, '42.8': 23.5, '42.9': 23.5,
+  '43.0': 23.6, '43.1': 23.6, '43.2': 23.7, '43.3': 23.7, '43.4': 23.8, '43.5': 23.8, '43.6': 23.9, '43.7': 23.9, '43.8': 24.0, '43.9': 24.0,
+  '44.0': 24.1, '44.1': 24.1, '44.2': 24.2, '44.3': 24.2, '44.4': 24.3, '44.5': 24.3, '44.6': 24.4, '44.7': 24.4, '44.8': 24.5, '44.9': 24.5,
+  '45.0': 24.6, '45.1': 24.7, '45.2': 24.7, '45.3': 24.8, '45.4': 24.8, '45.5': 24.9, '45.6': 24.9, '45.7': 25.0, '45.8': 25.0, '45.9': 25.1,
+  '46.0': 25.1, '46.1': 25.2, '46.2': 25.2, '46.3': 25.3, '46.4': 25.3, '46.5': 25.4, '46.6': 25.4, '46.7': 25.5, '46.8': 25.5, '46.9': 25.6,
+  '47.0': 25.6, '47.1': 25.7, '47.2': 25.7, '47.3': 25.8, '47.4': 25.8, '47.5': 25.9, '47.6': 26.0, '47.7': 26.0, '47.8': 26.1, '47.9': 26.1,
+  '48.0': 26.2, '48.1': 26.2, '48.2': 26.3, '48.3': 26.3, '48.4': 26.4, '48.5': 26.4, '48.6': 26.5, '48.7': 26.5, '48.8': 26.6, '48.9': 26.6,
+  '49.0': 26.7, '49.1': 26.7, '49.2': 26.8, '49.3': 26.8, '49.4': 26.9, '49.5': 26.9, '49.6': 27.0, '49.7': 27.0, '49.8': 27.1, '49.9': 27.1,
+  '50.0': 27.2, '50.1': 27.3, '50.2': 27.3, '50.3': 27.4, '50.4': 27.4, '50.5': 27.5, '50.6': 27.5, '50.7': 27.6, '50.8': 27.6, '50.9': 27.7,
+  '51.0': 27.7, '51.1': 27.8, '51.2': 27.8, '51.3': 27.9, '51.4': 27.9, '51.5': 28.0, '51.6': 28.0, '51.7': 28.1, '51.8': 28.1, '51.9': 28.2,
+  '52.0': 28.2, '52.1': 28.3, '52.2': 28.3, '52.3': 28.4, '52.4': 28.4, '52.5': 28.5, '52.6': 28.6, '52.7': 28.6, '52.8': 28.7, '52.9': 28.7,
+  '53.0': 28.8, '53.1': 28.8, '53.2': 28.9, '53.3': 28.9, '53.4': 29.0, '53.5': 29.0, '53.6': 29.1, '53.7': 29.1, '53.8': 29.2, '53.9': 29.2,
+  '54.0': 29.3
+};
+function sd9FromTable(hcpi){
+  if(hcpi==null||isNaN(hcpi))return null;
+  let h=Math.round(hcpi*10)/10;
+  if(h<-6)h=-6;if(h>54)h=54;
+  const key=h.toFixed(1);
+  if(HANDICAP_9H_TABLE[key]!=null)return HANDICAP_9H_TABLE[key];
+  // fallback formel: SD(9 berechnet) = ((HCPI*1,04)+2,4)/2
+  return Math.round(((hcpi*1.04+2.4)/2)*10)/10;
+}
+
+/* Course Handicap aus Index + Tee (für Stroke-Allokation der GBE-Kappe).
+   Bei 9-Loch-Runden wird das CH halbiert (gerundet). */
+function chForSD(index,tee,is9){
+  if(index==null||isNaN(parseFloat(index)))return null;
+  const i=parseFloat(String(index).replace(',','.'));
+  let ch=Math.round(i*tee.slope/113+(tee.cr-tee.par));
+  if(is9)ch=Math.round(ch/2);
+  return ch;
+}
+
+/* Gewertetes Bruttoergebnis (GBE):
+   Jedes gespielte Loch wird auf max. Netto-Doppelbogey gekappt.
+   Netto-DB = Par + Handicap-Schläge(Loch) + 2.
+   Nicht gespielte/eingelochte Löcher -> Par + Strokes + 2 (Netto-DB). */
+function computeGBE(entry,course,tee){
+  const is9=isNine(entry,course);
+  const ch=chForSD(entry.hcpIndex,tee,is9);
+  const chAbs=ch==null?0:ch;
+  // Stroke-Allokation: bei 9-Loch nur die 9 gespielten Löcher
+  const[start,end]=holeRangeFor(entry.roundLength,entry.courseKey);
+  const holeCount=end-start;
+  // Index-Werte der gespielten Löcher
+  const idxSlice=course.holeIdx.slice(start,end);
+  const parSlice=course.holePar.slice(start,end);
+  // Verteile chAbs Schläge über die gespielten Löcher nach Schwierigkeit
+  const strokes=allocateStrokes(chAbs,idxSlice,holeCount);
+  let gbe=0,detail=[];
+  for(let i=0;i<holeCount;i++){
+    const par=parSlice[i];
+    const st=strokes[i];
+    const nettoDB=par+st+2;
+    const raw=Number(entry.holes[start+i]?.score)||0;
+    const capped=(raw>0)?Math.min(raw,nettoDB):nettoDB; // nicht gespielt -> Netto-DB
+    gbe+=capped;
+    detail.push({hole:start+i+1,par,strokes:st,raw:raw||null,nettoDB,capped});
+  }
+  return{gbe,detail,ch:chAbs,holeCount};
+}
+
+/* Verteilt CH-Schläge über N Löcher nach holeIdx (1=schwerstes). */
+function allocateStrokes(ch,idxArr,n){
+  if(ch<0)ch=0;
+  // Bei 9-Loch: Indizes können 1..18 sein; wir ranken relativ
+  const base=Math.floor(ch/n);
+  const rem=ch-base*n;
+  const strokes=idxArr.map(()=>base);
+  const order=idxArr.map((idx,i)=>[idx,i]).sort((a,b)=>a[0]-b[0]);
+  for(let k=0;k<rem;k++)strokes[order[k][1]]++;
+  return strokes;
+}
+
+function isNine(entry,course){
+  if(course&&course.holes===9)return true;
+  if(entry.roundLength==='front9'||entry.roundLength==='back9')return true;
+  return false;
+}
+
+/* Score Differential nach DGV.
+   18-Loch: SD = (113/Slope) * (GBE - CR - PCC)
+   9-Loch:  SD(9gespielt) = (113/Slope)*(GBE9 - CR9 - PCC)
+            SD(18) = SD(9gespielt) + SD(9berechnet aus Tabelle) */
+function scoreDifferentialDGV(entry){
+  // ===== Importierte Runde (golf.de): GBE + CR + Slope direkt vorhanden =====
+  if(entry.imported&&entry.imp){
+    const im=entry.imp; // {gbe,cr,slope,par,is9,hcpi,pcc}
+    const pcc=Number(im.pcc)||0;
+    if(im.is9){
+      const sd9played=(113/im.slope)*(im.gbe-im.cr-pcc);
+      const sd9calc=sd9FromTable(im.hcpi);
+      const sd18=sd9played+(sd9calc==null?0:sd9calc);
+      return{sd:Math.round(sd18*10)/10,type:'9',gbe:im.gbe,cr:im.cr,slope:im.slope,pcc,
+        sd9played:Math.round(sd9played*10)/10,sd9calc,detail:null,ch:null,imported:true};
+    }else{
+      const sd=(113/im.slope)*(im.gbe-im.cr-pcc);
+      return{sd:Math.round(sd*10)/10,type:'18',gbe:im.gbe,cr:im.cr,slope:im.slope,pcc,
+        detail:null,ch:null,imported:true};
+    }
+  }
+  // ===== Live in der App gespielte Runde: GBE aus Löchern berechnen =====
+  const course=COURSES[entry.courseKey];
+  if(!course)return null;
+  const tee=course.tees.find(t=>t.id===entry.teeId)||course.tees[0];
+  if(!tee)return null;
+  const pcc=Number(entry.pcc)||0;
+  const{gbe,detail,ch,holeCount}=computeGBE(entry,course,tee);
+  const is9=isNine(entry,course);
+  if(is9){
+    // CR9: bei echtem 9-Loch-Platz = tee.cr; bei front9/back9 eines 18ers = tee.cr/2
+    const cr9=(course.holes===9)?tee.cr:tee.cr/2;
+    const sd9played=(113/tee.slope)*(gbe-cr9-pcc);
+    const idxVal=parseFloat(String(entry.hcpIndex).replace(',','.'));
+    const sd9calc=sd9FromTable(idxVal);
+    const sd18=sd9played+(sd9calc==null?0:sd9calc);
+    return{
+      sd:Math.round(sd18*10)/10,
+      type:'9',
+      gbe,cr:cr9,slope:tee.slope,pcc,
+      sd9played:Math.round(sd9played*10)/10,
+      sd9calc:sd9calc,
+      detail,ch
+    };
+  }else{
+    const sd=(113/tee.slope)*(gbe-tee.cr-pcc);
+    return{
+      sd:Math.round(sd*10)/10,
+      type:'18',
+      gbe,cr:tee.cr,slope:tee.slope,pcc,
+      detail,ch
+    };
+  }
+}
+
+/* DGV Anpassungstabelle: Anzahl Ergebnisse -> {count, adj} */
+function hcpiSelectionRule(n){
+  if(n<=0)return null;
+  if(n===1)return{take:1,adj:-2.0};
+  if(n===2)return{take:1,adj:-2.0};
+  if(n===3)return{take:1,adj:-2.0};
+  if(n===4)return{take:1,adj:-1.0};
+  if(n===5)return{take:1,adj:0};
+  if(n===6)return{take:2,adj:-1.0};
+  if(n<=8)return{take:2,adj:0};
+  if(n<=11)return{take:3,adj:0};
+  if(n<=14)return{take:4,adj:0};
+  if(n<=16)return{take:5,adj:0};
+  if(n<=18)return{take:6,adj:0};
+  if(n===19)return{take:7,adj:0};
+  return{take:8,adj:0};
+}
+
+/* Berechnet HCPI aus allen handicap-relevanten Runden.
+   Nutzt die letzten 20, wählt nach Tabelle die besten N SDs,
+   wendet ggf. Anpassung an. Gibt auch Detailobjekt zurück. */
+function computeHCPI(){
+  const rounds=DB.entries
+    .filter(e=>e.type==='round'&&e.status!=='live'&&e.hcpiRelevant)
+    .slice() // neueste zuerst (unshift-Reihenfolge)
+    .sort((a,b)=>(b.savedAt||0)-(a.savedAt||0));
+  const withSD=rounds.map(e=>{
+    const sdObj=scoreDifferentialDGV(e);
+    return sdObj?{entry:e,sd:sdObj.sd,sdObj}:null;
+  }).filter(Boolean);
+  if(!withSD.length)return null;
+  const last20=withSD.slice(0,20);
+  const rule=hcpiSelectionRule(last20.length);
+  if(!rule)return null;
+  const sortedBySD=last20.slice().sort((a,b)=>a.sd-b.sd);
+  const best=sortedBySD.slice(0,rule.take);
+  const avg=best.reduce((s,x)=>s+x.sd,0)/best.length;
+  let hcpi=avg+rule.adj;
+  hcpi=Math.round(hcpi*10)/10;
+  return{
+    hcpi,
+    avg:Math.round(avg*10)/10,
+    adj:rule.adj,
+    take:rule.take,
+    usedCount:last20.length,
+    best,
+    all:last20
+  };
+}
+
+/* ===== HISTORISCHE RUNDEN (Import golf.de Stand 28.06.2026) ===== */
+function seedHistoricalRounds(){
+  if(DB.seeded)return; // nur einmal
+  const seed=[
+    {date:'28.06.2026',club:'Golfclub Hummelbachaue e.V.',turnier:'Neusser Open - 9LA',
+     is9:true, par:35, cr:33.6, slope:125, gbe:49, hcpi:24.9, ts:Date.parse('2026-06-28')},
+    {date:'21.06.2026',club:'Golfclub Düren e.V.',turnier:'Juniorenliga Gruppe E',
+     is9:false, par:73, cr:73.4, slope:132, gbe:104, hcpi:25.5, ts:Date.parse('2026-06-21')},
+    {date:'19.04.2026',club:'Krefelder Golf Club e.V.',turnier:'Juniorenliga Gruppe E',
+     is9:false, par:72, cr:72.3, slope:130, gbe:103, hcpi:24.5, ts:Date.parse('2026-04-19')},
+    {date:'03.10.2025',club:'Golfclub Schloss Westerholt e.V.',turnier:'RPR: Steinke, Robin',
+     is9:false, par:72, cr:71.6, slope:129, gbe:103, hcpi:38.6, ts:Date.parse('2025-10-03')},
+    {date:'10.08.2025',club:'Golfclub Schloss Westerholt e.V.',turnier:'Tiger & Rabbit',
+     is9:true, par:36, cr:36.1, slope:126, gbe:56, hcpi:41.5, ts:Date.parse('2025-08-10')},
+    {date:'19.07.2025',club:'Golfclub Schloss Westerholt e.V.',turnier:'Monats Cup 9 Loch',
+     is9:true, par:36, cr:36.1, slope:126, gbe:53, hcpi:54.0, ts:Date.parse('2025-07-19')},
+    {date:'22.03.2025',club:'Golfclub Schloss Westerholt e.V.',turnier:'DGV-Platzreife',
+     is9:false, par:72, cr:70.0, slope:113, gbe:126, hcpi:54.0, ts:Date.parse('2025-03-22')}
+  ];
+  seed.forEach((s,i)=>{
+    DB.entries.push({
+      type:'round', id:'seed'+i, savedAt:s.ts,
+      date:s.date, dow:new Date(s.ts).getDay(),
+      status:'done', roundLength:s.is9?'front9':'18',
+      title:s.turnier, course:s.club, tees:'gelb',
+      courseKey:'_imported', teeId:'gelb',
+      hcpIndex:s.hcpi, hcpiRelevant:true,
+      imported:true,
+      imp:{gbe:s.gbe, cr:s.cr, slope:s.slope, par:s.par, is9:s.is9, hcpi:s.hcpi, pcc:0},
+      holes:[], shots:[],
+      goals:[],keysPills:[],goalPills:[],keys:{tech:'',tact:'',ment:''},
+      review:{tech:'',tact:'',ment:'',good:'',bad:''},reviewPills:{good:[],bad:[]}
+    });
+  });
+  // chronologisch sortieren (neueste zuerst)
+  DB.entries.sort((a,b)=>(b.savedAt||0)-(a.savedAt||0));
+  // Offiziellen HCPI (golf.de) als Startwert setzen, falls noch nicht gepflegt
+  if(DB.hcp===''||DB.hcp==null)DB.hcp='24.9';
+  DB.seeded=true;
+  persist();
+}
+
 
 /* ===== STATE ===== */
 let MODE='round',nine=1,mapHoleNum=1,tool='place',editingId=null,mapView='single',shotStatus='hit';
@@ -1161,6 +1487,7 @@ function fmtDate(d){return d.toLocaleDateString('de-DE',{day:'2-digit',month:'2-
 function blankRound(){return{type:'round',id:null,savedAt:null,date:fmtDate(new Date()),dow:new Date().getDay(),
   status:'new',roundLength:'18',title:'',
   courseKey:'mettmann',teeId:'gelb',hcpIndex:DB.hcp||'',
+  hcpiRelevant:false,pcc:0,
   course:'',tees:'',yards:'',rating:'',slope:'',hcp:'',
   goals:[{done:false,t:''},{done:false,t:''},{done:false,t:''}],
   goalPills:[],keysPills:[],
@@ -1184,7 +1511,7 @@ function go(v){
   document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.v===v));
   if(v==='home')renderHome();
   if(v==='history')renderHistory();
-  if(v==='stats')renderStats();
+  if(v==='stats'){renderHCPI();renderStats();}
   if(v==='notes')renderNotes();
   const sc=$('scroll');if(sc)sc.scrollTo(0,0);
 }
@@ -1405,6 +1732,11 @@ function renderHome(){
 }
 function renderHcpTrend(){
   const tr=$('hcpTrend');
+  const res=(typeof computeHCPI==='function')?computeHCPI():null;
+  if(res){
+    tr.innerHTML=`<div class="d down">≈ ${res.hcpi.toFixed(1)}</div><div class="t">Lowr-Schätzung</div>`;
+    return;
+  }
   const h=DB.hcpHist||[];
   if(h.length>=2){
     const diff=+(h[h.length-1].v-h[0].v).toFixed(1);
@@ -1525,6 +1857,14 @@ function setRoundLength(len){
   const nt=$('ninetabsRow');if(nt)nt.style.display=(len==='18')?'flex':'none';
 }
 function setNine(n){nine=n;$('front9').classList.toggle('on',n===1);$('back9').classList.toggle('on',n===2);buildHoles();}
+function toggleHcpRel(){cur.hcpiRelevant=!cur.hcpiRelevant;updateHcpRelUI();autosaveRound();}
+function updateHcpRelUI(){
+  const t=$('hcpRelToggle');if(!t)return;
+  const on=!!cur.hcpiRelevant;
+  t.classList.toggle('on',on);
+  $('hcpRelTitle').textContent=on?'Zählt fürs Handicap ✓':'Zählt nicht fürs Handicap';
+  $('hcpRelSub').textContent=on?'Score Differential wird berechnet':'Privatrunde / Übungsrunde';
+}
 function buildHoles(){const box=$('holes');box.innerHTML='';const c=curCourse();const strokes=curStrokes();const start=nine===1?0:9,end=nine===1?9:18;for(let i=start;i<end;i++){const h=cur.holes[i];const card=document.createElement('div');card.className='holecard'+(h.score?'':' holeempty');const head=document.createElement('div');head.className='holehead';const dots=strokes[i]>0?'•'.repeat(strokes[i]):'';const len=(c.holeLen&&c.holeLen[i])?`${c.holeLen[i]} m · `:'';head.innerHTML=`<div class="holenum">${i+1}</div><div><div class="holesum" id="sum${i}">${holeSummary(h,i)}</div><div class="holepar">${len}Par ${c.holePar[i]} · Idx ${c.holeIdx[i]} <span class="strokedots">${dots}</span></div></div><div class="holepts ${ptsClass(h,i)}" id="pts${i}">${ptsLabel(h,i)}</div><div class="holescore">${h.score||'–'}</div>`;head.onclick=()=>card.classList.toggle('open');const body=document.createElement('div');body.className='holebody';const sr=document.createElement('div');sr.className='statrow';sr.appendChild(stepBox('Score',h.score===''?0:h.score,v=>{h.score=v;refreshHole(i,card);autosaveRound();},1,15));sr.appendChild(stepBox('Putts',h.putts,v=>{h.putts=v;refreshHole(i,card);autosaveRound();},0,10));sr.appendChild(toggleBox('Fairway',h.fir,v=>{h.fir=v;refreshHole(i,card);autosaveRound();}));sr.appendChild(toggleBox('GIR',h.gir,v=>{h.gir=v;refreshHole(i,card);autosaveRound();}));body.appendChild(sr);const note=document.createElement('textarea');note.className='holenote';note.placeholder='Notiz zum Loch…';note.value=h.note;note.oninput=()=>{h.note=note.value;autosaveRound();};body.appendChild(note);card.appendChild(head);card.appendChild(body);box.appendChild(card);}}
 function ptsLabel(h,i){const c=curCourse(),strokes=curStrokes();const p=stablefordHole(Number(h.score),c.holePar[i],strokes[i]);return p==null?'':p+'P';}
 function ptsClass(h,i){const c=curCourse(),strokes=curStrokes();const p=stablefordHole(Number(h.score),c.holePar[i],strokes[i]);return p===0?'zero':'';}
@@ -1570,7 +1910,7 @@ function updateTeeButton(){const c=COURSES[cur.courseKey]||COURSES.mettmann;cons
 function openTeeModal(e){if(e)e.stopPropagation();const c=COURSES[cur.courseKey]||COURSES.mettmann;const list=$('teeModalList');list.innerHTML='';c.tees.forEach(t=>{const o=document.createElement('div');o.className='teeopt'+(t.id===cur.teeId?' sel':'');o.innerHTML=`<span class="sw" style="background:${t.color}"></span><div class="info"><div class="nm">${t.label}</div><div class="det">CR ${t.cr} · Slope ${t.slope} · Par ${t.par}</div></div>${t.id===cur.teeId?'<span class="check">✓</span>':''}`;o.onclick=()=>{cur.teeId=t.id;updateTeeButton();buildHoles();updateCHBanner();closeTeeModal();autosaveRound();};list.appendChild(o);});$('teeModal').classList.add('open');}
 function closeTeeModal(e){$('teeModal').classList.remove('open');}
 function updateCHBanner(){const b=$('chBanner');const ch=curCH();if(ch==null){b.classList.remove('show');return;}b.classList.add('show');const pts=totalStableford();b.innerHTML=`<div><div class="ch-l">Course Handicap</div><div class="ch-v">${ch}</div></div><div class="ch-r"><div class="ch-pts">${pts}</div><div class="ch-pl">Stableford-Punkte</div></div>`;}
-function fillRoundForm(){if(!cur.roundLength)cur.roundLength='18';if(!cur.title)cur.title='';if(!cur.goalPills)cur.goalPills=[];if(!cur.keysPills)cur.keysPills=[];if(!cur.reviewPills)cur.reviewPills={good:[],bad:[]};$('r_date').value=cur.date;$('r_title').value=cur.title||'';$('r_hcpIndex').value=cur.hcpIndex||'';populateCourseSelect();$('k_tech').value=cur.keys.tech;$('k_tact').value=cur.keys.tact;$('k_ment').value=cur.keys.ment;$('rv_tech').value=cur.review.tech;$('rv_tact').value=cur.review.tact;$('rv_ment').value=cur.review.ment;$('rv_good').value=cur.review.good;$('rv_bad').value=cur.review.bad;buildDow('dow',cur.dow);buildGoals();buildGoalPills();buildKeysPills();buildReviewPills();renderRoundStatusBox();
+function fillRoundForm(){if(!cur.roundLength)cur.roundLength='18';if(!cur.title)cur.title='';if(!cur.goalPills)cur.goalPills=[];if(!cur.keysPills)cur.keysPills=[];if(!cur.reviewPills)cur.reviewPills={good:[],bad:[]};$('r_date').value=cur.date;$('r_title').value=cur.title||'';$('r_hcpIndex').value=cur.hcpIndex||'';populateCourseSelect();$('k_tech').value=cur.keys.tech;$('k_tact').value=cur.keys.tact;$('k_ment').value=cur.keys.ment;$('rv_tech').value=cur.review.tech;$('rv_tact').value=cur.review.tact;$('rv_ment').value=cur.review.ment;$('rv_good').value=cur.review.good;$('rv_bad').value=cur.review.bad;buildDow('dow',cur.dow);buildGoals();buildGoalPills();buildKeysPills();buildReviewPills();renderRoundStatusBox();updateHcpRelUI();
   // bestehende Freitexte sichtbar lassen, falls schon was drinsteht
   if(cur.keys.tech||cur.keys.tact||cur.keys.ment){$('keysFreeBlock').style.display='grid';$('keysNoteToggle').textContent='– Notiz ausblenden';}
   if(cur.review.good){$('rv_good').style.display='block';$('goodNoteToggle').textContent='– Notiz ausblenden';}
@@ -1799,7 +2139,10 @@ bind('p_rangeBalls',v=>{curP.rangeBalls=v;updateVolSum();autosaveLive();});
 bind('pr_name',v=>{if(!DB.profile)DB.profile={name:'',clubs:[]};DB.profile.name=v;saveProfile();});
 
 /* ===== SAVE / EDIT ===== */
-function saveEntry(){const entry=MODE==='round'?JSON.parse(JSON.stringify(cur)):JSON.parse(JSON.stringify(curP));entry.type=MODE;if(MODE==='practice'){entry.live=false;entry.status='done';}if(MODE==='round'){entry.status='done';const c=curCourse(),t=curTee();entry.course=c.name;entry.tees=t.label;entry.courseKey=cur.courseKey;entry.teeId=cur.teeId;entry.stableford=totalStableford();entry.ch=curCH();}if(editingId){entry.id=editingId;const idx=DB.entries.findIndex(e=>e.id===editingId);entry.savedAt=DB.entries[idx].savedAt;DB.entries[idx]=entry;}else{entry.id='e'+Date.now();entry.savedAt=Date.now();DB.entries.unshift(entry);}persist();editingId=null;toast(MODE==='round'?'Runde gesichert ⛳':'Session gesichert 🎯');go('home');}
+function saveEntry(){const entry=MODE==='round'?JSON.parse(JSON.stringify(cur)):JSON.parse(JSON.stringify(curP));entry.type=MODE;if(MODE==='practice'){entry.live=false;entry.status='done';}if(MODE==='round'){entry.status='done';const c=curCourse(),t=curTee();entry.course=c.name;entry.tees=t.label;entry.courseKey=cur.courseKey;entry.teeId=cur.teeId;entry.stableford=totalStableford();entry.ch=curCH();}if(editingId){entry.id=editingId;const idx=DB.entries.findIndex(e=>e.id===editingId);entry.savedAt=DB.entries[idx].savedAt;DB.entries[idx]=entry;}else{entry.id='e'+Date.now();entry.savedAt=Date.now();DB.entries.unshift(entry);}persist();editingId=null;
+  if(MODE==='round'&&entry.hcpiRelevant){const res=computeHCPI();toast(res?`Runde gesichert ⛳ · Lowr-Schätzung: ≈${res.hcpi.toFixed(1)}`:'Runde gesichert ⛳');}
+  else toast(MODE==='round'?'Runde gesichert ⛳':'Session gesichert 🎯');
+  go('home');}
 function newEntry(){
   // falls eine Live-Runde offen war und nicht gespeichert wurde, fragen statt verwerfen
   if(MODE==='round'&&cur.status==='live'&&editingId){
@@ -1836,6 +2179,100 @@ function calculatedHandicap(){
 function roundStats(e){let score=0,putts=0,gir=0,fir=0,played=0;const[start,end]=holeRangeFor(e.roundLength,e.courseKey);e.holes.slice(start,end).forEach(h=>{if(h.score){score+=Number(h.score);played++;}putts+=Number(h.putts||0);if(h.gir===true)gir++;if(h.fir===true)fir++;});return{score,putts,gir,fir,played};}
 
 function renderHistory(){const list=$('histList');list.innerHTML='';const entries=DB.entries.filter(e=>e.type!=='note');$('histCount').textContent=entries.length?`${entries.length} Einträge`:'Noch nichts gespeichert';if(!entries.length){list.innerHTML='<div class="empty"><div class="ic">📖</div><p>Noch nichts gespeichert.<br>Tippe unten auf ➕, um zu starten.</p></div>';return;}entries.forEach(e=>list.appendChild(rowItem(e,true)));}
+
+/* ===== HANDICAP-SEITE RENDERN ===== */
+function fmtSD(v){return(v>=0?'':'')+v.toFixed(1);}
+function renderHCPI(){
+  const body=$('hcpiBody');if(!body)return;
+  const res=computeHCPI();
+  const official=DB.hcp!==''&&DB.hcp!=null?parseFloat(String(DB.hcp).replace(',','.')):null;
+
+  // ===== HERO: offizieller HCPI =====
+  let html=`<div class="hcpi-hero">
+    <div class="lab">Offizieller Handicap-Index</div>
+    <div class="val">${official!=null&&!isNaN(official)?official.toFixed(1):'–,–'}</div>
+    <div class="meta">${official!=null&&!isNaN(official)?'dein aktueller DGV-Wert (golf.de)':'Trag deinen HCPI unten ein'}</div>
+  </div>`;
+
+  // ===== Eingabefeld für offiziellen HCPI =====
+  html+=`<div class="hcpi-sec"><h3>Offiziellen HCPI pflegen</h3>
+    <div style="padding:12px 16px;border-top:1px solid var(--line);display:flex;align-items:center;gap:12px">
+      <span style="font-size:14px;color:var(--text-2);flex:1">Dein Wert von golf.de</span>
+      <input id="officialHcpInput" inputmode="decimal" placeholder="24.9"
+        value="${official!=null&&!isNaN(official)?official.toFixed(1):''}"
+        style="width:90px;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:18px;font-weight:700;text-align:center;color:var(--text)">
+    </div>
+    <div style="padding:0 16px 14px;font-size:12px;color:var(--text-3);line-height:1.5">Nach jedem handicap-relevanten Turnier aktualisiert golf.de deinen Index. Trag ihn hier ein, damit er überall in Lowr stimmt.</div>
+  </div>`;
+
+  if(!res){
+    body.innerHTML=html+'<div class="hcpi-sec"><div class="hcpi-calc">Sobald du eine Runde als „Handicap-relevant" markierst und die Loch-Scores einträgst, rechnet Lowr hier deinen Score Differential und eine eigene HCPI-Schätzung.</div></div>';
+    wireOfficialHcpInput();
+    return;
+  }
+  const r=res;
+
+  // ===== Berechnete Schätzung (sekundär) =====
+  const diff=(official!=null&&!isNaN(official))?(r.hcpi-official):null;
+  html+=`<div class="hcpi-sec"><h3>Lowr-Schätzung</h3>
+    <div class="hcpi-calc">
+      Aus deinen <b>${r.usedCount}</b> in Lowr erfassten Runden ergibt sich rechnerisch ein Index von <b style="color:var(--green)">${r.hcpi.toFixed(1)}</b>${diff!=null?` (${diff>0?'+':''}${diff.toFixed(1)} ggü. offiziell)`:''}.
+      <div class="formula">Ø(beste ${r.take} SD) ${r.adj!==0?`${r.adj>0?'+':'−'} ${Math.abs(r.adj).toFixed(1)} `:''}= ${r.hcpi.toFixed(1)}</div>
+      <div style="font-size:12px;color:var(--text-3);margin-top:4px">Hinweis: golf.de kann leicht abweichen (Stableford-Wertung, PCC, vollständiger Scoring Record). Der offizielle Wert oben bleibt maßgeblich.</div>
+    </div>
+  </div>`;
+
+  // ===== Alle SDs aufgelistet =====
+  const bestSet=new Set(r.best.map(b=>b.entry.id));
+  html+=`<div class="hcpi-sec"><h3>Score Differentials · letzte 20</h3>`;
+  r.all.forEach(x=>{
+    const isBest=bestSet.has(x.entry.id);
+    const is9=x.sdObj.type==='9';
+    html+=`<div class="sdrow${isBest?' best':''}">
+      <div class="date">${x.entry.date}</div>
+      <div class="ttl">${x.entry.title||x.entry.course||'Runde'}</div>
+      <div class="badge">${is9?'9L':'18L'}</div>
+      ${isBest?'<span class="star">★</span>':''}
+      <div class="sd">${x.sd.toFixed(1)}</div>
+    </div>`;
+  });
+  html+=`</div>`;
+
+  // ===== Detail der neuesten Runde =====
+  const newest=r.all[0];
+  if(newest){
+    const o=newest.sdObj;
+    html+=`<div class="sddetail">
+      <h3 style="margin:0 0 8px;padding:0;font-size:13px;letter-spacing:.5px;text-transform:uppercase;color:var(--text-3);font-weight:600">Neueste Runde · ${newest.entry.date}</h3>
+      <div class="sdline"><span>Gewertetes Bruttoergebnis (GBE)</span><b>${o.gbe}</b></div>
+      <div class="sdline"><span>Course Rating (CR)</span><b>${o.cr.toFixed(1)}</b></div>
+      <div class="sdline"><span>Slope</span><b>${o.slope}</b></div>`;
+    if(o.type==='9'){
+      html+=`<div class="sdline"><span>SD (9 gespielt)</span><b>${o.sd9played.toFixed(1)}</b></div>
+        <div class="sdline"><span>SD (9 berechnet · Tabelle)</span><b>${o.sd9calc!=null?o.sd9calc.toFixed(1):'–'}</b></div>`;
+    }
+    html+=`<div class="sdline" style="border-top:1px solid var(--line);margin-top:4px;padding-top:8px"><span><b>Score Differential (18)</b></span><b style="color:var(--green)">${o.sd.toFixed(1)}</b></div>
+    </div>`;
+  }
+
+  body.innerHTML=html;
+  wireOfficialHcpInput();
+}
+
+/* Eingabefeld für offiziellen HCPI verdrahten */
+function wireOfficialHcpInput(){
+  const inp=$('officialHcpInput');if(!inp)return;
+  inp.addEventListener('change',e=>{
+    const raw=e.target.value.trim();
+    DB.hcp=raw;
+    const v=parseFloat(raw.replace(',','.'));
+    if(!isNaN(v)){DB.hcpHist=DB.hcpHist||[];DB.hcpHist.push({t:Date.now(),v});if(DB.hcpHist.length>24)DB.hcpHist.shift();}
+    persist();
+    const hi=$('hcpInput');if(hi)hi.value=DB.hcp||'';
+    renderHCPI();renderHome();
+    toast('Offizieller HCPI aktualisiert');
+  });
+}
 
 function renderStats(){const body=$('statsBody');const rounds=DB.entries.filter(e=>e.type==='round'&&e.status!=='live');const practices=DB.entries.filter(e=>e.type==='practice');
   if(!rounds.length&&!practices.length){body.innerHTML='<div class="empty"><div class="ic">📊</div><p>Noch nichts gespeichert.<br>Spiele eine Runde oder logge ein Training.</p></div>';return;}
@@ -1974,6 +2411,7 @@ document.addEventListener('focusin',e=>{const t=e.target;if(t&&(t.tagName==='INP
 let lastTouch=0;document.addEventListener('touchend',e=>{const now=Date.now();if(now-lastTouch<=300){const tag=(e.target.tagName||'').toLowerCase();if(tag!=='input'&&tag!=='textarea'&&tag!=='select')e.preventDefault();}lastTouch=now;},{passive:false});
 
 /* boot */
+seedHistoricalRounds();
 (function resumeLive(){
   const openPractice=DB.entries.find(e=>e.type==='practice'&&(e.live||e.status==='planned'));
   if(openPractice){curP=JSON.parse(JSON.stringify(openPractice));editingId=openPractice.id;}

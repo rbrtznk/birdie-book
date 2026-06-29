@@ -183,6 +183,36 @@ input,textarea{-webkit-user-select:text;user-select:text;}
 .hcprel-switch{width:46px;height:28px;border-radius:14px;background:var(--surface-3);position:relative;flex-shrink:0;transition:background .2s;}
 .hcprel-toggle.on .hcprel-switch{background:var(--green);}
 .hcprel-knob{position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.3);}
+/* ===== STEPPER / STATLINE ===== */
+.statline{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:4px 0;}
+.statline-t{font-size:15px;font-weight:600;color:var(--text);}
+.statline-s{font-size:12px;color:var(--text-3);margin-top:2px;}
+.stepper{display:flex;align-items:center;gap:0;background:var(--surface-2);border:1px solid var(--line);border-radius:12px;overflow:hidden;flex-shrink:0;}
+.stepper button{width:44px;height:44px;background:transparent;border:none;color:var(--accent);font-size:24px;font-weight:700;display:flex;align-items:center;justify-content:center;}
+.stepper button:active{background:var(--surface-3);}
+.stepper span{min-width:48px;text-align:center;font-size:20px;font-weight:700;color:var(--text);}
+/* ===== ACHIEVEMENTS / TROPHÄEN ===== */
+.ach-seg{display:flex;gap:6px;margin:0 16px 14px;}
+.ach-seg button{flex:1;padding:10px;border-radius:11px;background:var(--surface-2);border:1px solid var(--line);color:var(--text-2);font-weight:600;font-size:13px;}
+.ach-seg button.on{background:var(--accent);color:#fff;border-color:var(--accent);}
+.ach-progress{margin:0 16px 16px;background:var(--surface);border-radius:var(--radius-sm);border:1px solid var(--line);padding:16px;}
+.ach-progress .pct{font-size:32px;font-weight:800;color:var(--green);letter-spacing:-1px;}
+.ach-progress .ptxt{font-size:13px;color:var(--text-3);margin-top:2px;}
+.ach-bar{height:8px;border-radius:4px;background:var(--surface-3);margin-top:12px;overflow:hidden;}
+.ach-bar-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,#1fc77b,#138f56);transition:width .4s;}
+.ach-grid{display:flex;flex-direction:column;gap:10px;margin:0 16px;}
+.ach-card{display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-sm);padding:14px 16px;position:relative;}
+.ach-card.done{background:var(--green-soft);border-color:var(--green);}
+.ach-ic{width:46px;height:46px;border-radius:12px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;filter:grayscale(1);opacity:.5;}
+.ach-card.done .ach-ic{filter:none;opacity:1;background:rgba(31,199,123,.18);}
+.ach-info{flex:1;min-width:0;}
+.ach-name{font-size:15px;font-weight:700;color:var(--text);}
+.ach-card.done .ach-name{color:var(--green);}
+.ach-desc{font-size:12.5px;color:var(--text-3);margin-top:2px;line-height:1.4;}
+.ach-check{width:26px;height:26px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;}
+.ach-card.done .ach-check{background:var(--green);color:#fff;}
+.ach-card:not(.done) .ach-check{border:2px solid var(--surface-3);}
+.ach-date{font-size:11px;color:var(--green);font-weight:600;margin-top:3px;}
 .hcprel-toggle.on .hcprel-knob{left:21px;}
 
 /* review/goal pills (Konzept C) */
@@ -698,6 +728,19 @@ select.inp{appearance:none;-webkit-appearance:none;background-image:url("data:im
         </div>
       </div>
       <div class="sheet">
+        <div class="sheet-head"><h2>Runden-Stats</h2><div class="hint">Für deine Trophäen 🏆</div></div>
+        <div class="sheet-body">
+          <div class="statline">
+            <div class="statline-l"><div class="statline-t">Verlorene Bälle</div><div class="statline-s">Wasser, O.B., verschollen</div></div>
+            <div class="stepper">
+              <button onclick="adjBalls(-1)">−</button>
+              <span id="ballsVal">0</span>
+              <button onclick="adjBalls(1)">+</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="sheet">
         <div class="sheet-head"><h2>Mehr Details</h2><div class="hint">Optional, falls du genauer werden willst</div></div>
         <div class="sheet-body">
           <div class="keys">
@@ -773,6 +816,7 @@ select.inp{appearance:none;-webkit-appearance:none;background-image:url("data:im
   <section class="view" id="view-stats">
     <div class="scrhead"><h1>Analytics</h1><p>Dein Handicap &amp; deine Form</p></div>
     <div id="hcpiBody"></div>
+    <div id="achBody"></div>
     <div id="statsBody">
       <div class="empty"><div class="ic">📊</div><p>Noch keine Runden gespeichert.<br>Spiele eine Runde, dann erscheinen hier deine Trends.</p></div>
     </div>
@@ -1436,6 +1480,79 @@ function computeHCPI(){
   };
 }
 
+/* ============================================================
+   ===== TROPHÄEN / ACHIEVEMENTS =====
+   ============================================================ */
+/* Jede Trophäe: id, icon, name, desc, len ('9'|'18'|'any'), test(stats)->bool
+   stats kommt aus achStats(entry) */
+const ACHIEVEMENTS=[
+  // ===== 18-LOCH SCORE =====
+  {id:'break100',icon:'💯',name:'Break 100',desc:'18 Löcher unter 100 Schläge',len:'18',test:s=>!s.imported&&s.played>=18&&s.score<100},
+  {id:'break90', icon:'🎯',name:'Break 90', desc:'18 Löcher unter 90 Schläge', len:'18',test:s=>!s.imported&&s.played>=18&&s.score<90},
+  {id:'break80', icon:'🔥',name:'Break 80', desc:'18 Löcher unter 80 Schläge', len:'18',test:s=>!s.imported&&s.played>=18&&s.score<80},
+  {id:'break72', icon:'👑',name:'Par-Runde',desc:'18 Löcher in Par oder besser',len:'18',test:s=>!s.imported&&s.played>=18&&s.par>0&&s.score<=s.par},
+  // ===== 9-LOCH SCORE =====
+  {id:'break50_9',icon:'5️⃣',name:'Break 50', desc:'9 Löcher unter 50 Schläge',len:'9',test:s=>!s.imported&&s.played>=9&&s.played<18&&s.score<50},
+  {id:'break45_9',icon:'⚡',name:'Break 45', desc:'9 Löcher unter 45 Schläge',len:'9',test:s=>!s.imported&&s.played>=9&&s.played<18&&s.score<45},
+  {id:'break40_9',icon:'🚀',name:'Break 40', desc:'9 Löcher unter 40 Schläge',len:'9',test:s=>!s.imported&&s.played>=9&&s.played<18&&s.score<40},
+  // ===== PRÄZISION (beide) =====
+  {id:'firstGir', icon:'🟢',name:'Erstes GIR',desc:'Ein Grün in Regulation getroffen',len:'any',test:s=>s.gir>=1},
+  {id:'gir5',     icon:'🌱',name:'5× GIR',    desc:'5 Grüns in Regulation in einer Runde',len:'18',test:s=>s.gir>=5},
+  {id:'gir3_9',   icon:'🌿',name:'3× GIR (9)',desc:'3 Grüns in Regulation über 9 Löcher',len:'9',test:s=>s.played<18&&s.gir>=3},
+  {id:'fairways', icon:'🏌️',name:'Fairway-Finder',desc:'8+ Fairways in einer Runde',len:'18',test:s=>s.fir>=8},
+  // ===== PUTTEN =====
+  {id:'no3putt',  icon:'🎱',name:'Keine 3-Putts',desc:'Ganze Runde ohne einen 3-Putt',len:'18',test:s=>s.played>=18&&s.puttsTracked&&s.threePutts===0},
+  {id:'putts30',  icon:'🥍',name:'Unter 30 Putts',desc:'Weniger als 30 Putts (18 Löcher)',len:'18',test:s=>s.played>=18&&s.puttsTracked&&s.putts<30&&s.putts>0},
+  {id:'no3putt_9',icon:'🎳',name:'Sauberes Putten (9)',desc:'9 Löcher ohne einen 3-Putt',len:'9',test:s=>s.played>=9&&s.played<18&&s.puttsTracked&&s.threePutts===0},
+  // ===== SAUBERES SPIEL =====
+  {id:'noBalls',  icon:'🧼',name:'Kein Ball verloren',desc:'Eine ganze Runde ohne verlorenen Ball',len:'any',test:s=>s.played>=9&&s.ballsTracked&&s.ballsLost===0},
+];
+
+/* Berechnet die Stats einer Runde, die Achievements brauchen */
+function achStats(e){
+  const[start,end]=holeRangeFor(e.roundLength,e.courseKey);
+  const slice=e.holes.slice(start,end);
+  let score=0,played=0,gir=0,fir=0,putts=0,threePutts=0;
+  let puttsTracked=false,par=0;
+  const course=COURSES[e.courseKey];
+  slice.forEach((h,i)=>{
+    if(h.score){score+=Number(h.score);played++;}
+    if(h.gir===true)gir++;
+    if(h.fir===true)fir++;
+    if(h.putts){putts+=Number(h.putts);puttsTracked=true;if(Number(h.putts)>=3)threePutts++;}
+    if(course&&course.holePar)par+=course.holePar[start+i]||0;
+  });
+  // Importierte Runden: Score aus GBE/imp
+  if(e.imported&&e.imp){
+    par=e.imp.par||0;
+    played=e.imp.is9?9:18;
+    score=e.imp.gbe||0; // GBE als Näherung (importierte Runden haben keine Loch-Scores)
+  }
+  return{
+    score,played,gir,fir,putts,threePutts,par,
+    puttsTracked,
+    ballsLost:Number(e.ballsLost)||0,
+    ballsTracked:(e.ballsLost!=null&&e.ballsLost!==''),
+    imported:!!(e.imported&&e.imp)
+  };
+}
+
+/* Liefert {achievedMap, byTrophy} – welche Trophäe in welcher Runde erreicht wurde */
+function evalAchievements(){
+  const rounds=DB.entries.filter(e=>e.type==='round'&&e.status!=='live')
+    .slice().sort((a,b)=>(a.savedAt||0)-(b.savedAt||0)); // älteste zuerst (erste Erreichung)
+  const result={}; // id -> {date, entryId}
+  rounds.forEach(e=>{
+    const s=achStats(e);
+    ACHIEVEMENTS.forEach(a=>{
+      if(result[a.id])return; // schon erreicht
+      try{ if(a.test(s)) result[a.id]={date:e.date,entryId:e.id}; }catch(err){}
+    });
+  });
+  return result;
+}
+
+
 /* ===== HISTORISCHE RUNDEN (Import golf.de Stand 28.06.2026) ===== */
 function seedHistoricalRounds(){
   if(DB.seeded)return; // nur einmal
@@ -1493,7 +1610,7 @@ function blankRound(){return{type:'round',id:null,savedAt:null,date:fmtDate(new 
   goalPills:[],keysPills:[],
   keys:{tech:'',tact:'',ment:''},
   holes:Array.from({length:18},()=>({score:'',fir:null,gir:null,putts:0,note:''})),
-  shots:[],review:{tech:'',tact:'',ment:'',good:'',bad:''},reviewPills:{good:[],bad:[]}};}
+  shots:[],review:{tech:'',tact:'',ment:'',good:'',bad:''},reviewPills:{good:[],bad:[]},ballsLost:0,achievements:{}};}
 function blankPractice(){return{type:'practice',id:null,savedAt:null,date:fmtDate(new Date()),dow:new Date().getDay(),
   live:false,startTs:null,status:'new',
   timeFrom:'',timeTo:'',rangeBalls:'',shortBlocks:[],drills:[],
@@ -1511,7 +1628,7 @@ function go(v){
   document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.v===v));
   if(v==='home')renderHome();
   if(v==='history')renderHistory();
-  if(v==='stats'){renderHCPI();renderStats();}
+  if(v==='stats'){renderHCPI();renderAchievements();renderStats();}
   if(v==='notes')renderNotes();
   const sc=$('scroll');if(sc)sc.scrollTo(0,0);
 }
@@ -1858,6 +1975,8 @@ function setRoundLength(len){
 }
 function setNine(n){nine=n;$('front9').classList.toggle('on',n===1);$('back9').classList.toggle('on',n===2);buildHoles();}
 function toggleHcpRel(){cur.hcpiRelevant=!cur.hcpiRelevant;updateHcpRelUI();autosaveRound();}
+function adjBalls(d){cur.ballsLost=Math.max(0,(Number(cur.ballsLost)||0)+d);updateBallsUI();autosaveRound();}
+function updateBallsUI(){const el=$('ballsVal');if(el)el.textContent=Number(cur.ballsLost)||0;}
 function updateHcpRelUI(){
   const t=$('hcpRelToggle');if(!t)return;
   const on=!!cur.hcpiRelevant;
@@ -1910,7 +2029,7 @@ function updateTeeButton(){const c=COURSES[cur.courseKey]||COURSES.mettmann;cons
 function openTeeModal(e){if(e)e.stopPropagation();const c=COURSES[cur.courseKey]||COURSES.mettmann;const list=$('teeModalList');list.innerHTML='';c.tees.forEach(t=>{const o=document.createElement('div');o.className='teeopt'+(t.id===cur.teeId?' sel':'');o.innerHTML=`<span class="sw" style="background:${t.color}"></span><div class="info"><div class="nm">${t.label}</div><div class="det">CR ${t.cr} · Slope ${t.slope} · Par ${t.par}</div></div>${t.id===cur.teeId?'<span class="check">✓</span>':''}`;o.onclick=()=>{cur.teeId=t.id;updateTeeButton();buildHoles();updateCHBanner();closeTeeModal();autosaveRound();};list.appendChild(o);});$('teeModal').classList.add('open');}
 function closeTeeModal(e){$('teeModal').classList.remove('open');}
 function updateCHBanner(){const b=$('chBanner');const ch=curCH();if(ch==null){b.classList.remove('show');return;}b.classList.add('show');const pts=totalStableford();b.innerHTML=`<div><div class="ch-l">Course Handicap</div><div class="ch-v">${ch}</div></div><div class="ch-r"><div class="ch-pts">${pts}</div><div class="ch-pl">Stableford-Punkte</div></div>`;}
-function fillRoundForm(){if(!cur.roundLength)cur.roundLength='18';if(!cur.title)cur.title='';if(!cur.goalPills)cur.goalPills=[];if(!cur.keysPills)cur.keysPills=[];if(!cur.reviewPills)cur.reviewPills={good:[],bad:[]};$('r_date').value=cur.date;$('r_title').value=cur.title||'';$('r_hcpIndex').value=cur.hcpIndex||'';populateCourseSelect();$('k_tech').value=cur.keys.tech;$('k_tact').value=cur.keys.tact;$('k_ment').value=cur.keys.ment;$('rv_tech').value=cur.review.tech;$('rv_tact').value=cur.review.tact;$('rv_ment').value=cur.review.ment;$('rv_good').value=cur.review.good;$('rv_bad').value=cur.review.bad;buildDow('dow',cur.dow);buildGoals();buildGoalPills();buildKeysPills();buildReviewPills();renderRoundStatusBox();updateHcpRelUI();
+function fillRoundForm(){if(!cur.roundLength)cur.roundLength='18';if(!cur.title)cur.title='';if(!cur.goalPills)cur.goalPills=[];if(!cur.keysPills)cur.keysPills=[];if(!cur.reviewPills)cur.reviewPills={good:[],bad:[]};$('r_date').value=cur.date;$('r_title').value=cur.title||'';$('r_hcpIndex').value=cur.hcpIndex||'';populateCourseSelect();$('k_tech').value=cur.keys.tech;$('k_tact').value=cur.keys.tact;$('k_ment').value=cur.keys.ment;$('rv_tech').value=cur.review.tech;$('rv_tact').value=cur.review.tact;$('rv_ment').value=cur.review.ment;$('rv_good').value=cur.review.good;$('rv_bad').value=cur.review.bad;buildDow('dow',cur.dow);buildGoals();buildGoalPills();buildKeysPills();buildReviewPills();renderRoundStatusBox();updateHcpRelUI();updateBallsUI();
   // bestehende Freitexte sichtbar lassen, falls schon was drinsteht
   if(cur.keys.tech||cur.keys.tact||cur.keys.ment){$('keysFreeBlock').style.display='grid';$('keysNoteToggle').textContent='– Notiz ausblenden';}
   if(cur.review.good){$('rv_good').style.display='block';$('goodNoteToggle').textContent='– Notiz ausblenden';}
@@ -2139,8 +2258,14 @@ bind('p_rangeBalls',v=>{curP.rangeBalls=v;updateVolSum();autosaveLive();});
 bind('pr_name',v=>{if(!DB.profile)DB.profile={name:'',clubs:[]};DB.profile.name=v;saveProfile();});
 
 /* ===== SAVE / EDIT ===== */
-function saveEntry(){const entry=MODE==='round'?JSON.parse(JSON.stringify(cur)):JSON.parse(JSON.stringify(curP));entry.type=MODE;if(MODE==='practice'){entry.live=false;entry.status='done';}if(MODE==='round'){entry.status='done';const c=curCourse(),t=curTee();entry.course=c.name;entry.tees=t.label;entry.courseKey=cur.courseKey;entry.teeId=cur.teeId;entry.stableford=totalStableford();entry.ch=curCH();}if(editingId){entry.id=editingId;const idx=DB.entries.findIndex(e=>e.id===editingId);entry.savedAt=DB.entries[idx].savedAt;DB.entries[idx]=entry;}else{entry.id='e'+Date.now();entry.savedAt=Date.now();DB.entries.unshift(entry);}persist();editingId=null;
-  if(MODE==='round'&&entry.hcpiRelevant){const res=computeHCPI();toast(res?`Runde gesichert ⛳ · Lowr-Schätzung: ≈${res.hcpi.toFixed(1)}`:'Runde gesichert ⛳');}
+function saveEntry(){const achBefore=(MODE==='round')?evalAchievements():{};const entry=MODE==='round'?JSON.parse(JSON.stringify(cur)):JSON.parse(JSON.stringify(curP));entry.type=MODE;if(MODE==='practice'){entry.live=false;entry.status='done';}if(MODE==='round'){entry.status='done';const c=curCourse(),t=curTee();entry.course=c.name;entry.tees=t.label;entry.courseKey=cur.courseKey;entry.teeId=cur.teeId;entry.stableford=totalStableford();entry.ch=curCH();}if(editingId){entry.id=editingId;const idx=DB.entries.findIndex(e=>e.id===editingId);entry.savedAt=DB.entries[idx].savedAt;DB.entries[idx]=entry;}else{entry.id='e'+Date.now();entry.savedAt=Date.now();DB.entries.unshift(entry);}persist();editingId=null;
+  // Neue Trophäen erkennen
+  let newAch=[];
+  if(MODE==='round'){const achAfter=evalAchievements();newAch=ACHIEVEMENTS.filter(a=>achAfter[a.id]&&!achBefore[a.id]);}
+  if(newAch.length){
+    const names=newAch.map(a=>`${a.icon} ${a.name}`).join(', ');
+    toast(`🏆 Neue Trophäe: ${names}`);
+  }else if(MODE==='round'&&entry.hcpiRelevant){const res=computeHCPI();toast(res?`Runde gesichert ⛳ · Lowr-Schätzung: ≈${res.hcpi.toFixed(1)}`:'Runde gesichert ⛳');}
   else toast(MODE==='round'?'Runde gesichert ⛳':'Session gesichert 🎯');
   go('home');}
 function newEntry(){
@@ -2272,6 +2397,55 @@ function wireOfficialHcpInput(){
     renderHCPI();renderHome();
     toast('Offizieller HCPI aktualisiert');
   });
+}
+
+/* ===== TROPHÄEN RENDERN ===== */
+let achFilter='18';
+function setAchFilter(f){achFilter=f;renderAchievements();}
+function renderAchievements(){
+  const body=$('achBody');if(!body)return;
+  const earned=evalAchievements();
+  // Filter: '18' zeigt 18-Loch + 'any'; '9' zeigt 9-Loch + 'any'
+  const list=ACHIEVEMENTS.filter(a=>a.len===achFilter||a.len==='any');
+  const doneCount=list.filter(a=>earned[a.id]).length;
+  const pct=list.length?Math.round(doneCount/list.length*100):0;
+
+  let html=`<div class="scrhead" style="padding-top:8px"><h1 style="font-size:22px">🏆 Trophäen</h1><p>Automatisch freigeschaltet</p></div>`;
+
+  // Umschalter 9 / 18
+  html+=`<div class="ach-seg">
+    <button class="${achFilter==='18'?'on':''}" onclick="setAchFilter('18')">18 Loch</button>
+    <button class="${achFilter==='9'?'on':''}" onclick="setAchFilter('9')">9 Loch</button>
+  </div>`;
+
+  // Fortschritt
+  html+=`<div class="ach-progress">
+    <div class="pct">${doneCount}/${list.length}</div>
+    <div class="ptxt">Trophäen freigeschaltet (${pct}%)</div>
+    <div class="ach-bar"><div class="ach-bar-fill" style="width:${pct}%"></div></div>
+  </div>`;
+
+  // Karten – erreichte zuerst
+  const sorted=list.slice().sort((a,b)=>{
+    const da=earned[a.id]?0:1, db=earned[b.id]?0:1;
+    return da-db;
+  });
+  html+=`<div class="ach-grid">`;
+  sorted.forEach(a=>{
+    const e=earned[a.id];
+    html+=`<div class="ach-card${e?' done':''}">
+      <div class="ach-ic">${a.icon}</div>
+      <div class="ach-info">
+        <div class="ach-name">${a.name}</div>
+        <div class="ach-desc">${a.desc}</div>
+        ${e?`<div class="ach-date">✓ erreicht am ${e.date}</div>`:''}
+      </div>
+      <div class="ach-check">${e?'✓':''}</div>
+    </div>`;
+  });
+  html+=`</div><div style="height:20px"></div>`;
+
+  body.innerHTML=html;
 }
 
 function renderStats(){const body=$('statsBody');const rounds=DB.entries.filter(e=>e.type==='round'&&e.status!=='live');const practices=DB.entries.filter(e=>e.type==='practice');

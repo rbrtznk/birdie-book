@@ -213,6 +213,48 @@ input,textarea{-webkit-user-select:text;user-select:text;}
 .ach-card.done .ach-check{background:var(--green);color:#fff;}
 .ach-card:not(.done) .ach-check{border:2px solid var(--surface-3);}
 .ach-date{font-size:11px;color:var(--green);font-weight:600;margin-top:3px;}
+/* ===== CELEBRATION / KONFETTI ===== */
+.celebrate-overlay{position:fixed;inset:0;z-index:9999;display:none;align-items:center;justify-content:center;background:rgba(8,12,20,.72);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);}
+.celebrate-overlay.show{display:flex;animation:celebFade .3s ease;}
+@keyframes celebFade{from{opacity:0}to{opacity:1}}
+#confettiCanvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;}
+.celebrate-card{position:relative;z-index:2;width:min(86vw,340px);background:linear-gradient(160deg,#1b2436,#121826);border:1px solid rgba(255,255,255,.1);border-radius:26px;padding:32px 26px 26px;text-align:center;box-shadow:0 30px 80px rgba(0,0,0,.6);transform:scale(.6);opacity:0;}
+.celebrate-overlay.show .celebrate-card{animation:celebPop .55s cubic-bezier(.18,.89,.32,1.28) .12s forwards;}
+@keyframes celebPop{to{transform:scale(1);opacity:1}}
+.celebrate-label{font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--green);font-weight:700;}
+.celebrate-ic{font-size:88px;line-height:1;margin:14px 0 10px;filter:drop-shadow(0 8px 24px rgba(31,199,123,.4));animation:celebBounce 1.2s ease-in-out infinite;}
+@keyframes celebBounce{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-10px) rotate(3deg)}}
+.celebrate-name{font-size:26px;font-weight:800;color:#fff;letter-spacing:-.5px;}
+.celebrate-desc{font-size:14px;color:var(--text-2);margin-top:8px;line-height:1.4;}
+.celebrate-count{font-size:12px;color:var(--text-3);margin-top:10px;}
+.celebrate-btn{margin-top:22px;width:100%;padding:15px;border-radius:14px;background:var(--green);color:#fff;border:none;font-size:16px;font-weight:700;}
+.celebrate-btn:active{transform:scale(.97);}
+.celebrate-multi{font-size:13px;color:var(--green);font-weight:600;margin-top:4px;}
+/* ===== TROPHÄEN-TEASER (Analytics) ===== */
+.trophy-teaser{margin:4px 16px 16px;background:linear-gradient(135deg,#2a2140,#1a1830);border:1px solid rgba(255,255,255,.08);border-radius:var(--radius);padding:18px 18px;display:flex;align-items:center;gap:16px;cursor:pointer;position:relative;overflow:hidden;}
+.trophy-teaser::after{content:'';position:absolute;right:-20px;top:-20px;width:110px;height:110px;border-radius:50%;background:radial-gradient(circle,rgba(255,210,63,.15),transparent 70%);}
+.trophy-teaser-ic{font-size:38px;flex-shrink:0;filter:drop-shadow(0 4px 12px rgba(255,210,63,.3));position:relative;z-index:1;}
+.trophy-teaser-info{flex:1;min-width:0;position:relative;z-index:1;}
+.trophy-teaser-t{font-size:16px;font-weight:700;color:#fff;}
+.trophy-teaser-s{font-size:13px;color:var(--text-2);margin-top:2px;}
+.trophy-teaser-arrow{font-size:22px;color:var(--text-3);flex-shrink:0;position:relative;z-index:1;}
+.trophy-teaser-bar{height:6px;border-radius:3px;background:rgba(255,255,255,.1);margin-top:8px;overflow:hidden;}
+.trophy-teaser-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,#ffd23f,#ff9f40);transition:width .4s;}
+/* ===== TROPHÄEN-SEITE HEAD ===== */
+.trophy-head{position:relative;}
+.trophy-back{position:absolute;top:-2px;left:0;background:none;border:none;color:var(--accent);font-size:15px;font-weight:600;padding:4px 0;}
+/* ===== COLLECTION POP-UP ===== */
+.coll-item{display:flex;align-items:center;gap:14px;padding:13px 18px;border-bottom:1px solid var(--line);}
+.coll-item:last-child{border-bottom:none;}
+.coll-ic{width:42px;height:42px;border-radius:11px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;filter:grayscale(1);opacity:.5;}
+.coll-item.done .coll-ic{filter:none;opacity:1;background:rgba(31,199,123,.18);}
+.coll-info{flex:1;min-width:0;}
+.coll-name{font-size:14.5px;font-weight:700;color:var(--text);}
+.coll-item.done .coll-name{color:var(--green);}
+.coll-desc{font-size:12px;color:var(--text-3);margin-top:2px;}
+.coll-check{width:24px;height:24px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;}
+.coll-item.done .coll-check{background:var(--green);color:#fff;}
+.coll-item:not(.done) .coll-check{border:2px solid var(--surface-3);}
 .hcprel-toggle.on .hcprel-knob{left:21px;}
 
 /* review/goal pills (Konzept C) */
@@ -816,10 +858,19 @@ select.inp{appearance:none;-webkit-appearance:none;background-image:url("data:im
   <section class="view" id="view-stats">
     <div class="scrhead"><h1>Analytics</h1><p>Dein Handicap &amp; deine Form</p></div>
     <div id="hcpiBody"></div>
-    <div id="achBody"></div>
+    <div id="trophyTeaser"></div>
     <div id="statsBody">
       <div class="empty"><div class="ic">📊</div><p>Noch keine Runden gespeichert.<br>Spiele eine Runde, dann erscheinen hier deine Trends.</p></div>
     </div>
+  </section>
+
+  <!-- =============== TROPHIES =============== -->
+  <section class="view" id="view-trophies">
+    <div class="scrhead trophy-head">
+      <button class="trophy-back" onclick="go('stats')">‹ Analytics</button>
+      <h1>🏆 Trophäen</h1><p>Werde besser, schalte frei</p>
+    </div>
+    <div id="achBody"></div>
   </section>
 
   <!-- =============== DATA =============== -->
@@ -906,6 +957,23 @@ select.inp{appearance:none;-webkit-appearance:none;background-image:url("data:im
   </nav>
 </div>
 <div class="toast" id="toast"></div>
+<div class="celebrate-overlay" id="celebrateOverlay">
+  <canvas id="confettiCanvas"></canvas>
+  <div class="celebrate-card" id="celebrateCard">
+    <div class="celebrate-label">Trophäe freigeschaltet!</div>
+    <div class="celebrate-ic" id="celebrateIc">🏆</div>
+    <div class="celebrate-name" id="celebrateName">Break 100</div>
+    <div class="celebrate-desc" id="celebrateDesc"></div>
+    <div class="celebrate-count" id="celebrateCount"></div>
+    <button class="celebrate-btn" onclick="dismissCelebrate()">Stark! 🎉</button>
+  </div>
+</div>
+<div class="modal-overlay" id="collectionModal" onclick="closeCollection(event)">
+  <div class="modal-sheet" onclick="event.stopPropagation()">
+    <div class="modal-head"><span>🗺️ Sammlung &amp; Meilensteine</span><button class="modal-x" onclick="closeCollection()">✕</button></div>
+    <div id="collectionBody" style="max-height:60vh;overflow-y:auto;padding:4px 0 8px"></div>
+  </div>
+</div>
 <div class="modal-overlay" id="newModal" onclick="closeNewSheet(event)">
   <div class="modal-sheet" onclick="event.stopPropagation()">
     <div class="modal-head"><span>Was möchtest du anlegen?</span><button class="modal-x" onclick="closeNewSheet()">✕</button></div>
@@ -1495,17 +1563,33 @@ const ACHIEVEMENTS=[
   {id:'break50_9',icon:'5️⃣',name:'Break 50', desc:'9 Löcher unter 50 Schläge',len:'9',test:s=>!s.imported&&s.played>=9&&s.played<18&&s.score<50},
   {id:'break45_9',icon:'⚡',name:'Break 45', desc:'9 Löcher unter 45 Schläge',len:'9',test:s=>!s.imported&&s.played>=9&&s.played<18&&s.score<45},
   {id:'break40_9',icon:'🚀',name:'Break 40', desc:'9 Löcher unter 40 Schläge',len:'9',test:s=>!s.imported&&s.played>=9&&s.played<18&&s.score<40},
-  // ===== PRÄZISION (beide) =====
-  {id:'firstGir', icon:'🟢',name:'Erstes GIR',desc:'Ein Grün in Regulation getroffen',len:'any',test:s=>s.gir>=1},
-  {id:'gir5',     icon:'🌱',name:'5× GIR',    desc:'5 Grüns in Regulation in einer Runde',len:'18',test:s=>s.gir>=5},
-  {id:'gir3_9',   icon:'🌿',name:'3× GIR (9)',desc:'3 Grüns in Regulation über 9 Löcher',len:'9',test:s=>s.played<18&&s.gir>=3},
+  // ===== LOCH-HIGHLIGHTS (beide) =====
+  {id:'firstPar', icon:'🟦',name:'Erstes Par',  desc:'Ein Loch in Par gespielt',len:'any',test:s=>s.pars>=1},
+  {id:'firstBirdie',icon:'🐦',name:'Erstes Birdie',desc:'Ein Loch unter Par gespielt',len:'any',test:s=>s.birdies>=1||s.eagles>=1},
+  {id:'eagle',    icon:'🦅',name:'Eagle',       desc:'Ein Loch 2 unter Par – stark!',len:'any',test:s=>s.eagles>=1},
+  {id:'birdieX3', icon:'🐤',name:'Birdie-Maschine',desc:'3 Birdies in einer Runde',len:'any',test:s=>s.birdies>=3},
+  {id:'parX5',    icon:'🎖️',name:'5× Par',      desc:'5 Pars in einer Runde',len:'18',test:s=>s.pars>=5},
+  // ===== PRÄZISION =====
+  {id:'firstGir', icon:'🟢',name:'Erstes GIR',  desc:'Ein Grün in Regulation getroffen',len:'any',test:s=>s.gir>=1},
+  {id:'gir5',     icon:'🌱',name:'5× GIR',      desc:'5 Grüns in Regulation in einer Runde',len:'18',test:s=>s.gir>=5},
+  {id:'gir3_9',   icon:'🌿',name:'3× GIR (9)',  desc:'3 Grüns in Regulation über 9 Löcher',len:'9',test:s=>s.played<18&&s.gir>=3},
+  {id:'gir9',     icon:'🌳',name:'Eisen-Präzision',desc:'9 Grüns in Regulation (18 Löcher)',len:'18',test:s=>s.gir>=9},
   {id:'fairways', icon:'🏌️',name:'Fairway-Finder',desc:'8+ Fairways in einer Runde',len:'18',test:s=>s.fir>=8},
+  {id:'fairways12',icon:'🎪',name:'Fairway-König',desc:'12+ Fairways in einer Runde',len:'18',test:s=>s.fir>=12},
   // ===== PUTTEN =====
+  {id:'onePutt',  icon:'🕳️',name:'One-Putt',    desc:'Ein Loch mit nur einem Putt',len:'any',test:s=>s.onePutts>=1},
+  {id:'onePuttX5',icon:'🎯',name:'Putt-Held',   desc:'5 One-Putts in einer Runde',len:'18',test:s=>s.onePutts>=5},
   {id:'no3putt',  icon:'🎱',name:'Keine 3-Putts',desc:'Ganze Runde ohne einen 3-Putt',len:'18',test:s=>s.played>=18&&s.puttsTracked&&s.threePutts===0},
   {id:'putts30',  icon:'🥍',name:'Unter 30 Putts',desc:'Weniger als 30 Putts (18 Löcher)',len:'18',test:s=>s.played>=18&&s.puttsTracked&&s.putts<30&&s.putts>0},
   {id:'no3putt_9',icon:'🎳',name:'Sauberes Putten (9)',desc:'9 Löcher ohne einen 3-Putt',len:'9',test:s=>s.played>=9&&s.played<18&&s.puttsTracked&&s.threePutts===0},
   // ===== SAUBERES SPIEL =====
   {id:'noBalls',  icon:'🧼',name:'Kein Ball verloren',desc:'Eine ganze Runde ohne verlorenen Ball',len:'any',test:s=>s.played>=9&&s.ballsTracked&&s.ballsLost===0},
+  // ===== MEILENSTEINE (über alle Runden, careerTest) =====
+  {id:'rounds1',  icon:'🌟',name:'Erste Runde',  desc:'Deine erste Runde in Lowr getrackt',len:'any',careerTest:c=>c.totalRounds>=1},
+  {id:'rounds5',  icon:'📅',name:'5 Runden',     desc:'5 Runden gespielt und getrackt',len:'any',careerTest:c=>c.totalRounds>=5},
+  {id:'rounds10', icon:'🗓️',name:'10 Runden',    desc:'10 Runden gespielt – Routine!',len:'any',careerTest:c=>c.totalRounds>=10},
+  {id:'rounds25', icon:'🏅',name:'25 Runden',    desc:'25 Runden – echtes Engagement',len:'any',careerTest:c=>c.totalRounds>=25},
+  {id:'threeCourses',icon:'🗺️',name:'Platz-Hopper',desc:'Auf 3 verschiedenen Plätzen gespielt',len:'any',careerTest:c=>c.uniqueCourses>=3},
 ];
 
 /* Berechnet die Stats einer Runde, die Achievements brauchen */
@@ -1514,13 +1598,26 @@ function achStats(e){
   const slice=e.holes.slice(start,end);
   let score=0,played=0,gir=0,fir=0,putts=0,threePutts=0;
   let puttsTracked=false,par=0;
+  let eagles=0,birdies=0,pars=0,bogeys=0,onePutts=0;
+  let bestVsPar=99; // bestes einzelnes Loch relativ zu Par
   const course=COURSES[e.courseKey];
   slice.forEach((h,i)=>{
-    if(h.score){score+=Number(h.score);played++;}
+    const holePar=(course&&course.holePar)?course.holePar[start+i]:null;
+    if(h.score){
+      score+=Number(h.score);played++;
+      if(holePar){
+        const vs=Number(h.score)-holePar;
+        if(vs<bestVsPar)bestVsPar=vs;
+        if(vs<=-2)eagles++;
+        else if(vs===-1)birdies++;
+        else if(vs===0)pars++;
+        else if(vs===1)bogeys++;
+      }
+    }
     if(h.gir===true)gir++;
     if(h.fir===true)fir++;
-    if(h.putts){putts+=Number(h.putts);puttsTracked=true;if(Number(h.putts)>=3)threePutts++;}
-    if(course&&course.holePar)par+=course.holePar[start+i]||0;
+    if(h.putts){putts+=Number(h.putts);puttsTracked=true;const p=Number(h.putts);if(p>=3)threePutts++;if(p===1)onePutts++;}
+    if(holePar)par+=holePar;
   });
   // Importierte Runden: Score aus GBE/imp
   if(e.imported&&e.imp){
@@ -1530,23 +1627,31 @@ function achStats(e){
   }
   return{
     score,played,gir,fir,putts,threePutts,par,
-    puttsTracked,
+    puttsTracked,eagles,birdies,pars,bogeys,onePutts,bestVsPar,
     ballsLost:Number(e.ballsLost)||0,
     ballsTracked:(e.ballsLost!=null&&e.ballsLost!==''),
     imported:!!(e.imported&&e.imp)
   };
 }
 
-/* Liefert {achievedMap, byTrophy} – welche Trophäe in welcher Runde erreicht wurde */
+/* Liefert {achievedMap} – welche Trophäe in welcher Runde erreicht wurde */
 function evalAchievements(){
   const rounds=DB.entries.filter(e=>e.type==='round'&&e.status!=='live')
     .slice().sort((a,b)=>(a.savedAt||0)-(b.savedAt||0)); // älteste zuerst (erste Erreichung)
   const result={}; // id -> {date, entryId}
+  let runningCount=0;
+  const seenCourses=new Set();
   rounds.forEach(e=>{
     const s=achStats(e);
+    runningCount++;
+    if(e.courseKey&&e.courseKey!=='_imported')seenCourses.add(e.courseKey);
+    const career={totalRounds:runningCount,uniqueCourses:seenCourses.size};
     ACHIEVEMENTS.forEach(a=>{
       if(result[a.id])return; // schon erreicht
-      try{ if(a.test(s)) result[a.id]={date:e.date,entryId:e.id}; }catch(err){}
+      try{
+        if(a.careerTest){ if(a.careerTest(career)) result[a.id]={date:e.date,entryId:e.id}; }
+        else if(a.test){ if(a.test(s)) result[a.id]={date:e.date,entryId:e.id}; }
+      }catch(err){}
     });
   });
   return result;
@@ -1628,7 +1733,8 @@ function go(v){
   document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.v===v));
   if(v==='home')renderHome();
   if(v==='history')renderHistory();
-  if(v==='stats'){renderHCPI();renderAchievements();renderStats();}
+  if(v==='stats'){renderHCPI();renderTrophyTeaser();renderStats();}
+  if(v==='trophies')renderAchievements();
   if(v==='notes')renderNotes();
   const sc=$('scroll');if(sc)sc.scrollTo(0,0);
 }
@@ -2263,8 +2369,11 @@ function saveEntry(){const achBefore=(MODE==='round')?evalAchievements():{};cons
   let newAch=[];
   if(MODE==='round'){const achAfter=evalAchievements();newAch=ACHIEVEMENTS.filter(a=>achAfter[a.id]&&!achBefore[a.id]);}
   if(newAch.length){
-    const names=newAch.map(a=>`${a.icon} ${a.name}`).join(', ');
-    toast(`🏆 Neue Trophäe: ${names}`);
+    // Erst zur Home navigieren, dann Celebration zeigen (Overlay liegt über allem)
+    if(MODE==='round'&&entry.hcpiRelevant){const res=computeHCPI();if(res)toast(`Lowr-Schätzung: ≈${res.hcpi.toFixed(1)}`);}
+    go('home');
+    setTimeout(()=>celebrateAchievements(newAch),350);
+    return;
   }else if(MODE==='round'&&entry.hcpiRelevant){const res=computeHCPI();toast(res?`Runde gesichert ⛳ · Lowr-Schätzung: ≈${res.hcpi.toFixed(1)}`:'Runde gesichert ⛳');}
   else toast(MODE==='round'?'Runde gesichert ⛳':'Session gesichert 🎯');
   go('home');}
@@ -2401,19 +2510,125 @@ function wireOfficialHcpInput(){
 
 /* ===== TROPHÄEN RENDERN ===== */
 let achFilter='18';
+/* ===== KONFETTI-ENGINE + CELEBRATION ===== */
+let _celebQueue=[],_celebActive=false,_confettiRAF=null;
+
+function celebrateAchievements(list){
+  if(!list||!list.length)return;
+  _celebQueue=_celebQueue.concat(list);
+  if(!_celebActive)showNextCelebration();
+}
+
+function showNextCelebration(){
+  if(!_celebQueue.length){_celebActive=false;return;}
+  _celebActive=true;
+  const item=_celebQueue.shift();
+  const remaining=_celebQueue.length;
+  $('celebrateIc').textContent=item.icon;
+  $('celebrateName').textContent=item.name;
+  $('celebrateDesc').textContent=item.desc;
+  $('celebrateCount').innerHTML=remaining>0?`<span class="celebrate-multi">+${remaining} weitere Trophäe${remaining>1?'n':''}…</span>`:'';
+  const ov=$('celebrateOverlay');
+  ov.classList.add('show');
+  startConfetti();
+  // Haptik (falls unterstützt)
+  if(navigator.vibrate)navigator.vibrate([18,40,18]);
+}
+
+function dismissCelebrate(){
+  const ov=$('celebrateOverlay');
+  ov.classList.remove('show');
+  stopConfetti();
+  // kurze Pause, dann nächste Trophäe (falls mehrere)
+  setTimeout(()=>{ if(_celebQueue.length)showNextCelebration(); else _celebActive=false; },260);
+}
+
+function startConfetti(){
+  const canvas=$('confettiCanvas');if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  const dpr=window.devicePixelRatio||1;
+  const W=canvas.clientWidth,H=canvas.clientHeight;
+  canvas.width=W*dpr;canvas.height=H*dpr;ctx.scale(dpr,dpr);
+  const colors=['#1fc77b','#3d7bff','#ffd23f','#ff5e7a','#a06bff','#ffffff','#ff9f40'];
+  const N=140;
+  const parts=[];
+  for(let i=0;i<N;i++){
+    parts.push({
+      x:W/2+(Math.random()-.5)*80,
+      y:H/2-40,
+      vx:(Math.random()-.5)*11,
+      vy:Math.random()*-13-4,
+      g:0.28+Math.random()*0.12,
+      size:6+Math.random()*7,
+      color:colors[(Math.random()*colors.length)|0],
+      rot:Math.random()*6.28,
+      vr:(Math.random()-.5)*0.3,
+      shape:Math.random()<.5?'rect':'circ',
+      life:0
+    });
+  }
+  let frame=0;
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    let alive=false;
+    parts.forEach(p=>{
+      p.vy+=p.g;p.x+=p.vx;p.y+=p.vy;p.rot+=p.vr;p.life++;
+      p.vx*=0.99;
+      if(p.y<H+30)alive=true;
+      const alpha=Math.max(0,1-p.life/130);
+      ctx.save();
+      ctx.globalAlpha=alpha;
+      ctx.translate(p.x,p.y);
+      ctx.rotate(p.rot);
+      ctx.fillStyle=p.color;
+      if(p.shape==='rect')ctx.fillRect(-p.size/2,-p.size/2,p.size,p.size*0.6);
+      else{ctx.beginPath();ctx.arc(0,0,p.size/2,0,6.28);ctx.fill();}
+      ctx.restore();
+    });
+    frame++;
+    if(alive&&frame<200)_confettiRAF=requestAnimationFrame(draw);
+    else{ctx.clearRect(0,0,W,H);}
+  }
+  cancelAnimationFrame(_confettiRAF);
+  _confettiRAF=requestAnimationFrame(draw);
+}
+
+function stopConfetti(){
+  if(_confettiRAF)cancelAnimationFrame(_confettiRAF);
+  const canvas=$('confettiCanvas');
+  if(canvas){const ctx=canvas.getContext('2d');ctx.clearRect(0,0,canvas.width,canvas.height);}
+}
+
 function setAchFilter(f){achFilter=f;renderAchievements();}
+/* Teaser-Button auf der Analytics-Seite */
+function renderTrophyTeaser(){
+  const el=$('trophyTeaser');if(!el)return;
+  const earned=evalAchievements();
+  // Nur Performance-Trophäen (mit test) für die Fortschrittsanzeige
+  const perf=ACHIEVEMENTS.filter(a=>a.test);
+  const done=perf.filter(a=>earned[a.id]).length;
+  const pct=perf.length?Math.round(done/perf.length*100):0;
+  el.innerHTML=`<div class="trophy-teaser" onclick="go('trophies')">
+    <div class="trophy-teaser-ic">🏆</div>
+    <div class="trophy-teaser-info">
+      <div class="trophy-teaser-t">Trophäen</div>
+      <div class="trophy-teaser-s">${done} von ${perf.length} freigeschaltet</div>
+      <div class="trophy-teaser-bar"><div class="trophy-teaser-fill" style="width:${pct}%"></div></div>
+    </div>
+    <div class="trophy-teaser-arrow">›</div>
+  </div>`;
+}
+
 function renderAchievements(){
   const body=$('achBody');if(!body)return;
   const earned=evalAchievements();
-  // Filter: '18' zeigt 18-Loch + 'any'; '9' zeigt 9-Loch + 'any'
-  const list=ACHIEVEMENTS.filter(a=>a.len===achFilter||a.len==='any');
+  // NUR Performance-Trophäen (mit test) – nach 9/18 gefiltert
+  const list=ACHIEVEMENTS.filter(a=>a.test&&(a.len===achFilter||a.len==='any'));
   const doneCount=list.filter(a=>earned[a.id]).length;
   const pct=list.length?Math.round(doneCount/list.length*100):0;
 
-  let html=`<div class="scrhead" style="padding-top:8px"><h1 style="font-size:22px">🏆 Trophäen</h1><p>Automatisch freigeschaltet</p></div>`;
-
   // Umschalter 9 / 18
-  html+=`<div class="ach-seg">
+  let html=`<div class="ach-seg">
     <button class="${achFilter==='18'?'on':''}" onclick="setAchFilter('18')">18 Loch</button>
     <button class="${achFilter==='9'?'on':''}" onclick="setAchFilter('9')">9 Loch</button>
   </div>`;
@@ -2421,7 +2636,7 @@ function renderAchievements(){
   // Fortschritt
   html+=`<div class="ach-progress">
     <div class="pct">${doneCount}/${list.length}</div>
-    <div class="ptxt">Trophäen freigeschaltet (${pct}%)</div>
+    <div class="ptxt">Performance-Trophäen (${pct}%)</div>
     <div class="ach-bar"><div class="ach-bar-fill" style="width:${pct}%"></div></div>
   </div>`;
 
@@ -2443,9 +2658,40 @@ function renderAchievements(){
       <div class="ach-check">${e?'✓':''}</div>
     </div>`;
   });
-  html+=`</div><div style="height:20px"></div>`;
+  html+=`</div>`;
+
+  // Sammlung-Button (Meilensteine)
+  const coll=ACHIEVEMENTS.filter(a=>a.careerTest);
+  const collDone=coll.filter(a=>earned[a.id]).length;
+  html+=`<button class="bigbtn ghost" style="margin:16px" onclick="openCollection()">🗺️ Sammlung &amp; Meilensteine (${collDone}/${coll.length})</button>`;
+  html+=`<div style="height:20px"></div>`;
 
   body.innerHTML=html;
+}
+
+/* Sammlung / Meilensteine Pop-up */
+function openCollection(){
+  const body=$('collectionBody');if(!body)return;
+  const earned=evalAchievements();
+  const coll=ACHIEVEMENTS.filter(a=>a.careerTest);
+  // erreichte zuerst
+  const sorted=coll.slice().sort((a,b)=>(earned[a.id]?0:1)-(earned[b.id]?0:1));
+  body.innerHTML=sorted.map(a=>{
+    const e=earned[a.id];
+    return `<div class="coll-item${e?' done':''}">
+      <div class="coll-ic">${a.icon}</div>
+      <div class="coll-info">
+        <div class="coll-name">${a.name}</div>
+        <div class="coll-desc">${a.desc}${e?` · ✓ ${e.date}`:''}</div>
+      </div>
+      <div class="coll-check">${e?'✓':''}</div>
+    </div>`;
+  }).join('');
+  $('collectionModal').classList.add('show');
+}
+function closeCollection(ev){
+  if(ev&&ev.target!==$('collectionModal'))return;
+  $('collectionModal').classList.remove('show');
 }
 
 function renderStats(){const body=$('statsBody');const rounds=DB.entries.filter(e=>e.type==='round'&&e.status!=='live');const practices=DB.entries.filter(e=>e.type==='practice');

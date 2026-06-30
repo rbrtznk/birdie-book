@@ -447,13 +447,16 @@ select.inp{appearance:none;-webkit-appearance:none;background-image:url("data:im
 .drillmodal-sheet{max-width:420px;max-height:80vh;display:flex;flex-direction:column;}
 .drillmodal-list{overflow-y:auto;-webkit-overflow-scrolling:touch;flex:1;}
 .drillcat-head{padding:12px 18px 6px;font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--accent-text);background:var(--surface-2);position:sticky;top:0;}
-.drillopt{padding:12px 18px;border-bottom:1px solid var(--line);}
+.drillopt{padding:12px 18px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;}
 .drillopt:active{background:var(--surface-3);}
+.drillopt .dopt-main{flex:1;min-width:0;}
 .drillopt .dname{font-size:14px;font-weight:600;}
 .drillopt .ddesc{font-size:12px;color:var(--text-3);margin-top:3px;line-height:1.4;}
 .drillopt .dlast{font-size:11px;margin-top:4px;font-weight:600;}
 .drillopt .dlast.stale{color:var(--amber);}
 .drillopt .dlast.ok{color:var(--text-3);}
+.dopt-info,.dinfo{flex:none;width:32px;height:32px;border-radius:50%;background:var(--surface-3);border:none;color:var(--accent);font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center;}
+.dopt-info:active,.dinfo:active{background:var(--accent);color:#fff;}
 .drillmodal-foot{padding:14px 18px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:8px;}
 
 /* drills in session list */
@@ -810,11 +813,9 @@ select.inp{appearance:none;-webkit-appearance:none;background-image:url("data:im
       </div>
 
       <div class="sheet">
-        <div class="sheet-head"><h2>Bälle & Volumen</h2><div class="hint">Gezogene Bälle = Vollschwung · Short Game zählt extra</div></div>
+        <div class="sheet-head"><h2>Bälle & Volumen</h2><div class="hint">Wie viele Bälle hast du am Automaten gezogen?</div></div>
         <div class="sheet-body">
-          <div class="field"><label>Gezogene Bälle (Vollschwung)</label><input class="inp" id="p_rangeBalls" inputmode="numeric" placeholder="z.B. 100"></div>
-          <div id="shortBlocks"></div>
-          <button class="addblock" onclick="addShortBlock()">+ Short-Game-Block</button>
+          <div class="field"><label>Gezogene Bälle gesamt</label><input class="inp" id="p_rangeBalls" inputmode="numeric" placeholder="z.B. 100"></div>
           <div class="volsum" id="volSum"></div>
         </div>
       </div>
@@ -974,6 +975,12 @@ select.inp{appearance:none;-webkit-appearance:none;background-image:url("data:im
     <div id="collectionBody" style="max-height:60vh;overflow-y:auto;padding:4px 0 8px"></div>
   </div>
 </div>
+<div class="modal-overlay" id="drillInfoModal" onclick="closeDrillInfo(event)">
+  <div class="modal-sheet" onclick="event.stopPropagation()">
+    <div class="modal-head"><span id="drillInfoTitle">Übung</span><button class="modal-x" onclick="closeDrillInfo()">✕</button></div>
+    <div id="drillInfoBody" style="max-height:62vh;overflow-y:auto;padding:4px 18px 18px"></div>
+  </div>
+</div>
 <div class="modal-overlay" id="newModal" onclick="closeNewSheet(event)">
   <div class="modal-sheet" onclick="event.stopPropagation()">
     <div class="modal-head"><span>Was möchtest du anlegen?</span><button class="modal-x" onclick="closeNewSheet()">✕</button></div>
@@ -1008,6 +1015,7 @@ let DB={entries:[],hcp:'',hcpHist:[],profile:{name:'',clubs:[]},customDrills:[],
 /* ===== DRILL LIBRARY ===== */
 /* Quellen: PGA.com, Golf.com, Golf Digest, Golf Monthly, HackMotion (siehe Beschreibungen) */
 const DRILL_CATS=[
+  {id:'einspielen',label:'Einspielen / Warm-up',icon:'🔥'},
   {id:'abschlaege',label:'Abschläge',icon:'🏌️'},
   {id:'lange_eisen',label:'Lange Eisen',icon:'🎯'},
   {id:'kurze_eisen',label:'Kurze Eisen',icon:'⛳'},
@@ -1061,36 +1069,47 @@ const KEYS_PILLS=[
 ];
 
 const DRILL_LIB=[
-  // Abschläge
-  {id:'d_abschlag_1',cat:'abschlaege',name:'Start-Linie Gate-Drill',desc:'2 Alignment-Sticks ca. 3 Yards vor dem Ball als Tor aufstellen. Ziel: Ball startet exakt durch das Tor — trainiert die Startrichtung.'},
-  {id:'d_abschlag_2',cat:'abschlaege',name:'Headcover-Hochschlag',desc:'Headcover 3 Bälle-Längen vor den Ball legen. Ohne es zu berühren schlagen — trainiert den Aufwärtswinkel und verhindert "Sky"-Schläge.'},
-  {id:'d_abschlag_3',cat:'abschlaege',name:'3-Tee-Höhen-Drill',desc:'3 Bälle auf unterschiedlich hohen Tees (hoch/mittel/tief) hintereinander schlagen — schult den Tiefpunkt deines Schwungs.'},
-  {id:'d_abschlag_4',cat:'abschlaege',name:'Pause-Drill am Top',desc:'Rückschwung normal, am höchsten Punkt 1-2 Sekunden pausieren, dann durchschwingen. Verbessert Timing & Sequenzierung.'},
-  // Lange Eisen
-  {id:'d_lang_1',cat:'lange_eisen',name:'3-Tee-Tiefpunkt-Drill',desc:'3 Bälle in einer Reihe (Abstand 1 Ballbreite). Ziel: Divot beginnt erst nach dem ersten Ball — trainiert den Tiefpunkt vor dem Ball.'},
-  {id:'d_lang_2',cat:'lange_eisen',name:'Towel-Drill gegen fett',desc:'Handtuch ca. eine Griff-Länge hinter den Ball legen. Ball treffen ohne das Handtuch zu berühren — eliminiert fette Schläge.'},
-  {id:'d_lang_3',cat:'lange_eisen',name:'45°-Stick-Drill',desc:'Alignment-Stick im 45°-Winkel hinter dem Ball in den Boden stecken. Schwingen ohne ihn zu treffen — fördert einen flacheren Schwungweg von innen.'},
-  {id:'d_lang_4',cat:'lange_eisen',name:'Halbschwung-Kontrolle',desc:'10 Bälle mit 75%-Schwung, Fokus auf Kontakt-Qualität statt Distanz. Baut Konstanz vor Power auf.'},
-  // Kurze Eisen
-  {id:'d_kurz_1',cat:'kurze_eisen',name:'Ladder-Drill Distanz',desc:'Handtuch auf unterschiedliche Distanzen legen (z.B. 60/80/100m). Reihe nach anlanden — schult Gefühl für Teilschwünge.'},
-  {id:'d_kurz_2',cat:'kurze_eisen',name:'3-Ball Tiefpunkt-Reihe',desc:'3 Bälle in einer Linie hintereinander schlagen ohne Pause zwischen den Schlägen — trainiert sauberen, wiederholbaren Kontakt.'},
-  {id:'d_kurz_3',cat:'kurze_eisen',name:'Landespunkt-Test',desc:'Ziel definieren (z.B. Fahne), 10 Bälle schlagen und Landepunkt (nicht Endpunkt) bewerten — schärft Zielgenauigkeit.'},
-  {id:'d_kurz_4',cat:'kurze_eisen',name:'Ein-Klub-Konstanz-Test',desc:'10 Bälle mit demselben Eisen, gleicher Schwung — Streuung (Yards links/rechts, kurz/lang) notieren und vergleichen.'},
-  // Transportschläge
-  {id:'d_trans_1',cat:'transport',name:'Gleiche Distanz, andere Klubs',desc:'Eine feste Ziel-Distanz (z.B. 120m) mit 3 verschiedenen Klubs anspielen — schult Trajektorie- und Rollout-Gefühl.'},
-  {id:'d_trans_2',cat:'transport',name:'Lagezonen-Drill',desc:'3 Zielzonen in Klub-Länge-Abständen markieren. Bälle systematisch in jede Zone landen — Layout-Präzision für Platzierungsschläge.'},
-  {id:'d_trans_3',cat:'transport',name:'Knockdown-Schlag',desc:'Tiefer, kontrollierter Schlag: Ball mittig/hinten im Stand, ¾-Schwung, tiefe Durchschwung-Position — für Wind & Kontrolle.'},
-  {id:'d_trans_4',cat:'transport',name:'Rollverhalten-Test',desc:'Gleichen Landepunkt mit 2 Klubs anspielen, Rollout messen — verstehen wie viel Boden- vs. Luftanteil pro Klub realistisch ist.'},
-  // Kurzes Spiel
-  {id:'d_short_1',cat:'kurzes_spiel',name:'Towel-Drill (Chip)',desc:'Handtuch flach 2 Ballbreiten hinter den Ball legen. Chippen ohne es zu berühren — sauberer, absteigender Treffpunkt vor dem Boden-Kontakt.'},
-  {id:'d_short_2',cat:'kurzes_spiel',name:'Ein-Hand-Chip (Ochoa-Drill)',desc:'Chips nur mit der führenden Hand schlagen — trainiert das Handgelenk stabil zu halten für konstanten Kontakt.'},
-  {id:'d_short_3',cat:'kurzes_spiel',name:'Ladder-Drill Chip-Distanz',desc:'3 Zonen in Klub-Längen-Abständen vom Ball aus markieren. 2 Bälle nacheinander in jede Zone landen, bei Fehler von vorne — Distanzgefühl.'},
-  {id:'d_short_4',cat:'kurzes_spiel',name:'Verschiedene Lagen üben',desc:'Bewusst aus unperfekten Lagen chippen (Rough, eng, Hang) statt nur vom perfekten Fairway — baut Anpassungsfähigkeit auf dem Platz auf.'},
-  // Putten
-  {id:'d_putt_1',cat:'putten',name:'Gate-Drill',desc:'2 Tees knapp breiter als der Putterkopf aufstellen, ca. 4 Fuß vor dem Loch. Durchputten ohne die Tees zu berühren — Start-Linie & Face-Kontrolle.'},
-  {id:'d_putt_2',cat:'putten',name:'Lag-Putting / Clock-Drill',desc:'Aus 20+ Fuß putten, Ziel: Ball stoppt zwischen Loch und einem Schläger ~2 Fuß dahinter — schult Speedkontrolle für lange Putts.'},
-  {id:'d_putt_3',cat:'putten',name:'Around the World (3 Fuß)',desc:'6 Bälle im Kreis um das Loch, je 3 Fuß entfernt. Alle nacheinander einlochen, bei Fehlversuch von vorne — Drucksituation & kurze Putts.'},
-  {id:'d_putt_4',cat:'putten',name:'Speed-Ladder',desc:'Putts aus 10/20/30 Fuß. Vor jedem nächsten Versuch den vorherigen einlochen — baut systematisches Distanzgefühl auf.'}
+  // ===== EINSPIELEN / WARM-UP =====
+  {id:'d_warm_full',cat:'einspielen',name:'Warm-up Vollschwung',desc:'Locker einschwingen, Tempo aufbauen, noch ohne Drill-Fokus.',guide:'Beginne mit halben Schwüngen und einem mittleren Eisen (7er/8er). Steigere über 10-15 Bälle langsam Schwunglänge und Tempo. Ziel ist nicht Distanz, sondern den Körper locker und die Bewegung rund zu bekommen. Erst danach in die eigentlichen Drills gehen.'},
+  {id:'d_warm_long',cat:'einspielen',name:'Warm-up lange Schläge',desc:'Driver, Hölzer, Hybride locker einspielen.',guide:'Nach dem allgemeinen Aufwärmen die langen Klubs durchgehen: Hybrid → Holz → Driver. Pro Klub 5-8 Bälle, bewusst mit 75% Tempo. Fokus auf Mitteltreffer und Rhythmus, nicht auf maximale Weite. Gut als Vorbereitung direkt vor einer Runde.'},
+  {id:'d_warm_short',cat:'einspielen',name:'Warm-up kurze Eisen & Wedges',desc:'Kurze Klubs und Annäherungen einspielen.',guide:'Wedges und kurze Eisen (PW, 9er, 8er) mit Teilschwüngen einspielen. 10-15 Bälle, verschiedene Längen (halb / drei-viertel / voll). Schult Distanzgefühl und sorgt für sauberen Bodenkontakt zum Einstieg.'},
+  {id:'d_warm_tee',cat:'einspielen',name:'Warm-up Abschläge',desc:'Tee-Shots routiniert durchgehen.',guide:'Mit Pre-Shot-Routine jeden Abschlag wie auf der Runde spielen: hinter den Ball, Ziel wählen, Probeschwung, dann schlagen. 8-10 Bälle. Trainiert nicht nur den Schwung, sondern auch den Rhythmus deiner Routine.'},
+  {id:'d_warm_freie',cat:'einspielen',name:'Freies Einspielen',desc:'Einfach ein paar Bälle ohne festen Plan schlagen.',guide:'Bewusst locker: Klub frei wählen, schlagen, Gefühl spüren. Kein Druck, keine Wertung. Gut um anzukommen oder den Kopf freizubekommen. Wenn du danach Lust auf Struktur hast, häng einen echten Drill an.'},
+  // ===== ABSCHLÄGE =====
+  {id:'d_abschlag_1',cat:'abschlaege',name:'Start-Linie Gate-Drill',desc:'Ball durch ein Tor aus Sticks starten lassen.',guide:'Stelle 2 Alignment-Sticks ca. 3 Yards vor dem Ball als schmales Tor auf, knapp breiter als deine Ziellinie. Ziel: Der Ball startet exakt durch das Tor. Achte darauf, dass das Tor wirklich auf dein Ziel zeigt (nicht parallel zu den Füßen). Sofortiges Feedback zur Startrichtung. 10-15 Bälle.'},
+  {id:'d_abschlag_2',cat:'abschlaege',name:'Headcover-Hochschlag',desc:'Aufwärtswinkel trainieren, "Sky"-Schläge vermeiden.',guide:'Lege ein Headcover ca. 3 Ball-Längen vor den aufgeteeten Ball. Schlage so, dass du das Headcover nicht berührst — das erzwingt einen aufsteigenden Treffmoment beim Driver. Achte auf Ballposition vorne im Stand (innenseite Ferse) und leichten Rückwärts-Tilt der Wirbelsäule bei Ansprache.'},
+  {id:'d_abschlag_3',cat:'abschlaege',name:'Wasserflaschen-Drill (Anti-Slice)',desc:'Über-die-Bahn-Bewegung abstellen.',guide:'Leere Wasserflasche oder Headcover ca. 25-30 cm vor und leicht links der Ballposition legen. Mit 75% schwingen. Wenn du über die Bahn (over the top) kommst, triffst du die Flasche. Korrigiere, indem du den Abschwung mehr von innen führst. Wiederhole bis du die Flasche zuverlässig verfehlst und von innen kommst.'},
+  {id:'d_abschlag_4',cat:'abschlaege',name:'Pause-Drill am Top',desc:'Timing & Sequenzierung verbessern.',guide:'Rückschwung normal ausführen, am höchsten Punkt 1-2 Sekunden bewusst pausieren, dann smooth in den Abschwung. Das verhindert Hängen/Casting und erzwingt korrekte Bewegungsabfolge (Unterkörper zuerst). Anfangs ungewohnt — über Zeit wird dein Übergang kontrollierter. 10 Bälle.'},
+  {id:'d_abschlag_5',cat:'abschlaege',name:'Fairway-Finder-Spiel',desc:'Druck simulieren: Punkte für getroffene Fairways.',guide:'Stell dir ein Fairway zwischen zwei Zielen auf der Range vor. Spiele 10 Abschläge, vergib dir selbst Punkte: Driver im Fairway = 3, Holz = 2, Hybrid = 1, im "Wasser"/Trouble = -1. So trainierst du die ehrliche Klubwahl und den Druck vom ersten Abschlag. Score notieren und über Sessions vergleichen.'},
+  // ===== LANGE EISEN =====
+  {id:'d_lang_1',cat:'lange_eisen',name:'3-Tee-Tiefpunkt-Drill',desc:'Tiefpunkt vor den Ball bringen.',guide:'Lege 3 Bälle in einer Reihe, je 1 Ballbreite Abstand. Schlage sie nacheinander. Ziel: Dein Divot beginnt erst NACH dem ersten Ball, also ballseitig vorne. Das trainiert das Treffen "Ball zuerst, dann Boden". Wenn das Divot vor dem Ball startet, schlägst du fett.'},
+  {id:'d_lang_2',cat:'lange_eisen',name:'Towel-Drill gegen fett',desc:'Fette Schläge eliminieren.',guide:'Lege ein Handtuch ca. eine Griff-Länge (15-20 cm) hinter den Ball. Schlage den Ball ohne das Handtuch zu berühren. Berührst du es, war dein Tiefpunkt zu früh (fett). Zwingt dich, das Gewicht zum Durchschwung nach vorne zu bringen und den Ball vorne zu komprimieren.'},
+  {id:'d_lang_3',cat:'lange_eisen',name:'45°-Stick-Drill',desc:'Flacheren Schwungweg von innen fördern.',guide:'Stecke einen Alignment-Stick im 45°-Winkel hinter dem Ball in den Boden (zeigt vom Ball weg nach hinten-oben). Schwinge ohne ihn zu treffen. Das fördert einen flacheren Abschwung von innen statt steil von außen. Hilft besonders gegen Slice mit langen Klubs.'},
+  {id:'d_lang_4',cat:'lange_eisen',name:'75%-Halbschwung-Kontrolle',desc:'Konstanz vor Power aufbauen.',guide:'Schlage 10 Bälle bewusst mit nur 75% Schwung. Fokus liegt komplett auf Kontakt-Qualität, nicht Distanz. Überraschung: Oft fliegen die 75%-Bälle gerader und kaum kürzer. Schult dein Gefühl für kontrollierten, wiederholbaren Kontakt — direkt auf den Platz übertragbar bei langen Eisen.'},
+  {id:'d_lang_5',cat:'lange_eisen',name:'Füße-zusammen-Drill',desc:'Balance & zentrierten Treffer trainieren.',guide:'Stelle die Füße fast zusammen (Knöchel berühren sich fast). Schlage halbe und dann volle Bälle. Bei zu viel Unterkörper-Bewegung oder Schwanken verlierst du sofort die Balance — das deckt Sway/Lunge auf. Führt zu einem zentrierteren, effizienteren Treffer, wenn du zum normalen Stand zurückkehrst.'},
+  // ===== KURZE EISEN =====
+  {id:'d_kurz_1',cat:'kurze_eisen',name:'Ladder-Drill Distanz',desc:'Gefühl für Teilschwünge schulen.',guide:'Lege Handtücher oder markiere Ziele auf verschiedene Distanzen (z.B. 60/80/100m). Spiele der Reihe nach an jedes Ziel an. Ziel ist, die Carry-Distanz über Schwunglänge zu steuern (z.B. 9-Uhr / 10-Uhr / volle Schwingung). Notiere, welche Schwunglänge welche Distanz ergibt.'},
+  {id:'d_kurz_2',cat:'kurze_eisen',name:'3-Ball Tiefpunkt-Reihe',desc:'Sauberen, wiederholbaren Kontakt trainieren.',guide:'Lege 3 Bälle in eine Linie hintereinander. Schlage sie zügig nacheinander ohne Pause. Das nimmt das Überdenken raus und zeigt deinen echten, reflexiven Tiefpunkt. Achte auf gleichmäßige Divots ballseitig vorne.'},
+  {id:'d_kurz_3',cat:'kurze_eisen',name:'Landespunkt-Test',desc:'Zielgenauigkeit schärfen.',guide:'Definiere ein klares Ziel (z.B. eine Fahne auf der Range). Schlage 10 Bälle und bewerte den LANDEPUNKT, nicht den Endpunkt. Bei kurzen Eisen zählt, wo der Ball aufkommt. Zähle, wie viele innerhalb eines gedachten 5m-Kreises landen.'},
+  {id:'d_kurz_4',cat:'kurze_eisen',name:'Ein-Klub-Konstanz-Test',desc:'Streuung messen und reduzieren.',guide:'10 Bälle mit demselben kurzen Eisen, identischer Schwung, identisches Ziel. Beobachte und notiere die Streuung: wie weit links/rechts und kurz/lang. Über mehrere Sessions solltest du die Streuung enger bekommen. Reine Konstanz-Messung.'},
+  {id:'d_kurz_5',cat:'kurze_eisen',name:'Tee-brechen Impact-Drill',desc:'Nach unten durch den Ball schlagen.',guide:'Stecke ein Tee ca. 1 cm tief etwa eine halbe Ballbreite VOR den Ball. Ziel: Beim Schlag das Tee brechen/treffen. Erzwingt einen abwärts gerichteten Treffmoment mit Divot, das beim oder nach dem Ball beginnt. Wenn du scoopst (löffelst), triffst du das Tee nicht.'},
+  // ===== TRANSPORTSCHLÄGE =====
+  {id:'d_trans_1',cat:'transport',name:'Gleiche Distanz, andere Klubs',desc:'Trajektorie- und Rollout-Gefühl schulen.',guide:'Wähle eine feste Ziel-Distanz (z.B. 120m) und spiele sie mit 3 verschiedenen Klubs an (z.B. voller PW, drei-viertel 9er, halber 8er). Beobachte Flugkurve und Rollverhalten. Lehrt dich, dieselbe Distanz situativ unterschiedlich zu lösen.'},
+  {id:'d_trans_2',cat:'transport',name:'Knockdown-Schlag',desc:'Tiefer, kontrollierter Schlag für Wind.',guide:'Ball mittig bis leicht hinten im Stand, Hände leicht voraus, ¾-Rückschwung und ¾-Durchschwung mit tiefer, kurzer Finish-Position. Erzeugt eine flache, kontrollierte Flugkurve. Ideal bei Wind oder wenn du den Ball unter Ästen halten musst. 10 Bälle mit Mittel-Eisen.'},
+  {id:'d_trans_3',cat:'transport',name:'Tiger\'s Nine-Windows',desc:'Ballflug-Kontrolle meistern.',guide:'Klassiker von Tiger Woods. Nimm ein 6er oder 7er Eisen. Spiele 9 verschiedene Flugkurven: niedrig/mittel/hoch jeweils als Draw, gerade, Fade. Stell sie dir als 3×3-Fenster vor. Sehr anspruchsvoll — zeigt schnell, welche Kurve dir schwerfällt. Daran dann gezielt arbeiten.'},
+  // ===== KURZES SPIEL =====
+  {id:'d_short_1',cat:'kurzes_spiel',name:'Towel-Drill (Chip)',desc:'Sauberen, absteigenden Chip-Kontakt lernen.',guide:'Lege ein Handtuch flach ca. 2 Ballbreiten HINTER den Ball. Chippe, ohne das Handtuch zu berühren. Erzwingt einen sauberen, absteigenden Treffpunkt VOR dem Boden-Kontakt — die Basis für konstantes Chippen. Wenn du das Handtuch triffst, war dein Tiefpunkt zu früh.'},
+  {id:'d_short_2',cat:'kurzes_spiel',name:'Ein-Hand-Chip (Ochoa-Drill)',desc:'Handgelenk stabil halten.',guide:'Chippe nur mit der führenden Hand (links bei Rechtshändern). Anfangs ohne Ball, dann mit. Trainiert ein stabiles, ruhiges Handgelenk und verhindert das nervöse "Löffeln". Beginne mit kurzen Chips, steigere langsam. Dann mit beiden Händen — das Gefühl bleibt.'},
+  {id:'d_short_3',cat:'kurzes_spiel',name:'Ladder-Drill Chip-Distanz',desc:'Distanzgefühl beim Chippen.',guide:'Markiere 3 Zonen in zunehmenden Abständen. Lande 2 Bälle nacheinander in jede Zone (nah → mittel → weit). Bei einem Fehler von vorne beginnen. Schult die Kontrolle des Carry beim Chip über Schwunglänge statt Krafteinsatz.'},
+  {id:'d_short_4',cat:'kurzes_spiel',name:'Verschiedene Lagen üben',desc:'Anpassungsfähigkeit auf dem Platz.',guide:'Chippe bewusst aus unperfekten Lagen: leichtes Rough, enge Lage, Hanglage, Divot. Statt nur vom perfekten Fairway. Auf dem Platz hast du nie die perfekte Lage — dieses Training macht dich anpassungsfähig und nimmt die Angst vor schwierigen Bällen.'},
+  {id:'d_short_5',cat:'kurzes_spiel',name:'Bunker Box-Drill',desc:'Sauberen Sand-Austritt lernen.',guide:'Zeichne ein Rechteck (ca. 15 cm) um den Ball in den Sand. Ziel: Den GESAMTEN Sand aus dem Rechteck herausschlagen, mit klarem Eintrittspunkt hinter dem Ball. Clubface leicht offen, Gewicht leicht vorne, Trail-Hand arbeitet unter den Ball und wirft den Sand hoch Richtung Ziel. Der Ball fliegt auf dem Sandpolster raus — nicht den Ball direkt treffen.'},
+  {id:'d_short_6',cat:'kurzes_spiel',name:'Up & Down Challenge',desc:'Kurzes Spiel unter Druck simulieren.',guide:'Wirf 10 Bälle rund ums Übungsgrün an verschiedene Stellen. Spiele jeden Ball mit dem Klub, den die Lage verlangt, und putte ihn aus. Zähle deine "Up & Downs" (Chip + 1 Putt). Sehr spielnah — bring deinen Score über Sessions nach oben.'},
+  // ===== PUTTEN =====
+  {id:'d_putt_1',cat:'putten',name:'Gate-Drill',desc:'Start-Linie & Face-Kontrolle.',guide:'Stelle 2 Tees knapp breiter als der Putterkopf auf, ca. 1,2 m vor dem Loch. Putte durch das Tor, ohne die Tees zu berühren. Trifft der Putter ein Tee, war dein Face beim Treffmoment offen/geschlossen. Schult eine saubere Startlinie aus kurzer Distanz.'},
+  {id:'d_putt_2',cat:'putten',name:'Lag-Putting / Clock-Drill',desc:'Speedkontrolle für lange Putts.',guide:'Putte aus 6+ m. Ziel: Der Ball stoppt zwischen Loch und einem Schläger, den du ca. 60 cm hinter das Loch legst. Es geht NICHT ums Einlochen, sondern um perfekte Distanz. Trainiert das Vermeiden von 3-Putts aus der Distanz.'},
+  {id:'d_putt_3',cat:'putten',name:'Around the World (1m)',desc:'Kurze Putts unter Druck.',guide:'Lege 6 Bälle im Kreis ums Loch, je ca. 1 m entfernt. Loche alle nacheinander ein. Bei einem Fehlversuch: komplett von vorne. Erzeugt echten Druck wie auf der Runde und baut Vertrauen in die "Geh-rein"-Putts auf.'},
+  {id:'d_putt_4',cat:'putten',name:'Speed-Ladder',desc:'Systematisches Distanzgefühl.',guide:'Putte aus 3 / 6 / 9 m. Vor jedem nächsten Versuch musst du den vorherigen einlochen. Schult, deinen Putt-Speed an die Länge anzupassen, und gibt klare Rückmeldung über dein Distanzgefühl.'},
+  {id:'d_putt_5',cat:'putten',name:'Münzen-Treffmoment',desc:'Mittigen Putter-Kontakt prüfen.',guide:'Klebe zwei kleine Münzen oder zwei Tees an die Puttfläche, knapp breiter als der Ball, sodass der Ball nur in der Mitte (Sweet Spot) sauber abrollt. Triffst du außermittig, springt der Ball schief weg. Sofortiges Feedback für zentrierten Treffmoment.'}
 ];
 function allDrills(){return DRILL_LIB.concat(DB.customDrills||[]);}
 function drillById(id){return allDrills().find(d=>d.id===id);}
@@ -1718,7 +1737,7 @@ function blankRound(){return{type:'round',id:null,savedAt:null,date:fmtDate(new 
   shots:[],review:{tech:'',tact:'',ment:'',good:'',bad:''},reviewPills:{good:[],bad:[]},ballsLost:0,achievements:{}};}
 function blankPractice(){return{type:'practice',id:null,savedAt:null,date:fmtDate(new Date()),dow:new Date().getDay(),
   live:false,startTs:null,status:'new',
-  timeFrom:'',timeTo:'',rangeBalls:'',shortBlocks:[],drills:[],
+  timeFrom:'',timeTo:'',rangeBalls:'',drills:[],
   pgoals:[{done:false,t:''},{done:false,t:''},{done:false,t:''}],
   agenda:[],
   pnotes:{tech:'',feel:''}};}
@@ -1838,7 +1857,6 @@ function startPracticeWithDrills(drillIds){
     const d=drillById(id);if(!d)return;
     const entry={drillId:id};
     if(d.cat==='putten')entry.minutes='';
-    else if(d.cat==='kurzes_spiel'){entry.balls='';entry.rounds=1;}
     else entry.balls='';
     curP.drills.push(entry);
   });
@@ -2141,25 +2159,16 @@ function fillRoundForm(){if(!cur.roundLength)cur.roundLength='18';if(!cur.title)
   if(cur.review.good){$('rv_good').style.display='block';$('goodNoteToggle').textContent='– Notiz ausblenden';}
   if(cur.review.bad){$('rv_bad').style.display='block';$('badNoteToggle').textContent='– Notiz ausblenden';}
   syncRoundLengthUI();nine=(cur.roundLength==='back9')?2:1;setNine(nine);setMapView('single');buildGreen();$('mapHoleNum').textContent=mapHoleNum;updateCHBanner();}
-function fillPracticeForm(){if(!curP.drills)curP.drills=[];$('p_date').value=curP.date;$('p_from').value=curP.timeFrom||'';$('p_to').value=curP.timeTo||'';$('p_rangeBalls').value=curP.rangeBalls||'';$('p_tech').value=curP.pnotes.tech;$('p_feel').value=curP.pnotes.feel;buildDow('dowP',curP.dow);buildPGoals();buildShortBlocks();buildDrillList();updateDuration();updateVolSum();renderLiveBox();}
+function fillPracticeForm(){if(!curP.drills)curP.drills=[];$('p_date').value=curP.date;$('p_from').value=curP.timeFrom||'';$('p_to').value=curP.timeTo||'';$('p_rangeBalls').value=curP.rangeBalls||'';$('p_tech').value=curP.pnotes.tech;$('p_feel').value=curP.pnotes.feel;buildDow('dowP',curP.dow);buildPGoals();buildDrillList();updateDuration();updateVolSum();renderLiveBox();}
 
 /* ===== PRACTICE VOLUME ===== */
-function addShortBlock(){curP.shortBlocks.push({balls:'',rounds:1});buildShortBlocks();updateVolSum();autosaveLive();}
-function buildShortBlocks(){const box=$('shortBlocks');box.innerHTML='';curP.shortBlocks.forEach((b,i)=>{const div=document.createElement('div');div.className='sblock';const shots=(Number(b.balls)||0)*(Number(b.rounds)||0);
-  div.innerHTML=`<div class="sb-head"><span class="sb-title">Short Game ${i+1}</span><button class="sb-del" data-i="${i}">✕</button></div>
-    <div class="sb-row">
-      <div class="field"><label>Bälle</label><input class="inp sb-balls" inputmode="numeric" placeholder="30" value="${b.balls}"></div>
-      <span class="sb-eq">×</span>
-      <div class="field"><label>Aufgesammelt</label><input class="inp sb-rounds" inputmode="numeric" placeholder="3" value="${b.rounds}"></div>
-      <span class="sb-eq">= <span class="sb-shots" id="sbshots${i}">${shots}</span></span>
-    </div>`;
-  const balls=div.querySelector('.sb-balls'),rounds=div.querySelector('.sb-rounds');
-  balls.oninput=()=>{b.balls=balls.value;$('sbshots'+i).textContent=(Number(b.balls)||0)*(Number(b.rounds)||0);updateVolSum();autosaveLive();};
-  rounds.oninput=()=>{b.rounds=rounds.value;$('sbshots'+i).textContent=(Number(b.balls)||0)*(Number(b.rounds)||0);updateVolSum();autosaveLive();};
-  div.querySelector('.sb-del').onclick=()=>{curP.shortBlocks.splice(i,1);buildShortBlocks();updateVolSum();autosaveLive();};
-  box.appendChild(div);
-});}
-function practiceVolumes(p){const long=Number(p.rangeBalls)||0;let short=0;(p.shortBlocks||[]).forEach(b=>short+=(Number(b.balls)||0)*(Number(b.rounds)||0));let drillBalls=0;(p.drills||[]).forEach(d=>drillBalls+=drillShots(d));return{long,short,drillBalls,total:long+short+drillBalls};}
+function practiceVolumes(p){
+  const totalBalls=Number(p.rangeBalls)||0; // am Automaten gezogen
+  let assigned=0; // durch Übungen zugeordnete Bälle
+  (p.drills||[]).forEach(d=>assigned+=drillShots(d));
+  const free=Math.max(0,totalBalls-assigned); // noch nicht zugeordnete Bälle
+  return{total:totalBalls,assigned,free,over:Math.max(0,assigned-totalBalls)};
+}
 
 /* ===== DRILLS ===== */
 function lastTrainedByCat(){
@@ -2179,8 +2188,11 @@ function openDrillModal(){
       const o=document.createElement('div');o.className='drillopt';
       const days=daysSince(last[cat.id]);
       const lastTxt=days==null?'<span class="dlast ok">noch nie trainiert</span>':days>=10?`<span class="dlast stale">zuletzt vor ${days} Tagen</span>`:`<span class="dlast ok">zuletzt vor ${days} Tag${days===1?'':'en'}</span>`;
-      o.innerHTML=`<div class="dname">${esc(d.name)}</div><div class="ddesc">${esc(d.desc)}</div><div class="dlastwrap">${lastTxt}</div>`;
-      o.onclick=()=>{addDrillToSession(d.id);closeDrillModal();};
+      const infoBtn=d.guide?`<button class="dopt-info" title="Anleitung">ⓘ</button>`:'';
+      o.innerHTML=`<div class="dopt-main"><div class="dname">${esc(d.name)}</div><div class="ddesc">${esc(d.desc)}</div><div class="dlastwrap">${lastTxt}</div></div>${infoBtn}`;
+      const ib=o.querySelector('.dopt-info');
+      if(ib)ib.onclick=(ev)=>{ev.stopPropagation();openDrillInfo(d.id);};
+      o.querySelector('.dopt-main').onclick=()=>{addDrillToSession(d.id);closeDrillModal();};
       list.appendChild(o);
     });
   });
@@ -2189,6 +2201,16 @@ function openDrillModal(){
   $('drillModal').classList.add('open');
 }
 function closeDrillModal(){$('drillModal').classList.remove('open');}
+function openDrillInfo(drillId){
+  const d=drillById(drillId);if(!d)return;
+  const cat=DRILL_CATS.find(c=>c.id===d.cat);
+  $('drillInfoTitle').textContent=d.name;
+  let html=`<div style="font-size:12px;color:var(--text-3);font-weight:600;margin:8px 0 12px">${cat?cat.icon+' '+cat.label:''}</div>`;
+  html+=`<div style="font-size:15px;line-height:1.65;color:var(--text)">${esc(d.guide||d.desc||'Keine Detail-Anleitung hinterlegt.')}</div>`;
+  $('drillInfoBody').innerHTML=html;
+  $('drillInfoModal').classList.add('open');
+}
+function closeDrillInfo(ev){if(ev&&ev.target!==$('drillInfoModal'))return;$('drillInfoModal').classList.remove('open');}
 function addCustomDrill(){
   const nameInp=$('customDrillName');const name=nameInp.value.trim();if(!name){toast('Bitte einen Namen eingeben');return;}
   const cat=$('customDrillCat').value;
@@ -2200,8 +2222,8 @@ function addCustomDrill(){
   addDrillToSession(id);
   closeDrillModal();
 }
-function addDrillToSession(drillId){const d=drillById(drillId);const entry={drillId};if(d&&d.cat==='putten')entry.minutes='';else if(d&&d.cat==='kurzes_spiel'){entry.balls='';entry.rounds=1;}else entry.balls='';curP.drills.push(entry);buildDrillList();autosaveLive();}
-function drillShots(entry){const d=drillById(entry.drillId);if(!d)return 0;if(d.cat==='putten')return 0;if(d.cat==='kurzes_spiel')return(Number(entry.balls)||0)*(Number(entry.rounds)||1);return Number(entry.balls)||0;}
+function addDrillToSession(drillId){const d=drillById(drillId);const entry={drillId};if(d&&d.cat==='putten')entry.minutes='';else entry.balls='';curP.drills.push(entry);buildDrillList();updateVolSum();autosaveLive();}
+function drillShots(entry){const d=drillById(entry.drillId);if(!d)return 0;if(d.cat==='putten')return 0;return Number(entry.balls)||0;}
 function buildDrillList(){
   const box=$('drillList');box.innerHTML='';
   curP.drills.forEach((entry,i)=>{
@@ -2211,22 +2233,32 @@ function buildDrillList(){
     let inputsHtml='';
     if(d.cat==='putten'){
       inputsHtml=`<div class="dinput-wrap"><input class="inp dmin" inputmode="numeric" placeholder="0" value="${entry.minutes||''}"><span class="dunit">min</span></div>`;
-    }else if(d.cat==='kurzes_spiel'){
-      inputsHtml=`<div class="dinput-wrap sg"><input class="inp dballs" inputmode="numeric" placeholder="Bälle" value="${entry.balls||''}"><span class="dx">×</span><input class="inp drounds" inputmode="numeric" placeholder="1" value="${entry.rounds||1}"><span class="dunit">×aufges.</span></div>`;
     }else{
       inputsHtml=`<div class="dinput-wrap"><input class="inp dballs" inputmode="numeric" placeholder="0" value="${entry.balls||''}"><span class="dunit">Bälle</span></div>`;
     }
-    row.innerHTML=`<div class="di"><div class="nm">${esc(d.name)}</div><div class="cat">${cat?cat.icon+' '+cat.label:''}</div></div>${inputsHtml}<button class="ddel">✕</button>`;
-    const minI=row.querySelector('.dmin'),ballI=row.querySelector('.dballs'),roundI=row.querySelector('.drounds');
+    const infoBtn=(d.guide)?`<button class="dinfo" data-i="${i}" title="Anleitung">ⓘ</button>`:'';
+    row.innerHTML=`<div class="di"><div class="nm">${esc(d.name)}</div><div class="cat">${cat?cat.icon+' '+cat.label:''}</div></div>${inputsHtml}${infoBtn}<button class="ddel">✕</button>`;
+    const minI=row.querySelector('.dmin'),ballI=row.querySelector('.dballs');
     if(minI)minI.oninput=e=>{entry.minutes=e.target.value;autosaveLive();};
     if(ballI)ballI.oninput=e=>{entry.balls=e.target.value;updateVolSum();autosaveLive();};
-    if(roundI)roundI.oninput=e=>{entry.rounds=e.target.value;updateVolSum();autosaveLive();};
+    const infoB=row.querySelector('.dinfo');
+    if(infoB)infoB.onclick=()=>openDrillInfo(d.id);
     row.querySelector('.ddel').onclick=()=>{curP.drills.splice(i,1);buildDrillList();updateVolSum();autosaveLive();};
     box.appendChild(row);
   });
 }
 function drillPuttMinutes(p){let m=0;(p.drills||[]).forEach(d=>{const dr=drillById(d.drillId);if(dr&&dr.cat==='putten')m+=Number(d.minutes)||0;});return m;}
-function updateVolSum(){const v=practiceVolumes(curP);$('volSum').innerHTML=`<div><div class="v">${v.long}</div><div class="l">Vollschwung</div></div><div><div class="v">${v.short}</div><div class="l">Short Game</div></div><div><div class="v tot">${v.total}</div><div class="l">Gesamt Schläge</div></div>`;}
+function updateVolSum(){
+  const v=practiceVolumes(curP);
+  let html=`<div><div class="v">${v.total}</div><div class="l">Gezogen</div></div>`;
+  html+=`<div><div class="v">${v.assigned}</div><div class="l">In Übungen</div></div>`;
+  if(v.over>0){
+    html+=`<div><div class="v" style="color:var(--red)">+${v.over}</div><div class="l">über Limit</div></div>`;
+  }else{
+    html+=`<div><div class="v tot">${v.free}</div><div class="l">Frei / Einspielen</div></div>`;
+  }
+  $('volSum').innerHTML=html;
+}
 function durationMinutes(from,to){if(!from||!to)return null;const[fh,fm]=from.split(':').map(Number),[th,tm]=to.split(':').map(Number);let d=(th*60+tm)-(fh*60+fm);if(d<0)d+=1440;return d;}
 function fmtDur(min){if(min==null)return'–';const h=Math.floor(min/60),m=min%60;return h?`${h}h ${m}min`:`${m}min`;}
 function updateDuration(){$('p_dur').textContent=fmtDur(durationMinutes(curP.timeFrom,curP.timeTo));}
@@ -2816,7 +2848,7 @@ function chartBlock(title,data,color){const wrap=document.createElement('div');w
 /* ===== BACKUP ===== */
 function exportData(){dl(new Blob([JSON.stringify(DB,null,2)],{type:'application/json'}),`lowr-backup-${new Date().toISOString().slice(0,10)}.json`);toast('Backup exportiert');}
 function importData(ev){const f=ev.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(d.entries){DB=Object.assign({entries:[],hcp:'',hcpHist:[],profile:{name:'',clubs:[]},customDrills:[]},d);persist();renderHome();renderHistory();renderStats();toast('Backup importiert ✓');go('home');}else toast('Keine gültige Datei');}catch(e){toast('Datei konnte nicht gelesen werden');}};r.readAsText(f);ev.target.value='';}
-function exportText(){let out='⛳ LOWR — Export '+new Date().toLocaleString('de-DE')+'\n\n';DB.entries.forEach(e=>{if(e.type==='round'){const s=roundStats(e);out+=`════════\nRUNDE · ${e.date}\nKurs: ${e.course} (${e.tees})\nScore ${s.score} (${s.played} Löcher) · Stableford ${entryStableford(e)} · Putts ${s.putts} · GIR ${s.gir} · FIR ${s.fir}\nZiele: ${e.goals.filter(g=>g.t).map(g=>(g.done?'[x] ':'[ ] ')+g.t).join(' | ')}\nReview Gut: ${e.review.good}\nReview Schlecht: ${e.review.bad}\n\n`;}else if(e.type==='practice'){out+=`════════\nTRAINING · ${e.date}${e.timeFrom?` · ${e.timeFrom}–${e.timeTo} (${fmtDur(durationMinutes(e.timeFrom,e.timeTo))})`:''}\nVolumen: Vollschwung ${practiceVolumes(e).long} · Short Game ${practiceVolumes(e).short} · Gesamt ${practiceVolumes(e).total} Schläge\nÜbungen: ${(e.drills||[]).map(d=>{const dr=drillById(d.drillId);if(!dr)return null;if(dr.cat==='putten')return dr.name+' ('+(d.minutes||0)+' min)';if(dr.cat==='kurzes_spiel')return dr.name+' ('+(d.balls||0)+'×'+(d.rounds||1)+'='+drillShots(d)+' Bälle)';return dr.name+' ('+(d.balls||0)+' Bälle)';}).filter(Boolean).join(' | ')||'–'}\nFokus: ${e.pgoals.filter(g=>g.t).map(g=>(g.done?'[x] ':'[ ] ')+g.t).join(' | ')}\n\n`;}else if(e.type==='note'){out+=`════════\nNOTIZ · ${e.date}${e.title?` · ${e.title}`:''}\n${e.didText?'Was gemacht: '+e.didText+'\n':''}${e.tipsText?'Tipps: '+e.tipsText+'\n':''}${e.newDrillsText?'Neue Übungen: '+e.newDrillsText+'\n':''}${e.fixText?'Verbessert: '+e.fixText+'\n':''}\n`;}});dl(new Blob([out],{type:'text/plain'}),`lowr-${new Date().toISOString().slice(0,10)}.txt`);toast('Text exportiert');}
+function exportText(){let out='⛳ LOWR — Export '+new Date().toLocaleString('de-DE')+'\n\n';DB.entries.forEach(e=>{if(e.type==='round'){const s=roundStats(e);out+=`════════\nRUNDE · ${e.date}\nKurs: ${e.course} (${e.tees})\nScore ${s.score} (${s.played} Löcher) · Stableford ${entryStableford(e)} · Putts ${s.putts} · GIR ${s.gir} · FIR ${s.fir}\nZiele: ${e.goals.filter(g=>g.t).map(g=>(g.done?'[x] ':'[ ] ')+g.t).join(' | ')}\nReview Gut: ${e.review.good}\nReview Schlecht: ${e.review.bad}\n\n`;}else if(e.type==='practice'){out+=`════════\nTRAINING · ${e.date}${e.timeFrom?` · ${e.timeFrom}–${e.timeTo} (${fmtDur(durationMinutes(e.timeFrom,e.timeTo))})`:''}\nVolumen: ${practiceVolumes(e).total} Bälle gezogen · ${practiceVolumes(e).assigned} in Übungen\nÜbungen: ${(e.drills||[]).map(d=>{const dr=drillById(d.drillId);if(!dr)return null;if(dr.cat==='putten')return dr.name+' ('+(d.minutes||0)+' min)';return dr.name+' ('+(d.balls||0)+' Bälle)';}).filter(Boolean).join(' | ')||'–'}\nFokus: ${e.pgoals.filter(g=>g.t).map(g=>(g.done?'[x] ':'[ ] ')+g.t).join(' | ')}\n\n`;}else if(e.type==='note'){out+=`════════\nNOTIZ · ${e.date}${e.title?` · ${e.title}`:''}\n${e.didText?'Was gemacht: '+e.didText+'\n':''}${e.tipsText?'Tipps: '+e.tipsText+'\n':''}${e.newDrillsText?'Neue Übungen: '+e.newDrillsText+'\n':''}${e.fixText?'Verbessert: '+e.fixText+'\n':''}\n`;}});dl(new Blob([out],{type:'text/plain'}),`lowr-${new Date().toISOString().slice(0,10)}.txt`);toast('Text exportiert');}
 function wipeAll(){if(!confirm('Wirklich ALLE Einträge löschen? Mach vorher ein Backup!'))return;DB={entries:[],hcp:'',hcpHist:[],profile:DB.profile||{name:'',clubs:[]}};persist();renderHome();renderHistory();renderStats();toast('Alles gelöscht');}
 function dl(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);}
 
